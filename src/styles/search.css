@@ -1,0 +1,115 @@
+.search {
+  margin: 0 auto;
+  display: flex;
+  gap: 10px;
+  width: 528px;
+  align-items: center;
+  padding: 10px 16px;
+  border-radius: 20px;
+  transition: background-color 0.3s;
+  position: relative;
+  background-color: rgb(240, 243, 245);
+}
+
+.search-input {
+  border: none;
+  outline: none;
+  background-color: transparent;
+  flex-grow: 1;
+  font-size: 14px;
+}
+
+.search:hover {
+  background-color: rgb(219, 228, 233);
+}
+
+/* ============================= */
+/* SEARCH RESULTS DROPDOWN */
+/* ============================= */
+
+.search-results {
+  display: none; /* controlled by JS */
+  position: absolute;
+  background-color: white;
+  top: 100%; /* position BELOW the search bar */
+  left: 0;
+  width: 100%;
+  margin-top: 6px; /* small gap between bar and results */
+  z-index: 10;
+  border-radius: 12px;
+  box-shadow:
+    0 1px 4px 0 rgba(0, 0, 0, 0.15),
+    0 4px 4px 0 rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+  opacity: 0;
+  transform: translateY(-5px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+/* when JS makes it visible */
+.search-results.show {
+  display: block;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.search-results-scrollable {
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  max-height: calc(100vh - 56px - 10px);
+  overflow-y: auto;
+}
+
+/* ============================= */
+/* RECENT SEARCHES */
+/* ============================= */
+
+.recent-searches {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.recent-searches > li {
+  display: flex;
+  align-items: center;
+  padding: 4px 24px;
+  gap: 14px;
+}
+
+.recent-searches > li:hover {
+  background-color: #F6F8F9;
+  cursor: pointer;
+}
+
+.recent-searches > li:active {
+  background-color: rgba(0, 0, 0, 0.16);
+}
+
+.recent-searches .remove {
+  background-color: transparent;
+  border: none;
+  padding: 8px;
+  border-radius: 50%;
+}
+
+.recent-searches .remove:hover {
+  background-color: rgb(219, 228, 233);
+  cursor: pointer;
+}
+
+.recent-searches .remove:active {
+  background-color: rgba(0, 0, 0, 0.16);
+}
+
+.recent-search-value {
+  flex-grow: 1;
+  font-size: 14px;
+  color: #333D42;
+}
+
+.community-image {
+  width: 16px;
+  height: 16px;
+  border-radius: 8px;
+}

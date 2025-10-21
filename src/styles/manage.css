@@ -1,0 +1,80 @@
+
+.search-bar {
+  width: 70%;
+  padding: 10px 14px;
+  margin-bottom: 15px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 16px;
+}
+
+.community-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.community-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #f8f8f8;
+  padding: 10px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.community-card:hover {
+  background: #eaeaea;
+}
+
+.community-card img {
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+}
+
+.community-card span {
+  flex: 1;
+  margin-left: 10px;
+  font-weight: 500;
+}
+
+.community-card .fav-toggle{
+    flex-shrink: 0;
+  margin-left: 6px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.community-card .fav-toggle img {
+  width: 20px;
+  height: 20px;
+}
+
+.join-toggle {
+  background: #0079d3;
+  color: white;
+  border: none;
+  border-radius: 16px;
+  padding: 5px 14px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.join-toggle:hover {
+  background: #005fa3;
+}
+
+.join-toggle.joined {
+  background: #e2e2e2;
+  color: #333;
+}
+
+.join-toggle.joined:hover {
+  background: #d0d0d0;
+}
