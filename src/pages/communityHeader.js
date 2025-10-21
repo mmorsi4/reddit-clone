@@ -1,10 +1,14 @@
 import React, { useState, useEffect } from "react";
 
 function CommunityHeader({ banner, avatar, name }) {
-  const storageKey = `joined_${name}`; // unique key per community
+  const storageKey = `joined_${name}`;
   const [joined, setJoined] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
+  const [isMuted, setIsMuted] = useState(false);
+  const [isInCustomFeed, setIsInCustomFeed] = useState(false);
 
-  // ✅ Load from localStorage when component loads
+
+  // Load from localStorage when component loads
   useEffect(() => {
     const saved = localStorage.getItem(storageKey);
     if (saved) {
@@ -18,7 +22,7 @@ function CommunityHeader({ banner, avatar, name }) {
     }
   }, [storageKey]);
 
-  // ✅ Handle join / unjoin
+  // Handle join / unjoin
   const handleJoin = () => {
     const newState = !joined;
     setJoined(newState);
@@ -47,7 +51,7 @@ function CommunityHeader({ banner, avatar, name }) {
     }
   };
 
-  // ✅ NEW: Add community to RECENT visited list
+  // Add community to RECENT visited list
   useEffect(() => {
     const recent = JSON.parse(localStorage.getItem("recentCommunities")) || [];
     const newCommunity = { name, image: avatar, link: `/r/${name}` };
@@ -55,6 +59,69 @@ function CommunityHeader({ banner, avatar, name }) {
     const updated = [newCommunity, ...recent.filter(c => c.name !== name)].slice(0, 5);
     localStorage.setItem("recentCommunities", JSON.stringify(updated));
   }, [name, avatar]);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (!e.target.closest(".community-action-more-container")) {
+        setShowMenu(false);
+      }
+    };
+    document.addEventListener("click", handleClickOutside);
+    return () => document.removeEventListener("click", handleClickOutside);
+  }, []);
+
+  // Load mute state
+  useEffect(() => {
+    const mutedList = JSON.parse(localStorage.getItem("mutedCommunities")) || [];
+    setIsMuted(mutedList.includes(name));
+  }, [name]);
+
+  // Handle mute / unmute
+  const handleMute = (communityName) => {
+    let mutedList = JSON.parse(localStorage.getItem("mutedCommunities")) || [];
+
+    if (isMuted) {
+      mutedList = mutedList.filter((n) => n !== communityName);
+      alert(`r/${communityName} unmuted`);
+    } else {
+      mutedList.push(communityName);
+      alert(`r/${communityName} muted`);
+    }
+
+    localStorage.setItem("mutedCommunities", JSON.stringify(mutedList));
+    setIsMuted(!isMuted);
+  };
+
+  /// Handle Add/Remove from Custom Feed
+  const handleAddToCustomFeed = (communityName, avatar) => {
+    let customFeeds = JSON.parse(localStorage.getItem("customFeeds")) || [];
+
+    const newCommunity = {
+      name: communityName,
+      image: avatar,
+      link: `/r/${communityName}`, // ✅ same format as recentCommunities
+    };
+
+    const exists = customFeeds.some((c) => c.name === communityName);
+
+    if (exists) {
+      // Remove existing
+      customFeeds = customFeeds.filter((c) => c.name !== communityName);
+      setIsInCustomFeed(false);
+    } else {
+      // Add new on top, remove duplicates, keep only 10 for example
+      customFeeds = [newCommunity, ...customFeeds.filter((c) => c.name !== communityName)];
+      if (customFeeds.length > 10) customFeeds = customFeeds.slice(0, 10);
+      setIsInCustomFeed(true);
+    }
+
+    // Save updated list
+    localStorage.setItem("customFeeds", JSON.stringify(customFeeds));
+
+    // Dispatch event to update sidebar immediately
+    window.dispatchEvent(new Event("customFeedUpdated"));
+  };
+
 
   return (
     <div className="main-head">
@@ -72,7 +139,7 @@ function CommunityHeader({ banner, avatar, name }) {
             Create a post
           </button>
 
-          {/* ✅ Join button with saved state */}
+          {/* Join button with saved state */}
           <button
             className={`community-action-join ${joined ? "joined" : ""}`}
             onClick={handleJoin}
@@ -81,17 +148,37 @@ function CommunityHeader({ banner, avatar, name }) {
           </button>
 
           <div className="community-action-more-container">
-            <input type="checkbox" id={`more-${name}`} hidden />
-            <button className="community-action-more">
-              <label htmlFor={`more-${name}`}>
-                <img src="../images/three-dots.svg" alt="More options" />
-              </label>
+            <button
+              className="community-action-more"
+              onClick={(e) => {
+                e.stopPropagation(); // prevent closing instantly
+                setShowMenu((prev) => !prev);
+              }}
+            >
+              <img src="../images/three-dots.svg" alt="More options" />
             </button>
-            <ul className="more-menu">
-              <li className="more-menu-item">Add to custom feed</li>
+
+            <ul className={`more-menu ${showMenu ? "visible" : ""}`}>
+              <li
+                className="more-menu-item"
+                onClick={() => handleAddToCustomFeed(name, avatar)}
+              >
+                {isInCustomFeed ? "Remove from custom feed" : "Add to custom feed"}
+              </li>
+
               <li className="more-menu-item">Add to favourites</li>
-              <li className="more-menu-item">Mute r/{name}</li>
+
+              <li
+                className="more-menu-item"
+                onClick={() => {
+                  handleMute(name);
+                  setShowMenu(false);
+                }}
+              >
+                {isMuted ? `Unmute r/${name}` : `Mute r/${name}`}
+              </li>
             </ul>
+
           </div>
         </div>
       </div>

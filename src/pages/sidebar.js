@@ -5,12 +5,28 @@ import allCommunities from "../data/communitiesDB";
 function Sidebar() {
   const [recent, setRecent] = useState([]);
   const location = useLocation(); // to detect navigation changes
+  const [customFeeds, setCustomFeeds] = useState([]);
 
   // Load recent communities from localStorage
   useEffect(() => {
     const recentData = JSON.parse(localStorage.getItem("recentCommunities")) || [];
     setRecent(recentData);
   }, []);
+
+
+  useEffect(() => {
+  const loadFeeds = () => {
+    const feeds = JSON.parse(localStorage.getItem("customFeeds")) || [];
+    setCustomFeeds(feeds);
+  };
+
+  loadFeeds();
+  window.addEventListener("customFeedUpdated", loadFeeds);
+
+  return () => {
+    window.removeEventListener("customFeedUpdated", loadFeeds);
+  };
+}, []);
 
   // ✅ When the user visits a community route, check if it matches one in allCommunities
   useEffect(() => {
@@ -75,6 +91,28 @@ function Sidebar() {
                 <div className="sidebar-section-item-details">Create Custom Feed</div>
               </a>
             </li>
+
+            {/* ✅ Dynamically loaded custom feeds */}
+            {customFeeds.length === 0 ? (
+              <li className="sidebar-link">
+                <div className="sidebar-section-item-details">
+                  No custom feeds yet
+                </div>
+              </li>
+            ) : (
+              customFeeds.map((feed, index) => (
+                <li key={index}>
+                  <Link to={feed.link} className="sidebar-link">
+                    <img
+                      src={feed.image || "../images/default-community.svg"}
+                      className="sidebar-link-icon-round"
+                      alt={feed.name}
+                    />
+                    <div className="sidebar-section-item-details">{feed.name}</div>
+                  </Link>
+                </li>
+              ))
+            )}
           </ul>
         </li>
 

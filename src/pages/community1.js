@@ -136,7 +136,6 @@ function Community1() {
         </ul>
       </div>
       <Sidebar/>
-
       <div className="main">
         <CommunityHeader
           banner="../images/community-banner.png"
