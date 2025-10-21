@@ -26,11 +26,26 @@ const handleJoin = () => {
 
   const dataToSave = {
     joined: newState,
-    avatar: avatar,   // ✅ save avatar dynamically
-    banner: banner,   // optional — store banner too
+    avatar: avatar,
+    banner: banner,
   };
 
+  // Save per-community data
   localStorage.setItem(storageKey, JSON.stringify(dataToSave));
+
+  // ✅ Update the global "joinedCommunities" list for the Home search
+  const all = JSON.parse(localStorage.getItem("joinedCommunities")) || [];
+
+  if (newState) {
+    // Add community if joining
+    const newCommunity = { name, image: avatar };
+    const updated = [...all.filter(c => c.name !== name), newCommunity];
+    localStorage.setItem("joinedCommunities", JSON.stringify(updated));
+  } else {
+    // Remove if unjoining
+    const updated = all.filter(c => c.name !== name);
+    localStorage.setItem("joinedCommunities", JSON.stringify(updated));
+  }
 };
 
   return (

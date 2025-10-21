@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import "../styles/header.css";
 import "../styles/search.css";
 import "../styles/main.css";
@@ -11,12 +11,9 @@ import "../styles/edit_avatar.css";
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import Post from "./post";
-
-
-
+import SearchBar from "./searchbar";
 
 function Home() {
-  const navigate = useNavigate();
 
   return (
     <>
@@ -25,39 +22,7 @@ function Home() {
           <img src="../images/reddit-logo.png" className="reddit-logo" />
         </a>
 
-        <div className="search">
-          <img src="../images/search.svg" />
-          <input type="text" placeholder="Search Reddit" className="search-input" />
-          <div className="search-results">
-            <div className="search-results-scrollable">
-              <ul className="recent-searches">
-                <li>
-                  <img src="../images/community1.png" className="community-image" />
-                  <div className="recent-search-value">r/sims4</div>
-                  <button className="remove">
-                    <img src="../images/close.svg" />
-                  </button>
-                </li>
-                <li>
-                  <img src="../images/community2.png" className="community-image" />
-                  <div className="recent-search-value">r/egyOutfits</div>
-                  <button className="remove">
-                    <img src="../images/close.svg" />
-                  </button>
-                </li>
-                <li>
-                  <img src="../images/community3.png" className="community-image" />
-                  <div className="recent-search-value">r/GoodCoffeeGreatCoffee</div>
-                  <button className="remove">
-                    <img src="../images/close.svg" />
-                  </button>
-                </li>
-              </ul>
-              <div className="trending-today">
-              </div>
-            </div>
-          </div>
-        </div>
+       <SearchBar />
 
         <ul className="header-actions">
           <li className="header-action">
