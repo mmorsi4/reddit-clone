@@ -25,7 +25,6 @@ function App() {
         <Route path="/create_post"element={<CreatePost/>}/>
         <Route path="/viewprofile"element={<ViewProfile/>}/>
         <Route path="/edit-avatar"element={<AvatarCustomizer/>}/>
-
       </Routes>
     </Router>
   );
