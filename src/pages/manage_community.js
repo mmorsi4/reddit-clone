@@ -5,44 +5,44 @@ import SearchBar from "./searchbar";
 
 
 function ManageCommunity() {
-    const [joinedCommunities, setJoinedCommunities] = useState([]);
-    const [searchTerm, setSearchTerm] = useState("");
+  const [joinedCommunities, setJoinedCommunities] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
 
-    useEffect(() => {
-        const communities = [];
+  useEffect(() => {
+    const communities = [];
 
-        for (let i = 0; i < localStorage.length; i++) {
-            const key = localStorage.key(i);
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
 
-            if (key.startsWith("joined_")) {
-                const data = JSON.parse(localStorage.getItem(key));
-                if (data && data.joined) {
-                    const name = key.replace("joined_", "");
-                    communities.push({
-                        name: name,
-                        avatar: data.avatar || "../images/community-avatar1.jpg", // ✅ use stored avatar
-                    });
-                }
-            }
+      if (key.startsWith("joined_")) {
+        const data = JSON.parse(localStorage.getItem(key));
+        if (data && data.joined) {
+          const name = key.replace("joined_", "");
+          communities.push({
+            name: name,
+            avatar: data.avatar || "../images/community-avatar1.jpg", // ✅ use stored avatar
+          });
         }
+      }
+    }
 
-        setJoinedCommunities(communities);
-    }, []);
+    setJoinedCommunities(communities);
+  }, []);
 
-    // ✅ Filter communities based on search
-    const filtered = joinedCommunities.filter((c) =>
-        c.name.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+  // ✅ Filter communities based on search
+  const filtered = joinedCommunities.filter((c) =>
+    c.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
 
-    return (
-        <>
-            <div className="header">
+  return (
+    <>
+      <div className="header">
         <a>
           <img src="../images/reddit-logo.png" className="reddit-logo" />
         </a>
 
-       <SearchBar />
+        <SearchBar />
 
         <ul className="header-actions">
           <li className="header-action">
@@ -163,205 +163,205 @@ function ManageCommunity() {
           </li>
         </ul>
       </div>
-            <div className="sidebar-container">
-                <div className="sidebar-container">
-                    <ul className="sidebar">
-                        <li>
-                            <ul className="sidebar-section">
-                                <li>
-                                    <Link to="/" className="sidebar-link">
-                                        <img src="../images/home.svg" alt="Home" />
-                                        <div className="sidebar-section-item-details">
-                                            Home
-                                        </div>
-                                    </Link>
-                                </li>
-                                <li>
-                                    <a href="" className="sidebar-link">
-                                        <img src="../images/popular.svg" />
-                                        <div className="sidebar-section-item-details">
-                                            Popular
-                                        </div>
-                                    </a>
-                                </li>
-                                <li>
-                                    <a href="" className="sidebar-link">
-                                        <img src="../images/all.svg" />
-                                        <div className="sidebar-section-item-details">
-                                            All
-                                        </div>
-                                    </a>
-                                </li>
+      <div className="sidebar-container">
+        <div className="sidebar-container">
+          <ul className="sidebar">
+            <li>
+              <ul className="sidebar-section">
+                <li>
+                  <Link to="/" className="sidebar-link">
+                    <img src="../images/home.svg" alt="Home" />
+                    <div className="sidebar-section-item-details">
+                      Home
+                    </div>
+                  </Link>
+                </li>
+                <li>
+                  <a href="" className="sidebar-link">
+                    <img src="../images/popular.svg" />
+                    <div className="sidebar-section-item-details">
+                      Popular
+                    </div>
+                  </a>
+                </li>
+                <li>
+                  <a href="" className="sidebar-link">
+                    <img src="../images/all.svg" />
+                    <div className="sidebar-section-item-details">
+                      All
+                    </div>
+                  </a>
+                </li>
 
-                            </ul>
-                        </li>
-                        <li>
-                            <input type="checkbox" className="sidebar-collapse-checkbox"
-                                id="sidebar-collapse-checkbox-custom-feeds" />
-                            <label className="sidebar-collapse-label" for="sidebar-collapse-checkbox-custom-feeds"> Custom Feeds
-                                <img src="../images/down.svg" />
-                            </label>
-                            <ul className="sidebar-section">
-                                <li>
-                                    <a href="" className="sidebar-link">
-                                        <img src="../images/plus.svg" />
-                                        <div className="sidebar-section-item-details">
-                                            Create Custom Feed
-                                        </div>
-                                    </a>
-                                </li>
-                            </ul>
-                        </li>
-                        <li>
-                            <input type="checkbox" className="sidebar-collapse-checkbox" id="sidebar-collapse-checkbox-Recent" />
-                            <label className="sidebar-collapse-label" for="sidebar-collapse-checkbox-Recent"> RECENT
-                                <img src="../images/down.svg" />
-                            </label>
-                            <ul className="sidebar-section">
-                            </ul>
-                        </li>
-                        <li>
-                            <input type="checkbox" id="sidebar-collapse-checkbox-communities" className="sidebar-collapse-checkbox" />
-                            <label for="sidebar-collapse-checkbox-communities" className="sidebar-collapse-label">
-                                Communities
-                                <img src="../images/down.svg" />
-                            </label>
-                            <ul className="sidebar-section">
-                                <li>
-                                    <a href="#" className="sidebar-link create-community-link">
-                                        <img src="../images/plus.svg" />
-                                        <div className="sidebar-section-item-details">
-                                            Create a community
-                                        </div>
-                                    </a>
-                                </li>
-                                <li>
-                                    <Link to="/manage_community" className="sidebar-link">
-                                        <img src="../images/settings.svg" />
-                                        <div className="sidebar-section-item-details">
-                                            Manage Community
-                                        </div>
-                                    </Link>
-                                </li>
-                                <li>
-                                    <Link to="/community1" className="sidebar-link">
-                                        <img src="../images/community-avatar1.jpg" className="sidebar-link-icon-round" alt="Community 1" />
-                                        <div className="sidebar-section-item-details">
-                                            <span className="community-name">r/webdev</span>
-                                            <button className="make-favourite">
-                                                <img src="../images/star.svg" alt="Star" />
-                                            </button>
-                                        </div>
-                                    </Link>
-                                </li>
-                                <li>
-                                    <Link to="/community2" className="sidebar-link">
-                                        <img src="../images/community-avatar2.jpg" className="sidebar-link-icon-round" />
-                                        <div className="sidebar-section-item-details">
-                                            <span className="community-name">r/harrypotter</span>
-                                            <button className="make-favourite">
-                                                <img src="../images/star.svg" />
-                                            </button>
-                                        </div>
-                                    </Link>
-                                </li>
-                                <li>
-                                    <Link to="/community3" className="sidebar-link">
-                                        <img src="../images/community-avatar3.jpg" className="sidebar-link-icon-round" />
-                                        <div className="sidebar-section-item-details">
-                                            <span className="community-name">r/playstation</span>
-                                            <button className="make-favourite">
-                                                <img src="../images/star.svg" />
-                                            </button>
-                                        </div>
-                                    </Link>
-                                </li>
-                                <li>
-                                    <Link to="/community4" className="sidebar-link">
-                                        <img src="../images/community-avatar4.jpg" className="sidebar-link-icon-round" />
-                                        <div className="sidebar-section-item-details">
-                                            <span className="community-name">r/GoodCoffeeGreatCoffee</span>
-                                            <button className="make-favourite">
-                                                <img src="../images/star.svg" />
-                                            </button>
-                                        </div>
-                                    </Link>
-                                </li>
-                            </ul>
-                        </li>
-                        <li>
-                            <input type="checkbox" className="sidebar-collapse-checkbox" id="sidebar-collapse-checkbox-resources" />
-                            <label className="sidebar-collapse-label" for="sidebar-collapse-checkbox-resources"> RESOURCES
-                                <img src="../images/down.svg" />
-                            </label>
-                            <ul className="sidebar-section">
-                                <li>
-                                    <a href="" className="sidebar-link">
-                                        <img src="../images/plus.svg" />
-                                        <div className="sidebar-section-item-details">
-                                            Create Community
-                                        </div>
-                                    </a>
-                                </li>
-                                <li>
-                                    <a href="" className="sidebar-link">
-                                        <img src="../images/settings.svg" />
-                                        <div className="sidebar-section-item-details">
-                                            Manage Community
-                                        </div>
-                                    </a>
-                                </li>
-                            </ul>
-                            <a href="" className="copyright-link">
-                                Reddit, Inc. &copy;2025. All rights reserved.
-                            </a>
-                        </li>
-
-
-                    </ul>
-                </div>
-            </div>
-            <div className="main">
-                <h1>Manage communities</h1>
-                <input
-                    type="text"
-                    id="communitySearch"
-                    placeholder="Search communities..."
-                    className="search-bar"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                />
-
-                <div id="allCommunities" className="community-list">
-                    {filtered.length === 0 ? (
-                        <p>No joined communities found.</p>
-                    ) : (
-                        filtered.map((community, index) => (
-                            <div className="community-card" key={index}>
-                                <img src={community.avatar} alt={community.name} />
-                                <span>r/{community.name}</span>
-
-                                <button
-                                    className="join-toggle joined"
-                                    onClick={() => {
-                                        // Unjoin functionality
-                                        localStorage.setItem(`joined_${community.name}`, "false");
-                                        setJoinedCommunities((prev) =>
-                                            prev.filter((c) => c.name !== community.name)
-                                        );
-                                    }}
-                                >
-                                    Joined
-                                </button>
-                            </div>
-                        ))
-                    )}
-                </div>
-
-            </div>
+              </ul>
+            </li>
+            <li>
+              <input type="checkbox" className="sidebar-collapse-checkbox"
+                id="sidebar-collapse-checkbox-custom-feeds" />
+              <label className="sidebar-collapse-label" for="sidebar-collapse-checkbox-custom-feeds"> Custom Feeds
+                <img src="../images/down.svg" />
+              </label>
+              <ul className="sidebar-section">
+                <li>
+                  <a href="" className="sidebar-link">
+                    <img src="../images/plus.svg" />
+                    <div className="sidebar-section-item-details">
+                      Create Custom Feed
+                    </div>
+                  </a>
+                </li>
+              </ul>
+            </li>
+            <li>
+              <input type="checkbox" className="sidebar-collapse-checkbox" id="sidebar-collapse-checkbox-Recent" />
+              <label className="sidebar-collapse-label" for="sidebar-collapse-checkbox-Recent"> RECENT
+                <img src="../images/down.svg" />
+              </label>
+              <ul className="sidebar-section">
+              </ul>
+            </li>
+            <li>
+              <input type="checkbox" id="sidebar-collapse-checkbox-communities" className="sidebar-collapse-checkbox" />
+              <label for="sidebar-collapse-checkbox-communities" className="sidebar-collapse-label">
+                Communities
+                <img src="../images/down.svg" />
+              </label>
+              <ul className="sidebar-section">
+                <li>
+                  <a href="#" className="sidebar-link create-community-link">
+                    <img src="../images/plus.svg" />
+                    <div className="sidebar-section-item-details">
+                      Create a community
+                    </div>
+                  </a>
+                </li>
+                <li>
+                  <Link to="/manage_community" className="sidebar-link">
+                    <img src="../images/settings.svg" />
+                    <div className="sidebar-section-item-details">
+                      Manage Community
+                    </div>
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/community1" className="sidebar-link">
+                    <img src="../images/community-avatar1.jpg" className="sidebar-link-icon-round" alt="Community 1" />
+                    <div className="sidebar-section-item-details">
+                      <span className="community-name">r/webdev</span>
+                      <button className="make-favourite">
+                        <img src="../images/star.svg" alt="Star" />
+                      </button>
+                    </div>
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/community2" className="sidebar-link">
+                    <img src="../images/community-avatar2.jpg" className="sidebar-link-icon-round" />
+                    <div className="sidebar-section-item-details">
+                      <span className="community-name">r/harrypotter</span>
+                      <button className="make-favourite">
+                        <img src="../images/star.svg" />
+                      </button>
+                    </div>
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/community3" className="sidebar-link">
+                    <img src="../images/community-avatar3.jpg" className="sidebar-link-icon-round" />
+                    <div className="sidebar-section-item-details">
+                      <span className="community-name">r/playstation</span>
+                      <button className="make-favourite">
+                        <img src="../images/star.svg" />
+                      </button>
+                    </div>
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/community4" className="sidebar-link">
+                    <img src="../images/community-avatar4.jpg" className="sidebar-link-icon-round" />
+                    <div className="sidebar-section-item-details">
+                      <span className="community-name">r/GoodCoffeeGreatCoffee</span>
+                      <button className="make-favourite">
+                        <img src="../images/star.svg" />
+                      </button>
+                    </div>
+                  </Link>
+                </li>
+              </ul>
+            </li>
+            <li>
+              <input type="checkbox" className="sidebar-collapse-checkbox" id="sidebar-collapse-checkbox-resources" />
+              <label className="sidebar-collapse-label" for="sidebar-collapse-checkbox-resources"> RESOURCES
+                <img src="../images/down.svg" />
+              </label>
+              <ul className="sidebar-section">
+                <li>
+                  <a href="" className="sidebar-link">
+                    <img src="../images/plus.svg" />
+                    <div className="sidebar-section-item-details">
+                      Create Community
+                    </div>
+                  </a>
+                </li>
+                <li>
+                  <a href="" className="sidebar-link">
+                    <img src="../images/settings.svg" />
+                    <div className="sidebar-section-item-details">
+                      Manage Community
+                    </div>
+                  </a>
+                </li>
+              </ul>
+              <a href="" className="copyright-link">
+                Reddit, Inc. &copy;2025. All rights reserved.
+              </a>
+            </li>
 
 
-        </>
-    );
+          </ul>
+        </div>
+      </div>
+      <div className="main">
+        <h1>Manage communities</h1>
+        <input
+          type="text"
+          id="communitySearch"
+          placeholder="Search communities..."
+          className="search-bar"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+
+        <div id="allCommunities" className="community-list">
+          {filtered.length === 0 ? (
+            <p>No joined communities found.</p>
+          ) : (
+            filtered.map((community, index) => (
+              <div className="community-card" key={index}>
+                <img src={community.avatar} alt={community.name} />
+                <span>r/{community.name}</span>
+
+                <button
+                  className="join-toggle joined"
+                  onClick={() => {
+                    // Unjoin functionality
+                    localStorage.setItem(`joined_${community.name}`, "false");
+                    setJoinedCommunities((prev) =>
+                      prev.filter((c) => c.name !== community.name)
+                    );
+                  }}
+                >
+                  Joined
+                </button>
+              </div>
+            ))
+          )}
+        </div>
+
+      </div>
+
+
+    </>
+  );
 }
 export default ManageCommunity;

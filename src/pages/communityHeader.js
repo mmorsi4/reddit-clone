@@ -1,52 +1,60 @@
 import React, { useState, useEffect } from "react";
 
-
 function CommunityHeader({ banner, avatar, name }) {
   const storageKey = `joined_${name}`; // unique key per community
-const [joined, setJoined] = useState(false);
+  const [joined, setJoined] = useState(false);
 
-// ✅ Load from localStorage when component loads
-useEffect(() => {
-  const saved = localStorage.getItem(storageKey);
-  if (saved) {
-    try {
-      const data = JSON.parse(saved);
-      if (data.joined) setJoined(true);
-    } catch {
-      // for backward compatibility (old "true"/"false" values)
-      if (saved === "true") setJoined(true);
+  // ✅ Load from localStorage when component loads
+  useEffect(() => {
+    const saved = localStorage.getItem(storageKey);
+    if (saved) {
+      try {
+        const data = JSON.parse(saved);
+        if (data.joined) setJoined(true);
+      } catch {
+        // for backward compatibility (old "true"/"false" values)
+        if (saved === "true") setJoined(true);
+      }
     }
-  }
-}, [storageKey]);
+  }, [storageKey]);
 
-// ✅ Handle join / unjoin
-const handleJoin = () => {
-  const newState = !joined;
-  setJoined(newState);
+  // ✅ Handle join / unjoin
+  const handleJoin = () => {
+    const newState = !joined;
+    setJoined(newState);
 
-  const dataToSave = {
-    joined: newState,
-    avatar: avatar,
-    banner: banner,
+    const dataToSave = {
+      joined: newState,
+      avatar: avatar,
+      banner: banner,
+    };
+
+    // Save per-community data
+    localStorage.setItem(storageKey, JSON.stringify(dataToSave));
+
+    // ✅ Update the global "joinedCommunities" list for the Home search
+    const all = JSON.parse(localStorage.getItem("joinedCommunities")) || [];
+
+    if (newState) {
+      // Add community if joining
+      const newCommunity = { name, image: avatar };
+      const updated = [...all.filter(c => c.name !== name), newCommunity];
+      localStorage.setItem("joinedCommunities", JSON.stringify(updated));
+    } else {
+      // Remove if unjoining
+      const updated = all.filter(c => c.name !== name);
+      localStorage.setItem("joinedCommunities", JSON.stringify(updated));
+    }
   };
 
-  // Save per-community data
-  localStorage.setItem(storageKey, JSON.stringify(dataToSave));
-
-  // ✅ Update the global "joinedCommunities" list for the Home search
-  const all = JSON.parse(localStorage.getItem("joinedCommunities")) || [];
-
-  if (newState) {
-    // Add community if joining
-    const newCommunity = { name, image: avatar };
-    const updated = [...all.filter(c => c.name !== name), newCommunity];
-    localStorage.setItem("joinedCommunities", JSON.stringify(updated));
-  } else {
-    // Remove if unjoining
-    const updated = all.filter(c => c.name !== name);
-    localStorage.setItem("joinedCommunities", JSON.stringify(updated));
-  }
-};
+  // ✅ NEW: Add community to RECENT visited list
+  useEffect(() => {
+    const recent = JSON.parse(localStorage.getItem("recentCommunities")) || [];
+    const newCommunity = { name, image: avatar, link: `/r/${name}` };
+    // remove duplicates, add new on top, keep max 5
+    const updated = [newCommunity, ...recent.filter(c => c.name !== name)].slice(0, 5);
+    localStorage.setItem("recentCommunities", JSON.stringify(updated));
+  }, [name, avatar]);
 
   return (
     <div className="main-head">

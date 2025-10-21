@@ -5,36 +5,36 @@ import SearchBar from "./searchbar";
 
 
 function ViewProfile() {
-    useEffect(() => {
-        // 🧠 Get current user data
-        const user = JSON.parse(localStorage.getItem("currentUser"));
-        const savedAvatar = localStorage.getItem("userAvatar");
+  useEffect(() => {
+    // 🧠 Get current user data
+    const user = JSON.parse(localStorage.getItem("currentUser"));
+    const savedAvatar = localStorage.getItem("userAvatar");
 
-        const avatarEl = document.getElementById("profile-avatar");
-        const nameEl = document.getElementById("profile-name");
-        const usernameEl = document.getElementById("profile-username");
-        const emptyTextEl = document.getElementById("empty-text");
+    const avatarEl = document.getElementById("profile-avatar");
+    const nameEl = document.getElementById("profile-name");
+    const usernameEl = document.getElementById("profile-username");
+    const emptyTextEl = document.getElementById("empty-text");
 
-        if (user) {
-            nameEl.textContent = user.username;
-            usernameEl.textContent = `u/${user.username}`;
-            emptyTextEl.textContent = `u/${user.username} hasn't posted yet`;
-        }
+    if (user) {
+      nameEl.textContent = user.username;
+      usernameEl.textContent = `u/${user.username}`;
+      emptyTextEl.textContent = `u/${user.username} hasn't posted yet`;
+    }
 
-        // 🧩 If saved avatar exists, load it
-        if (savedAvatar) {
-            avatarEl.src = savedAvatar;
-        }
-    }, []);
-    return (
+    // 🧩 If saved avatar exists, load it
+    if (savedAvatar) {
+      avatarEl.src = savedAvatar;
+    }
+  }, []);
+  return (
 
-        <>
-            <div className="header">
+    <>
+      <div className="header">
         <a>
           <img src="../images/reddit-logo.png" className="reddit-logo" />
         </a>
 
-       <SearchBar />
+        <SearchBar />
 
         <ul className="header-actions">
           <li className="header-action">
@@ -155,216 +155,216 @@ function ViewProfile() {
           </li>
         </ul>
       </div>
-            <div className="sidebar-container">
-                <div className="sidebar-container">
-                    <ul className="sidebar">
-                        <li>
-                            <ul className="sidebar-section">
-                                <li>
-                                    <Link to="/" className="sidebar-link">
-                                        <img src="../images/home.svg" alt="Home" />
-                                        <div className="sidebar-section-item-details">
-                                            Home
-                                        </div>
-                                    </Link>
-                                </li>
-                                <li>
-                                    <a href="" className="sidebar-link">
-                                        <img src="../images/popular.svg" />
-                                        <div className="sidebar-section-item-details">
-                                            Popular
-                                        </div>
-                                    </a>
-                                </li>
-                                <li>
-                                    <a href="" className="sidebar-link">
-                                        <img src="../images/all.svg" />
-                                        <div className="sidebar-section-item-details">
-                                            All
-                                        </div>
-                                    </a>
-                                </li>
-
-                            </ul>
-                        </li>
-                        <li>
-                            <input type="checkbox" className="sidebar-collapse-checkbox"
-                                id="sidebar-collapse-checkbox-custom-feeds" />
-                            <label className="sidebar-collapse-label" for="sidebar-collapse-checkbox-custom-feeds"> Custom Feeds
-                                <img src="../images/down.svg" />
-                            </label>
-                            <ul className="sidebar-section">
-                                <li>
-                                    <a href="" className="sidebar-link">
-                                        <img src="../images/plus.svg" />
-                                        <div className="sidebar-section-item-details">
-                                            Create Custom Feed
-                                        </div>
-                                    </a>
-                                </li>
-                            </ul>
-                        </li>
-                        <li>
-                            <input type="checkbox" className="sidebar-collapse-checkbox" id="sidebar-collapse-checkbox-Recent" />
-                            <label className="sidebar-collapse-label" for="sidebar-collapse-checkbox-Recent"> RECENT
-                                <img src="../images/down.svg" />
-                            </label>
-                            <ul className="sidebar-section">
-                            </ul>
-                        </li>
-                        <li>
-                            <input type="checkbox" id="sidebar-collapse-checkbox-communities" className="sidebar-collapse-checkbox" />
-                            <label for="sidebar-collapse-checkbox-communities" className="sidebar-collapse-label">
-                                Communities
-                                <img src="../images/down.svg" />
-                            </label>
-                            <ul className="sidebar-section">
-                                <li>
-                                    <a href="#" className="sidebar-link create-community-link">
-                                        <img src="../images/plus.svg" />
-                                        <div className="sidebar-section-item-details">
-                                            Create a community
-                                        </div>
-                                    </a>
-                                </li>
-                                <li>
-                                    <Link to="/manage_community" className="sidebar-link">
-                                        <img src="../images/settings.svg" />
-                                        <div className="sidebar-section-item-details">
-                                            Manage Community
-                                        </div>
-                                    </Link>
-                                </li>
-                                <li>
-                                    <Link to="/community1" className="sidebar-link">
-                                        <img src="../images/community-avatar1.jpg" className="sidebar-link-icon-round" alt="Community 1" />
-                                        <div className="sidebar-section-item-details">
-                                            <span className="community-name">r/webdev</span>
-                                            <button className="make-favourite">
-                                                <img src="../images/star.svg" alt="Star" />
-                                            </button>
-                                        </div>
-                                    </Link>
-                                </li>
-                                <li>
-                                    <Link to="/community2" className="sidebar-link">
-                                        <img src="../images/community-avatar2.jpg" className="sidebar-link-icon-round" />
-                                        <div className="sidebar-section-item-details">
-                                            <span className="community-name">r/harrypotter</span>
-                                            <button className="make-favourite">
-                                                <img src="../images/star.svg" />
-                                            </button>
-                                        </div>
-                                    </Link>
-                                </li>
-                                <li>
-                                    <Link to="/community3" className="sidebar-link">
-                                        <img src="../images/community-avatar3.jpg" className="sidebar-link-icon-round" />
-                                        <div className="sidebar-section-item-details">
-                                            <span className="community-name">r/playstation</span>
-                                            <button className="make-favourite">
-                                                <img src="../images/star.svg" />
-                                            </button>
-                                        </div>
-                                    </Link>
-                                </li>
-                                <li>
-                                    <Link to="/community4" className="sidebar-link">
-                                        <img src="../images/community-avatar4.jpg" className="sidebar-link-icon-round" />
-                                        <div className="sidebar-section-item-details">
-                                            <span className="community-name">r/GoodCoffeeGreatCoffee</span>
-                                            <button className="make-favourite">
-                                                <img src="../images/star.svg" />
-                                            </button>
-                                        </div>
-                                    </Link>
-                                </li>
-                            </ul>
-                        </li>
-                        <li>
-                            <input type="checkbox" className="sidebar-collapse-checkbox" id="sidebar-collapse-checkbox-resources" />
-                            <label className="sidebar-collapse-label" for="sidebar-collapse-checkbox-resources"> RESOURCES
-                                <img src="../images/down.svg" />
-                            </label>
-                            <ul className="sidebar-section">
-                                <li>
-                                    <a href="" className="sidebar-link">
-                                        <img src="../images/plus.svg" />
-                                        <div className="sidebar-section-item-details">
-                                            Create Community
-                                        </div>
-                                    </a>
-                                </li>
-                                <li>
-                                    <a href="" className="sidebar-link">
-                                        <img src="../images/settings.svg" />
-                                        <div className="sidebar-section-item-details">
-                                            Manage Community
-                                        </div>
-                                    </a>
-                                </li>
-                            </ul>
-                            <a href="" className="copyright-link">
-                                Reddit, Inc. &copy;2025. All rights reserved.
-                            </a>
-                        </li>
-
-
-                    </ul>
-                </div>
-            </div>
-            <div className="main">
-                <div className="profile-header">
-                    <img
-                        id="profile-avatar"
-                        src="../images/default-avatar.png"
-                        alt="Avatar"
-                        className="profile-avatar"
-                    />
-                    <div className="profile-info">
-                        <h2 id="profile-name" className="profile-name">
-                            Username
-                        </h2>
-                        <p id="profile-username" className="profile-username">
-                            u/username
-                        </p>
+      <div className="sidebar-container">
+        <div className="sidebar-container">
+          <ul className="sidebar">
+            <li>
+              <ul className="sidebar-section">
+                <li>
+                  <Link to="/" className="sidebar-link">
+                    <img src="../images/home.svg" alt="Home" />
+                    <div className="sidebar-section-item-details">
+                      Home
                     </div>
-                </div>
-
-                <div className="profile-tabs">
-                    <button className="tab active">Overview</button>
-                    <button className="tab">Posts</button>
-                    <button className="tab">Comments</button>
-                    <button className="tab">Saved</button>
-                    <button className="tab">History</button>
-                    <button className="tab">Hidden</button>
-                    <button className="tab">Upvoted</button>
-                    <button className="tab">Downvoted</button>
-                </div>
-
-                <div className="profile-content">
-                    <div className="showing-content">
-                        <span>Showing all content</span>
+                  </Link>
+                </li>
+                <li>
+                  <a href="" className="sidebar-link">
+                    <img src="../images/popular.svg" />
+                    <div className="sidebar-section-item-details">
+                      Popular
                     </div>
-
-                    <div className="create-post">
-                        <button className="create-post-btn">+ Create Post</button>
-                        <select className="sort-select">
-                            <option>New</option>
-                            <option>Top</option>
-                            <option>Hot</option>
-                        </select>
+                  </a>
+                </li>
+                <li>
+                  <a href="" className="sidebar-link">
+                    <img src="../images/all.svg" />
+                    <div className="sidebar-section-item-details">
+                      All
                     </div>
+                  </a>
+                </li>
 
-                    <div className="empty-state">
-                        <p className="empty-text" id="empty-text">
-                            User hasn’t posted yet
-                        </p>
+              </ul>
+            </li>
+            <li>
+              <input type="checkbox" className="sidebar-collapse-checkbox"
+                id="sidebar-collapse-checkbox-custom-feeds" />
+              <label className="sidebar-collapse-label" for="sidebar-collapse-checkbox-custom-feeds"> Custom Feeds
+                <img src="../images/down.svg" />
+              </label>
+              <ul className="sidebar-section">
+                <li>
+                  <a href="" className="sidebar-link">
+                    <img src="../images/plus.svg" />
+                    <div className="sidebar-section-item-details">
+                      Create Custom Feed
                     </div>
-                </div>
-            </div>
+                  </a>
+                </li>
+              </ul>
+            </li>
+            <li>
+              <input type="checkbox" className="sidebar-collapse-checkbox" id="sidebar-collapse-checkbox-Recent" />
+              <label className="sidebar-collapse-label" for="sidebar-collapse-checkbox-Recent"> RECENT
+                <img src="../images/down.svg" />
+              </label>
+              <ul className="sidebar-section">
+              </ul>
+            </li>
+            <li>
+              <input type="checkbox" id="sidebar-collapse-checkbox-communities" className="sidebar-collapse-checkbox" />
+              <label for="sidebar-collapse-checkbox-communities" className="sidebar-collapse-label">
+                Communities
+                <img src="../images/down.svg" />
+              </label>
+              <ul className="sidebar-section">
+                <li>
+                  <a href="#" className="sidebar-link create-community-link">
+                    <img src="../images/plus.svg" />
+                    <div className="sidebar-section-item-details">
+                      Create a community
+                    </div>
+                  </a>
+                </li>
+                <li>
+                  <Link to="/manage_community" className="sidebar-link">
+                    <img src="../images/settings.svg" />
+                    <div className="sidebar-section-item-details">
+                      Manage Community
+                    </div>
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/community1" className="sidebar-link">
+                    <img src="../images/community-avatar1.jpg" className="sidebar-link-icon-round" alt="Community 1" />
+                    <div className="sidebar-section-item-details">
+                      <span className="community-name">r/webdev</span>
+                      <button className="make-favourite">
+                        <img src="../images/star.svg" alt="Star" />
+                      </button>
+                    </div>
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/community2" className="sidebar-link">
+                    <img src="../images/community-avatar2.jpg" className="sidebar-link-icon-round" />
+                    <div className="sidebar-section-item-details">
+                      <span className="community-name">r/harrypotter</span>
+                      <button className="make-favourite">
+                        <img src="../images/star.svg" />
+                      </button>
+                    </div>
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/community3" className="sidebar-link">
+                    <img src="../images/community-avatar3.jpg" className="sidebar-link-icon-round" />
+                    <div className="sidebar-section-item-details">
+                      <span className="community-name">r/playstation</span>
+                      <button className="make-favourite">
+                        <img src="../images/star.svg" />
+                      </button>
+                    </div>
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/community4" className="sidebar-link">
+                    <img src="../images/community-avatar4.jpg" className="sidebar-link-icon-round" />
+                    <div className="sidebar-section-item-details">
+                      <span className="community-name">r/GoodCoffeeGreatCoffee</span>
+                      <button className="make-favourite">
+                        <img src="../images/star.svg" />
+                      </button>
+                    </div>
+                  </Link>
+                </li>
+              </ul>
+            </li>
+            <li>
+              <input type="checkbox" className="sidebar-collapse-checkbox" id="sidebar-collapse-checkbox-resources" />
+              <label className="sidebar-collapse-label" for="sidebar-collapse-checkbox-resources"> RESOURCES
+                <img src="../images/down.svg" />
+              </label>
+              <ul className="sidebar-section">
+                <li>
+                  <a href="" className="sidebar-link">
+                    <img src="../images/plus.svg" />
+                    <div className="sidebar-section-item-details">
+                      Create Community
+                    </div>
+                  </a>
+                </li>
+                <li>
+                  <a href="" className="sidebar-link">
+                    <img src="../images/settings.svg" />
+                    <div className="sidebar-section-item-details">
+                      Manage Community
+                    </div>
+                  </a>
+                </li>
+              </ul>
+              <a href="" className="copyright-link">
+                Reddit, Inc. &copy;2025. All rights reserved.
+              </a>
+            </li>
 
-        </>
-    );
+
+          </ul>
+        </div>
+      </div>
+      <div className="main">
+        <div className="profile-header">
+          <img
+            id="profile-avatar"
+            src="../images/default-avatar.png"
+            alt="Avatar"
+            className="profile-avatar"
+          />
+          <div className="profile-info">
+            <h2 id="profile-name" className="profile-name">
+              Username
+            </h2>
+            <p id="profile-username" className="profile-username">
+              u/username
+            </p>
+          </div>
+        </div>
+
+        <div className="profile-tabs">
+          <button className="tab active">Overview</button>
+          <button className="tab">Posts</button>
+          <button className="tab">Comments</button>
+          <button className="tab">Saved</button>
+          <button className="tab">History</button>
+          <button className="tab">Hidden</button>
+          <button className="tab">Upvoted</button>
+          <button className="tab">Downvoted</button>
+        </div>
+
+        <div className="profile-content">
+          <div className="showing-content">
+            <span>Showing all content</span>
+          </div>
+
+          <div className="create-post">
+            <button className="create-post-btn">+ Create Post</button>
+            <select className="sort-select">
+              <option>New</option>
+              <option>Top</option>
+              <option>Hot</option>
+            </select>
+          </div>
+
+          <div className="empty-state">
+            <p className="empty-text" id="empty-text">
+              User hasn’t posted yet
+            </p>
+          </div>
+        </div>
+      </div>
+
+    </>
+  );
 }
 export default ViewProfile;

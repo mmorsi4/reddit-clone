@@ -10,7 +10,7 @@ function Login() {
   const handleLogin = (e) => {
     e.preventDefault();
     alert("Login successful!");
-    navigate("/"); 
+    navigate("/");
   };
 
   const handleSignup = (e) => {
