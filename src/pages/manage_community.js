@@ -38,7 +38,7 @@ function ManageCommunity() {
 
   return (
     <>
-      <div className="header">
+       <div className="header">
         <a>
           <img src="../images/reddit-logo.png" className="reddit-logo" />
         </a>
@@ -65,12 +65,12 @@ function ManageCommunity() {
             </button>
           </li>
           <li className="header-action">
-            <a href="./create_post.html" className="header-action-link">
+            <Link to ="/create_post" className="header-action-link">
               <img src="../images/create-post.svg" /> Create
               <div className="header-action-tooltip">
                 Create post
               </div>
-            </a>
+            </Link>
           </li>
           <li className="header-action">
             <button className="inbox-button">

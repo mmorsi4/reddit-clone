@@ -7,6 +7,7 @@ import "../styles/main-sidebar.css";
 import "../styles/main-posts.css";
 import "../styles/viewprofile.css";
 import "../styles/manage.css";
+import "../styles/create_post.css";
 import "../styles/edit_avatar.css";
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
@@ -46,12 +47,12 @@ function Home() {
             </button>
           </li>
           <li className="header-action">
-            <a href="./create_post.html" className="header-action-link">
+            <Link to ="/create_post" className="header-action-link">
               <img src="../images/create-post.svg" /> Create
               <div className="header-action-tooltip">
                 Create post
               </div>
-            </a>
+            </Link>
           </li>
           <li className="header-action">
             <button className="inbox-button">

@@ -1,45 +1,82 @@
-.custom-dropdown {
+.community-dropdown {
   position: relative;
-  width: 250px;
-  background-color: white;
-  border: 1px solid #ccc;
-  border-radius: 6px;
+  width: 280px;
+  background-color: #fff;
+  border: 0.8px solid #bbb;  
+  border-radius: 12px;        
   cursor: pointer;
   user-select: none;
+  transition: all 0.2s ease;
+  font-family: Arial, sans-serif;
+  box-sizing: border-box;
 }
 
-.selected-option {
-  padding: 10px;
+.community-dropdown.open {
+  border-color: #0079d3;
+  box-shadow: 0 0 6px rgba(0, 121, 211, 0.3);
 }
 
-.dropdown-list {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  right: 0;
-  background: white;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  max-height: 180px;
-  overflow-y: auto;
-  display: none;
-  z-index: 10;
-}
-
-.dropdown-list li {
+.community-selected {
+  padding: 10px 12px;
   display: flex;
   align-items: center;
-  padding: 8px 10px;
+  justify-content: space-between;
+  font-size: 14px;
+  color: #333;
+}
+
+.community-selected-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.community-avatar {
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.community-dropdown-list {
+  position: absolute;
+  top: calc(100% - 1px);
+  left: 0;
+  right: 0;
+  background: #fff;
+  border: 1px solid #ccc;
+  border-top: none;
+  border-radius: 0 0 8px 8px;
+  max-height: 220px;
+  overflow-y: auto;
+  display: block;
+  z-index: 20;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+}
+
+.community-dropdown-item {
+  display: flex;
+  align-items: center;
+  padding: 10px 12px;
   gap: 10px;
   transition: background 0.2s;
+  font-size: 14px;
+  color: #333;
 }
 
-.dropdown-list li:hover {
-  background: #f5f5f5;
+.community-dropdown-item:hover {
+  background: #f5f7f9;
 }
 
-.dropdown-list img {
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
+.community-dropdown-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.community-dropdown-list::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 4px;
+}
+
+.community-dropdown-list::-webkit-scrollbar-thumb:hover {
+  background: #999;
 }

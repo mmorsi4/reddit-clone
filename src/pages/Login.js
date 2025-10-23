@@ -1,25 +1,88 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import "../styles/auth.css"
+import "../styles/auth.css";
 
 function Login() {
   const [activeForm, setActiveForm] = useState("login");
   const [showPassword, setShowPassword] = useState(false);
+  const [users, setUsers] = useState([]);
   const navigate = useNavigate();
 
+  // Load existing users from localStorage
+  useEffect(() => {
+    const storedUsers = JSON.parse(localStorage.getItem("users")) || [];
+    setUsers(storedUsers);
+  }, []);
+
+  // Toggle password visibility
+  const togglePassword = () => setShowPassword((prev) => !prev);
+
+  //  Handle Login
   const handleLogin = (e) => {
     e.preventDefault();
-    alert("Login successful!");
-    navigate("/");
+    const usernameOrEmail = e.target.elements["login-username-email"].value.trim();
+    const password = e.target.elements["login-password"].value.trim();
+
+    // Validation
+    if (usernameOrEmail === "" || password === "") {
+      alert("Please fill out all fields.");
+      return;
+    }
+
+    // Find matching user
+    const user = users.find(
+      (u) =>
+        (u.username === usernameOrEmail || u.email === usernameOrEmail) &&
+        u.password === password
+    );
+
+    if (user) {
+      alert(`Welcome back, ${user.username}!`);
+      navigate("/");
+    } else {
+      alert("Invalid username/email or password. Try again!");
+    }
   };
 
+  //  Handle Signup
   const handleSignup = (e) => {
     e.preventDefault();
-    alert("Account created successfully! Redirecting to Login...");
-    setTimeout(() => navigate("/login"), 1500);
-  };
+    const username = e.target.elements["signup-username"].value.trim();
+    const email = e.target.elements["signup-email"].value.trim();
+    const password = e.target.elements["signup-password"].value.trim();
 
-  const togglePassword = () => setShowPassword((prev) => !prev);
+    // Validation
+    if (username === "" || email === "" || password === "") {
+      alert("Please fill out all fields.");
+      return;
+    }
+
+    if (!email.includes("@")) {
+      alert("Please enter a valid email address.");
+      return;
+    }
+
+    if (password.length < 6) {
+      alert("Password must be at least 6 characters long.");
+      return;
+    }
+
+    // Check if user already exists
+    const userExists = users.some((u) => u.email === email || u.username === username);
+    if (userExists) {
+      alert("User with this email or username already exists!");
+      return;
+    }
+
+    // Add new user
+    const newUser = { username, email, password };
+    const updatedUsers = [...users, newUser];
+    setUsers(updatedUsers);
+    localStorage.setItem("users", JSON.stringify(updatedUsers));
+
+    alert("Account created successfully! Redirecting to Login...");
+    setTimeout(() => setActiveForm("login"), 1500);
+  };
 
   return (
     <div>
@@ -28,7 +91,6 @@ function Login() {
         <Link to="/">
           <img src="../images/reddit-logo.png" className="reddit-logo" alt="Reddit Logo" />
         </Link>
-
       </div>
 
       {/* AUTH BOX */}
@@ -51,11 +113,7 @@ function Login() {
 
           {/* 🟢 Login Form */}
           {activeForm === "login" && (
-            <form
-              className={`login-form ${activeForm === "login" ? "login-active" : ""}`}
-              id="login-form"
-              onSubmit={handleLogin}
-            >
+            <form className="login-form login-active" id="login-form" onSubmit={handleLogin}>
               <h2>Welcome Back!</h2>
               <input
                 id="login-username-email"
@@ -76,7 +134,8 @@ function Login() {
                   className="login-toggle-password"
                   onClick={togglePassword}
                   style={{ cursor: "pointer" }}
-                />              </div>
+                />
+              </div>
               <button type="submit" className="login-btn">Login</button>
               <p className="login-switch-text">
                 Don’t have an account?{" "}
@@ -87,11 +146,7 @@ function Login() {
 
           {/* 🟣 Signup Form */}
           {activeForm === "signup" && (
-            <form
-              className={`login-form ${activeForm === "signup" ? "login-active" : ""}`}
-              id="signup-form"
-              onSubmit={handleSignup}
-            >
+            <form className="login-form login-active" id="signup-form" onSubmit={handleSignup}>
               <h2>Create an Account</h2>
               <input id="signup-username" type="text" placeholder="Username" required />
               <input id="signup-email" type="email" placeholder="Email" required />
@@ -99,7 +154,7 @@ function Login() {
                 <input
                   id="signup-password"
                   type={showPassword ? "text" : "password"}
-                  placeholder="Password"
+                  placeholder="Password (min 6 chars)"
                   required
                 />
                 <img
@@ -108,7 +163,8 @@ function Login() {
                   className="login-toggle-password"
                   onClick={togglePassword}
                   style={{ cursor: "pointer" }}
-                />              </div>
+                />
+              </div>
               <button type="submit" className="login-btn">Sign Up</button>
               <p className="login-switch-text">
                 Already have an account?{" "}
@@ -118,7 +174,6 @@ function Login() {
           )}
         </div>
       </div>
-
     </div>
   );
 }
