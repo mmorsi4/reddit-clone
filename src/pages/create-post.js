@@ -1,14 +1,18 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom"; // ✅ added useNavigate
 import SearchBar from "./searchbar";
 import Sidebar from "./sidebar";
-import allCommunities from "../data/communitiesDB"; // ✅ Import database
+import allCommunities from "../data/communitiesDB";
 
 function CreatePost() {
   const [postType, setPostType] = useState("text");
   const [selectedCommunity, setSelectedCommunity] = useState(null);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState([]);
+  const [title, setTitle] = useState("");
+  const [content, setContent] = useState("");
+
+  const navigate = useNavigate(); // ✅ added navigation after posting
 
   const handleTypeSwitch = (type) => setPostType(type);
 
@@ -18,9 +22,55 @@ function CreatePost() {
   };
 
   const handleFileChange = (e) => {
-  const files = Array.from(e.target.files);
-  setSelectedFiles(files);
-};
+    const files = Array.from(e.target.files);
+    setSelectedFiles(files);
+  };
+
+  // ✅ Fixed: Save Draft button now works
+  const handleSaveDraft = () => {
+    const draft = { title, content, selectedCommunity, postType, selectedFiles };
+    localStorage.setItem("draft_post", JSON.stringify(draft));
+    alert("Draft saved!");
+  };
+
+  // ✅ Fixed: Post button adds post to the selected community
+  const handlePost = () => {
+    if (!title.trim()) {
+      alert("Please add a title before posting!");
+      return;
+    }
+    if (!selectedCommunity) {
+      alert("Please select a community before posting!");
+      return;
+    }
+
+    const communityKey = `posts_${selectedCommunity.name}`; // dynamic key per community
+
+    const newPost = {
+      username: "Mai", // change later when login system ready
+      time: "Just now",
+      title,
+      textPreview:
+        postType === "text"
+          ? content
+          : postType === "link"
+          ? content
+          : selectedFiles.length > 0
+          ? `Uploaded ${selectedFiles.length} file(s)`
+          : "",
+      avatar: "../images/avatar.png",
+      initialVotes: 0,
+      initialComments: [],
+    };
+
+    const existingPosts = JSON.parse(localStorage.getItem(communityKey)) || [];
+    const updatedPosts = [newPost, ...existingPosts];
+    localStorage.setItem(communityKey, JSON.stringify(updatedPosts));
+
+    alert(`Post added to r/${selectedCommunity.name}!`);
+    navigate(`/community1`); // ✅ redirect back to the community page
+  };
+
   return (
     <>
       {/* HEADER */}
@@ -195,8 +245,7 @@ function CreatePost() {
           </div>
         </div>
 
-
-        {/*  Post Type Buttons */}
+        {/* Post Type Buttons */}
         <div className="post-type-select">
           <button
             className={`type-btn ${postType === "text" ? "active" : ""}`}
@@ -218,22 +267,35 @@ function CreatePost() {
           </button>
         </div>
 
-        {/*  Post Form */}
+        {/* Post Form */}
         <div id="post-form">
           {postType === "text" && (
             <div className="post-section text-section">
-              <input type="text" className="input-title" placeholder="Title" />
+              <input
+                type="text"
+                className="input-title"
+                placeholder="Title"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)} // ✅ bind title
+              />
               <textarea
                 className="input-description"
                 placeholder="Write your post..."
+                value={content}
+                onChange={(e) => setContent(e.target.value)} // ✅ bind content
               ></textarea>
             </div>
           )}
 
           {postType === "media" && (
             <div className="post-section media-section">
-              <input type="text" className="input-title" placeholder="Title" />
-
+              <input
+                type="text"
+                className="input-title"
+                placeholder="Title"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+              />
               <div
                 className="upload-box"
                 id="uploadBox"
@@ -244,15 +306,13 @@ function CreatePost() {
                   <span
                     className="upload-text"
                     onClick={(e) => {
-                      e.stopPropagation(); // prevent double trigger
+                      e.stopPropagation();
                       document.getElementById("fileInput").click();
                     }}
                   >
                     browse
                   </span>
                 </p>
-
-                {/*  Show selected file names */}
                 {selectedFiles.length > 0 && (
                   <ul className="selected-files">
                     {selectedFiles.map((file, index) => (
@@ -260,14 +320,13 @@ function CreatePost() {
                     ))}
                   </ul>
                 )}
-
                 <input
                   type="file"
                   id="fileInput"
                   accept="image/*,video/*"
                   multiple
                   hidden
-                  onChange={(e) => handleFileChange(e)}
+                  onChange={handleFileChange}
                 />
               </div>
             </div>
@@ -275,16 +334,30 @@ function CreatePost() {
 
           {postType === "link" && (
             <div className="post-section link-section">
-              <input type="text" className="input-title" placeholder="Title" />
-              <input type="url" className="input-link" placeholder="Paste your link URL" />
+              <input
+                type="text"
+                className="input-title"
+                placeholder="Title"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+              />
+              <input
+                type="url"
+                className="input-link"
+                placeholder="Paste your link URL"
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
+              />
             </div>
           )}
         </div>
 
         {/* Buttons */}
         <div className="post-actions">
-          <button className="btn-secondary">Save Draft</button>
-          <button className="btn-primary" id="postBtn">
+          <button className="btn-secondary" onClick={handleSaveDraft}>
+            Save Draft
+          </button>
+          <button className="btn-primary" id="postBtn" onClick={handlePost}>
             Post
           </button>
         </div>

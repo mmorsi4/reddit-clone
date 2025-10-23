@@ -1,15 +1,22 @@
-import React from "react";
 import { Link } from "react-router-dom";
 import Post from "./post";
 import CommunityHeader from "./communityHeader";
 import SearchBar from "./searchbar";
 import Sidebar from "./sidebar";
+import React, { useState, useEffect } from "react";
 
 
 function Community1() {
+  const [posts, setPosts] = useState([]);
+
+  useEffect(() => {
+    // Load saved posts from localStorage (including new ones)
+    const savedPosts = JSON.parse(localStorage.getItem("posts_webdev")) || [];
+    setPosts(savedPosts);
+  }, []);
   return (
     <>
-       <div className="header">
+      <div className="header">
         <a>
           <img src="../images/reddit-logo.png" className="reddit-logo" />
         </a>
@@ -36,7 +43,7 @@ function Community1() {
             </button>
           </li>
           <li className="header-action">
-            <Link to ="/create_post" className="header-action-link">
+            <Link to="/create_post" className="header-action-link">
               <img src="../images/create-post.svg" /> Create
               <div className="header-action-tooltip">
                 Create post
@@ -135,7 +142,7 @@ function Community1() {
           </li>
         </ul>
       </div>
-      <Sidebar/>
+      <Sidebar />
       <div className="main">
         <CommunityHeader
           banner="../images/community-banner.png"
@@ -146,6 +153,24 @@ function Community1() {
           <div className="main-posts">
             <div className="post-container">
               <div className="post">
+                {/* 🆕 Dynamic posts appear first */}
+                {posts.length > 0 &&
+                  posts.map((p, index) => (
+                    <Post
+                      key={index}
+                      username={p.username}
+                      time={p.time}
+                      title={p.title}
+                      textPreview={p.textPreview}
+                      preview={p.preview}
+                      avatar={p.avatar || "../images/avatar.png"}
+                      initialVotes={0}
+                      initialComments={[]}
+                    />
+                  ))}
+
+                {/* Existing hardcoded posts */}
+
                 <Post
                   username="QuinnHannan1"
                   time="5 days ago"
