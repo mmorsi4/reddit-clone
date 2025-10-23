@@ -8,6 +8,7 @@ function CreatePost() {
   const [postType, setPostType] = useState("text");
   const [selectedCommunity, setSelectedCommunity] = useState(null);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [selectedFiles, setSelectedFiles] = useState([]);
 
   const handleTypeSwitch = (type) => setPostType(type);
 
@@ -16,6 +17,10 @@ function CreatePost() {
     setIsDropdownOpen(false);
   };
 
+  const handleFileChange = (e) => {
+  const files = Array.from(e.target.files);
+  setSelectedFiles(files);
+};
   return (
     <>
       {/* HEADER */}
@@ -143,55 +148,55 @@ function CreatePost() {
       <div className="main">
         <label className="create-label">Create post</label>
 
-       {/* 🧩 Community Dropdown */}
-<div className="community-select">
-  <label htmlFor="community" className="community-label">
-    Select a community
-  </label>
+        {/* Community Dropdown */}
+        <div className="community-select">
+          <label htmlFor="community" className="community-label">
+            Select a community
+          </label>
 
-  <div
-    className={`community-dropdown ${isDropdownOpen ? "open" : ""}`}
-    id="communityDropdown"
-    onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-  >
-    <div className="community-selected">
-      {selectedCommunity ? (
-        <div className="community-selected-content">
-          <img
-            src={selectedCommunity.image}
-            alt={selectedCommunity.name}
-            className="community-avatar"
-          />
-          r/{selectedCommunity.name}
-        </div>
-      ) : (
-        "-- Choose a community --"
-      )}
-    </div>
-
-    {isDropdownOpen && (
-      <ul className="community-dropdown-list">
-        {allCommunities.map((community, index) => (
-          <li
-            key={index}
-            className="community-dropdown-item"
-            onClick={() => handleSelectCommunity(community)}
+          <div
+            className={`custom-community-dropdown ${isDropdownOpen ? "open" : ""}`}
+            id="communityDropdown"
+            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
           >
-            <img
-              src={community.image}
-              alt={community.name}
-              className="community-avatar"
-            />
-            r/{community.name}
-          </li>
-        ))}
-      </ul>
-    )}
-  </div>
-</div>
+            <div className="custom-selected">
+              {selectedCommunity ? (
+                <div className="custom-selected-content">
+                  <img
+                    src={selectedCommunity.image}
+                    alt={selectedCommunity.name}
+                    className="custom-avatar"
+                  />
+                  r/{selectedCommunity.name}
+                </div>
+              ) : (
+                "-- Choose a community --"
+              )}
+            </div>
+
+            {isDropdownOpen && (
+              <ul className="custom-dropdown-list">
+                {allCommunities.map((community, index) => (
+                  <li
+                    key={index}
+                    className="custom-dropdown-item"
+                    onClick={() => handleSelectCommunity(community)}
+                  >
+                    <img
+                      src={community.image}
+                      alt={community.name}
+                      className="custom-avatar"
+                    />
+                    r/{community.name}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </div>
 
 
-        {/* 🟣 Post Type Buttons */}
+        {/*  Post Type Buttons */}
         <div className="post-type-select">
           <button
             className={`type-btn ${postType === "text" ? "active" : ""}`}
@@ -213,29 +218,56 @@ function CreatePost() {
           </button>
         </div>
 
-        {/* 🔵 Post Form */}
+        {/*  Post Form */}
         <div id="post-form">
           {postType === "text" && (
             <div className="post-section text-section">
               <input type="text" className="input-title" placeholder="Title" />
-              <textarea className="input-description" placeholder="Write your post..."></textarea>
+              <textarea
+                className="input-description"
+                placeholder="Write your post..."
+              ></textarea>
             </div>
           )}
 
           {postType === "media" && (
             <div className="post-section media-section">
               <input type="text" className="input-title" placeholder="Title" />
-              <div className="upload-box" id="uploadBox">
+
+              <div
+                className="upload-box"
+                id="uploadBox"
+                onClick={() => document.getElementById("fileInput").click()}
+              >
                 <p>
                   Drag & drop images or videos here, or{" "}
-                  <span className="upload-text">browse</span>
+                  <span
+                    className="upload-text"
+                    onClick={(e) => {
+                      e.stopPropagation(); // prevent double trigger
+                      document.getElementById("fileInput").click();
+                    }}
+                  >
+                    browse
+                  </span>
                 </p>
+
+                {/*  Show selected file names */}
+                {selectedFiles.length > 0 && (
+                  <ul className="selected-files">
+                    {selectedFiles.map((file, index) => (
+                      <li key={index}>{file.name}</li>
+                    ))}
+                  </ul>
+                )}
+
                 <input
                   type="file"
                   id="fileInput"
                   accept="image/*,video/*"
                   multiple
                   hidden
+                  onChange={(e) => handleFileChange(e)}
                 />
               </div>
             </div>
