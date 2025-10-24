@@ -276,13 +276,13 @@ function CreatePost() {
                 className="input-title"
                 placeholder="Title"
                 value={title}
-                onChange={(e) => setTitle(e.target.value)} // ✅ bind title
+                onChange={(e) => setTitle(e.target.value)} 
               />
               <textarea
                 className="input-description"
                 placeholder="Write your post..."
                 value={content}
-                onChange={(e) => setContent(e.target.value)} // ✅ bind content
+                onChange={(e) => setContent(e.target.value)} 
               ></textarea>
             </div>
           )}

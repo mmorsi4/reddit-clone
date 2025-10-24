@@ -91,6 +91,28 @@
   padding: 0;
 }
 
+.type-btn {
+  padding: 8px 16px;
+  border: 1px solid #ccc;
+  border-radius: 20px;
+  background-color: white;
+  cursor: pointer;
+  font-size: 14px;
+  color: #333;
+  transition: all 0.3s ease;
+}
+
+.type-btn:hover {
+  border-color: #0079d3;
+  color: #0079d3;
+}
+
+.type-btn.active {
+  background-color: #0079d3;
+  color: white;
+  border-color: #0079d3;
+}
+
 .selected-files li {
   background: #f6f7f8;
   border-radius: 6px;

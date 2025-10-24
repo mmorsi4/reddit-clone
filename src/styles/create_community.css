@@ -45,11 +45,6 @@ textarea {
   height: 80px;
 }
 
-.popup-buttons {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 15px;
-}
 
 .btn-primary,
 .btn-secondary {
@@ -198,4 +193,34 @@ textarea {
   margin-top: 8px;
 }
 
+.community-action-join.joined {
+  background-color: white;
+  color: rgb(138, 31, 31);
+  border: 1px solid rgb(138, 31, 31);
+}
+
+.community-action-join.joined:hover {
+  background-color: rgb(250, 230, 230);
+}
+
+.community-action-join.joined:active {
+  background-color: rgb(240, 210, 210);
+}
+
+
+.community-action-more-container .more-menu {
+  display: none;
+}
+
+.community-action-more-container .more-menu.visible {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  list-style: none;
+  overflow: hidden;
+}
+
+.no-underline {
+  text-decoration: none;
+}
 
