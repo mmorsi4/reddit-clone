@@ -8,7 +8,7 @@ function CommunityHeader({ banner, avatar, name }) {
   const [isMuted, setIsMuted] = useState(false);
   const [isInCustomFeed, setIsInCustomFeed] = useState(false);
 
-  // ✅ Load joined state from localStorage
+  //  Load joined state from localStorage
   useEffect(() => {
     const saved = localStorage.getItem(storageKey);
     if (saved) {
@@ -21,7 +21,7 @@ function CommunityHeader({ banner, avatar, name }) {
     }
   }, [storageKey]);
 
-  // ✅ Handle join/unjoin
+  //  Handle join/unjoin
   const handleJoin = () => {
     const newState = !joined;
     setJoined(newState);
@@ -41,7 +41,7 @@ function CommunityHeader({ banner, avatar, name }) {
     }
   };
 
-  // ✅ Add to RECENT communities
+  //  Add to RECENT communities
   useEffect(() => {
     const recent = JSON.parse(localStorage.getItem("recentCommunities")) || [];
     const newCommunity = { name, image: avatar, link: `/community/${name}` };
@@ -49,7 +49,7 @@ function CommunityHeader({ banner, avatar, name }) {
     localStorage.setItem("recentCommunities", JSON.stringify(updated));
   }, [name, avatar]);
 
-  // ✅ Close menu on outside click
+  //  Close menu on outside click
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (!e.target.closest(".community-action-more-container")) {
@@ -60,13 +60,13 @@ function CommunityHeader({ banner, avatar, name }) {
     return () => document.removeEventListener("click", handleClickOutside);
   }, []);
 
-  // ✅ Load mute state
+  //  Load mute state
   useEffect(() => {
     const mutedList = JSON.parse(localStorage.getItem("mutedCommunities")) || [];
     setIsMuted(mutedList.includes(name));
   }, [name]);
 
-  // ✅ Handle mute/unmute
+  //  Handle mute/unmute
   const handleMute = (communityName) => {
     let mutedList = JSON.parse(localStorage.getItem("mutedCommunities")) || [];
 
@@ -82,7 +82,7 @@ function CommunityHeader({ banner, avatar, name }) {
     setIsMuted(!isMuted);
   };
 
-  // ✅ Handle Add/Remove from Custom Feed
+  //  Handle Add/Remove from Custom Feed
   const handleAddToCustomFeed = (communityName, avatar) => {
     let customFeeds = JSON.parse(localStorage.getItem("customFeeds")) || [];
 
@@ -110,7 +110,7 @@ function CommunityHeader({ banner, avatar, name }) {
     window.dispatchEvent(new Event("customFeedUpdated"));
   };
 
-  // ✅ Check if already in custom feeds (on page load)
+  //  Check if already in custom feeds (on page load)
   useEffect(() => {
     const customFeeds = JSON.parse(localStorage.getItem("customFeeds")) || [];
     setIsInCustomFeed(customFeeds.some((c) => c.name === name));
@@ -118,7 +118,7 @@ function CommunityHeader({ banner, avatar, name }) {
 
   return (
     <div className="main-head">
-      {/* ✅ Banner Upload */}
+      {/* Banner Upload */}
       <div className="banner-container">
         <label htmlFor="bannerUpload">
           <img

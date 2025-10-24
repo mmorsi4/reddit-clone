@@ -39,7 +39,7 @@ function Post({ username, time, title, preview, textPreview, avatar, initialVote
   };
 
   return (
-    <div className="post-container">
+    <div className="post-fullwidth">
       <div className="post">
         <div className="post-meta">
           <div className="post-user-info">

@@ -5,6 +5,7 @@ import SearchBar from "../components/searchbar";
 import CommunityHeader from "../components/communityHeader";
 import React, { useState, useEffect } from "react";
 import allCommunities from "../data/communitiesDB"; 
+import MainSidebar from "../components/main-sidebar";
 
 function Community() {
   const { name } = useParams();
@@ -156,8 +157,8 @@ function Community() {
           avatar={community.avatar}
           name={community.name}
         />
-
         <div className="main-body">
+          <div className="main-posts-container">
           <div className="main-posts">
             <div className="post-container">
               <div className="post">
@@ -189,7 +190,11 @@ function Community() {
             </div>
           </div>
         </div>
+        <MainSidebar community={community} />
+        </div>
       </div>
+
+      
     </>
   );
 }
