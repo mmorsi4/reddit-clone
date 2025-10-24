@@ -3,6 +3,7 @@ import "../styles/search.css";
 import "../styles/main.css";
 import "../styles/sidebar.css";
 import "../styles/main-sidebar.css";
+import "../styles/community.css";
 import "../styles/main-posts.css";
 import "../styles/viewprofile.css";
 import "../styles/manage.css";
