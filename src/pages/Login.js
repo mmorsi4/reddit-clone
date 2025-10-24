@@ -18,7 +18,7 @@ function Login() {
   const togglePassword = () => setShowPassword((prev) => !prev);
 
   //  Handle Login
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     const usernameOrEmail = e.target.elements["login-username-email"].value.trim();
     const password = e.target.elements["login-password"].value.trim();
@@ -29,23 +29,44 @@ function Login() {
       return;
     }
 
-    // Find matching user
-    const user = users.find(
-      (u) =>
-        (u.username === usernameOrEmail || u.email === usernameOrEmail) &&
-        u.password === password
-    );
+    try {
+      const res = await fetch("/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ usernameOrEmail, password })
+      });
 
-    if (user) {
-      alert(`Welcome back, ${user.username}!`);
-      navigate("/");
-    } else {
-      alert("Invalid username/email or password. Try again!");
+      const data = await res.json();
+      if (res.ok) {
+        alert(`Welcome back, ${data.user.username}!`);
+        navigate("/");
+        //setTimeout(() => setActiveForm("login"), 1500);
+      } else {
+        alert(res.status || "Invalid credentials.");
+        alert(data.message || "Invalid credentials.");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Error connecting to server.");
     }
+
+    // // Find matching user
+    // const user = users.find(
+    //   (u) =>
+    //     (u.username === usernameOrEmail || u.email === usernameOrEmail) &&
+    //     u.password === password
+    // );
+
+    // if (user) {
+    //   alert(`Welcome back, ${user.username}!`);
+    //   navigate("/");
+    // } else {
+    //   alert("Invalid username/email or password. Try again!");
+    // }
   };
 
   //  Handle Signup
-  const handleSignup = (e) => {
+  const handleSignup = async (e) => {
     e.preventDefault();
     const username = e.target.elements["signup-username"].value.trim();
     const email = e.target.elements["signup-email"].value.trim();
@@ -67,21 +88,25 @@ function Login() {
       return;
     }
 
-    // Check if user already exists
-    const userExists = users.some((u) => u.email === email || u.username === username);
-    if (userExists) {
-      alert("User with this email or username already exists!");
-      return;
+    try {
+      const res = await fetch("/api/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, email, password })
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        alert("Account created successfully! Redirecting to Login...");
+        setTimeout(() => setActiveForm("login"), 1500);
+      } else {
+        alert(data.message || "Signup failed.");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Error connecting to server.");
     }
-
-    // Add new user
-    const newUser = { username, email, password };
-    const updatedUsers = [...users, newUser];
-    setUsers(updatedUsers);
-    localStorage.setItem("users", JSON.stringify(updatedUsers));
-
-    alert("Account created successfully! Redirecting to Login...");
-    setTimeout(() => setActiveForm("login"), 1500);
   };
 
   return (

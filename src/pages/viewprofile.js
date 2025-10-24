@@ -3,30 +3,46 @@ import { Link } from "react-router-dom";
 import Sidebar from "../components/sidebar";
 import SearchBar from "../components/searchbar";
 
-
-
-
 function ViewProfile() {
   useEffect(() => {
     // 🧠 Get current user data
-    const user = JSON.parse(localStorage.getItem("currentUser"));
-    const savedAvatar = localStorage.getItem("userAvatar");
+    const fetchProfile = async () => {
+      const res = await fetch("/api/view_profile", {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include"
+      });
 
-    const avatarEl = document.getElementById("profile-avatar");
-    const nameEl = document.getElementById("profile-name");
-    const usernameEl = document.getElementById("profile-username");
-    const emptyTextEl = document.getElementById("empty-text");
+      console.log(res)
 
-    if (user) {
-      nameEl.textContent = user.username;
-      usernameEl.textContent = `u/${user.username}`;
-      emptyTextEl.textContent = `u/${user.username} hasn't posted yet`;
+      // const user = JSON.parse(localStorage.getItem("currentUser"));
+      const data = await res.json();
+      const user = data.user;
+
+      console.log(user);
+
+      // const savedAvatar = localStorage.getItem("userAvatar");
+      const savedAvatar = user.avatarUrl || NaN;
+
+      const avatarEl = document.getElementById("profile-avatar");
+      const nameEl = document.getElementById("profile-name");
+      const usernameEl = document.getElementById("profile-username");
+      const emptyTextEl = document.getElementById("empty-text");
+
+
+      if (user) {
+        nameEl.textContent = user.username;
+        usernameEl.textContent = `u/${user.username}`;
+        emptyTextEl.textContent = `u/${user.username} hasn't posted yet`;
+      }
+
+      // 🧩 If saved avatar exists, load it
+      if (savedAvatar) {
+        avatarEl.src = savedAvatar;
+      }
     }
 
-    // 🧩 If saved avatar exists, load it
-    if (savedAvatar) {
-      avatarEl.src = savedAvatar;
-    }
+    fetchProfile();
   }, []);
   return (
 
