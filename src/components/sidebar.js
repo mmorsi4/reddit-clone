@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import allCommunities from "../data/communitiesDB";
+import CreateCommunityPopup from "./create-community";
 
 function Sidebar() {
   const [recent, setRecent] = useState([]);
-  const location = useLocation(); // to detect navigation changes
+  const [customCommunities, setCustomCommunities] = useState([]);
+  const [showPopup, setShowPopup] = useState(false);
   const [customFeeds, setCustomFeeds] = useState([]);
+  const location = useLocation();
 
-  // Load recent communities from localStorage
+  // Load recent communities
   useEffect(() => {
     const recentData = JSON.parse(localStorage.getItem("recentCommunities")) || [];
     setRecent(recentData);
@@ -15,34 +18,51 @@ function Sidebar() {
 
 
   useEffect(() => {
-  const loadFeeds = () => {
-    const feeds = JSON.parse(localStorage.getItem("customFeeds")) || [];
-    setCustomFeeds(feeds);
-  };
+    const storedFeeds = JSON.parse(localStorage.getItem("customFeeds")) || [];
+    setCustomFeeds(storedFeeds);
+    const updateFeeds = () => {
+      const updated = JSON.parse(localStorage.getItem("customFeeds")) || [];
+      setCustomFeeds(updated);
+    };
 
-  loadFeeds();
-  window.addEventListener("customFeedUpdated", loadFeeds);
+    window.addEventListener("customFeedUpdated", updateFeeds);
 
-  return () => {
-    window.removeEventListener("customFeedUpdated", loadFeeds);
-  };
-}, []);
+    return () => window.removeEventListener("customFeedUpdated", updateFeeds);
+  }, [])
 
-  // ✅ When the user visits a community route, check if it matches one in allCommunities
+  // Load all custom communities
   useEffect(() => {
-    const matchedCommunity = allCommunities.find(
-      (community) => community.link === location.pathname
-    );
-    if (matchedCommunity) {
-      // Add to recent if not already there
-      setRecent((prev) => {
-        let updated = [matchedCommunity, ...prev.filter((c) => c.name !== matchedCommunity.name)];
-        if (updated.length > 5) updated = updated.slice(0, 5);
-        localStorage.setItem("recentCommunities", JSON.stringify(updated));
-        return updated;
-      });
+    const loadCustom = () => {
+      const stored = JSON.parse(localStorage.getItem("customCommunities")) || [];
+      setCustomCommunities(stored);
+    };
+
+    loadCustom();
+    window.addEventListener("customCommunityUpdated", loadCustom);
+    return () => window.removeEventListener("customCommunityUpdated", loadCustom);
+  }, []);
+
+  // Detect when user visits a community
+  useEffect(() => {
+    if (location.pathname.startsWith("/community/")) {
+      const communityName = location.pathname.split("/")[2];
+      const matched = [...allCommunities, ...customCommunities].find(
+        (c) => c.name === communityName
+      );
+
+      if (matched) {
+        setRecent((prev) => {
+          let updated = [
+            matched,
+            ...prev.filter((c) => c.name !== matched.name),
+          ];
+          if (updated.length > 5) updated = updated.slice(0, 5);
+          localStorage.setItem("recentCommunities", JSON.stringify(updated));
+          return updated;
+        });
+      }
     }
-  }, [location.pathname]);
+  }, [location.pathname, customCommunities]);
 
   return (
     <div className="sidebar-container">
@@ -88,23 +108,22 @@ function Sidebar() {
             <li>
               <a href="#" className="sidebar-link">
                 <img src="../images/plus.svg" alt="Create Feed" />
-                <div className="sidebar-section-item-details">Create Custom Feed</div>
+                <div className="sidebar-section-item-details">
+                  Create Custom Feed
+                </div>
               </a>
             </li>
 
-            {/* ✅ Dynamically loaded custom feeds */}
             {customFeeds.length === 0 ? (
               <li className="sidebar-link">
-                <div className="sidebar-section-item-details">
-                  No custom feeds yet
-                </div>
+                <div className="sidebar-section-item-details">No custom feeds yet</div>
               </li>
             ) : (
               customFeeds.map((feed, index) => (
                 <li key={index}>
                   <Link to={feed.link} className="sidebar-link">
                     <img
-                      src={feed.image || "../images/default-community.svg"}
+                      src={feed.avatar || "../images/default-community.svg"}
                       className="sidebar-link-icon-round"
                       alt={feed.name}
                     />
@@ -139,9 +158,12 @@ function Sidebar() {
             ) : (
               recent.map((community, index) => (
                 <li key={index}>
-                  <Link to={community.link} className="sidebar-link">
+                  <Link
+                    to={`/community/${community.name}`}
+                    className="sidebar-link"
+                  >
                     <img
-                      src={community.image || "../images/default-community.svg"}
+                      src={community.avatar || "../images/default-community.svg"}
                       className="sidebar-link-icon-round"
                       alt={community.name}
                     />
@@ -169,23 +191,55 @@ function Sidebar() {
             Communities <img src="../images/down.svg" alt="Expand" />
           </label>
           <ul className="sidebar-section">
+            {/* Create Community button */}
             <li>
-              <a href="#" className="sidebar-link">
-                <img src="../images/plus.svg" alt="Create Community" />
-                <div className="sidebar-section-item-details">Create Community</div>
-              </a>
+              <button
+                onClick={() => setShowPopup(true)}
+                className="sidebar-link create-btn"
+              >
+                <img src="../images/plus.svg" alt="Create" />
+                <div className="sidebar-section-item-details">
+                  Create Community
+                </div>
+              </button>
             </li>
             <li>
               <Link to="/manage_community" className="sidebar-link">
                 <img src="../images/settings.svg" alt="Manage Community" />
-                <div className="sidebar-section-item-details">Manage Community</div>
+                <div className="sidebar-section-item-details">
+                  Manage Community
+                </div>
               </Link>
             </li>
+
+            {/* Default communities */}
             {allCommunities.map((community, index) => (
-              <li key={index}>
-                <Link to={community.link} className="sidebar-link">
+              <li key={`default-${index}`}>
+                <Link
+                  to={`/community/${community.name}`}
+                  className="sidebar-link"
+                >
                   <img
-                    src={community.image || "../images/default-community.svg"}
+                    src={community.avatar || "../images/default-community.svg"}
+                    className="sidebar-link-icon-round"
+                    alt={community.name}
+                  />
+                  <div className="sidebar-section-item-details">
+                    {community.name}
+                  </div>
+                </Link>
+              </li>
+            ))}
+
+            {/* Custom-created communities */}
+            {customCommunities.map((community, index) => (
+              <li key={`custom-${index}`}>
+                <Link
+                  to={`/community/${community.name}`}
+                  className="sidebar-link"
+                >
+                  <img
+                    src={community.avatar || "../images/default-community.svg"}
                     className="sidebar-link-icon-round"
                     alt={community.name}
                   />
@@ -215,13 +269,17 @@ function Sidebar() {
             <li>
               <a href="#" className="sidebar-link">
                 <img src="../images/plus.svg" alt="Create Community" />
-                <div className="sidebar-section-item-details">Create Community</div>
+                <div className="sidebar-section-item-details">
+                  Create Community
+                </div>
               </a>
             </li>
             <li>
               <Link to="/manage_community" className="sidebar-link">
                 <img src="../images/settings.svg" alt="Manage Community" />
-                <div className="sidebar-section-item-details">Manage Community</div>
+                <div className="sidebar-section-item-details">
+                  Manage Community
+                </div>
               </Link>
             </li>
           </ul>
@@ -230,6 +288,14 @@ function Sidebar() {
           </a>
         </li>
       </ul>
+
+      {/* Popup */}
+      {showPopup && (
+        <CreateCommunityPopup
+          onClose={() => setShowPopup(false)}
+          onCreate={() => { }}
+        />
+      )}
     </div>
   );
 }

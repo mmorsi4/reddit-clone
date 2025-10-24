@@ -189,3 +189,29 @@
 .sidebar-section-item-details::first-line {
   text-overflow: ellipsis;
 }
+
+/* Make the Create Community button look exactly like sidebar links */
+.sidebar-link.create-btn {
+  background: none;
+  border: none;
+  width: 100%;
+  text-align: left;
+}
+
+.sidebar-link.create-btn:hover {
+  background-color: rgb(246, 248, 249);
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.sidebar-link.create-btn:active {
+  background-color: rgba(0, 0, 0, 0.16);
+}
+
+
+.sidebar-link-icon-round {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  object-fit: cover;
+}

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom"; // ✅ added useNavigate
-import SearchBar from "./searchbar";
-import Sidebar from "./sidebar";
+import { Link, useNavigate } from "react-router-dom"; 
+import Sidebar from "../components/sidebar";
+import SearchBar from "../components/searchbar";
 import allCommunities from "../data/communitiesDB";
 
 function CreatePost() {
@@ -54,10 +54,10 @@ function CreatePost() {
         postType === "text"
           ? content
           : postType === "link"
-          ? content
-          : selectedFiles.length > 0
-          ? `Uploaded ${selectedFiles.length} file(s)`
-          : "",
+            ? content
+            : selectedFiles.length > 0
+              ? `Uploaded ${selectedFiles.length} file(s)`
+              : "",
       avatar: "../images/avatar.png",
       initialVotes: 0,
       initialComments: [],

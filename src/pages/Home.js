@@ -1,4 +1,3 @@
-import React, { useState, useEffect } from "react";
 import "../styles/header.css";
 import "../styles/search.css";
 import "../styles/main.css";
@@ -9,11 +8,11 @@ import "../styles/viewprofile.css";
 import "../styles/manage.css";
 import "../styles/create_post.css";
 import "../styles/edit_avatar.css";
+import "../styles/create_community.css";
 import { Link } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
-import Post from "./post";
-import SearchBar from "./searchbar";
-import Sidebar from "./sidebar";
+import Post from "../components/post";
+import SearchBar from "../components/searchbar";
+import Sidebar from "../components/sidebar";
 
 
 function Home() {

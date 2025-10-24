@@ -1,21 +1,41 @@
-import { Link } from "react-router-dom";
-import Post from "./post";
-import CommunityHeader from "./communityHeader";
-import SearchBar from "./searchbar";
-import Sidebar from "./sidebar";
+import { Link, useParams } from "react-router-dom";
+import Post from "../components/post";
+import Sidebar from "../components/sidebar";
+import SearchBar from "../components/searchbar";
+import CommunityHeader from "../components/communityHeader";
 import React, { useState, useEffect } from "react";
+import allCommunities from "../data/communitiesDB"; 
 
-
-function Community1() {
+function Community() {
+  const { name } = useParams();
   const [posts, setPosts] = useState([]);
+  const [community, setCommunity] = useState(null);
 
   useEffect(() => {
-    // Load saved posts from localStorage (including new ones)
-    const savedPosts = JSON.parse(localStorage.getItem("posts_webdev")) || [];
-    setPosts(savedPosts);
-  }, []);
+    const builtIn = allCommunities;
+    const custom = JSON.parse(localStorage.getItem("customCommunities")) || [];
+    const all = [...builtIn, ...custom];
+    const found = all.find(
+      (c) => c.name.toLowerCase() === name.toLowerCase()
+    );
+    setCommunity(found);
+  }, [name]);
+
+  useEffect(() => {
+    if (community) {
+      const savedPosts =
+        JSON.parse(localStorage.getItem(`posts_${name}`)) || [];
+      setPosts(savedPosts);
+    }
+  }, [name, community]);
+
+  if (!community) {
+    return <h2 style={{ textAlign: "center", marginTop: "50px" }}>Community not found</h2>;
+  }
+
   return (
     <>
+      {/* ---------- HEADER ---------- */}
       <div className="header">
         <a>
           <img src="../images/reddit-logo.png" className="reddit-logo" />
@@ -27,47 +47,41 @@ function Community1() {
           <li className="header-action">
             <button>
               <img src="../images/ads.svg" />
-              <div className="header-action-tooltip">
-                Advertise on Reddit
-              </div>
+              <div className="header-action-tooltip">Advertise on Reddit</div>
             </button>
           </li>
+
           <li className="header-action">
             <button>
               <a href="./chats.html" className="header-action-link">
                 <img src="../images/chat.svg" />
-                <div className="header-action-tooltip">
-                  Open chat
-                </div>
+                <div className="header-action-tooltip">Open chat</div>
               </a>
             </button>
           </li>
+
           <li className="header-action">
             <Link to="/create_post" className="header-action-link">
               <img src="../images/create-post.svg" /> Create
-              <div className="header-action-tooltip">
-                Create post
-              </div>
+              <div className="header-action-tooltip">Create post</div>
             </Link>
           </li>
+
           <li className="header-action">
             <button className="inbox-button">
               <img src="../images/open-inbox.svg" />
               <div className="notification-counter">1</div>
-              <div className="header-action-tooltip">
-                Open inbox
-              </div>
+              <div className="header-action-tooltip">Open inbox</div>
             </button>
           </li>
+
           <li className="header-action">
             <button className="profile-menu-button">
-              <label for="profile-menu-visibility-checkbox">
+              <label htmlFor="profile-menu-visibility-checkbox">
                 <img src="../images/avatar.png" className="header-action-avatar" />
               </label>
               <div className="online-indicator"></div>
-              <div className="header-action-tooltip">
-                Open profile menu
-              </div>
+              <div className="header-action-tooltip">Open profile menu</div>
             </button>
             <input type="checkbox" className="profile-menu-visibility" id="profile-menu-visibility-checkbox" />
             <ul className="profile-menu">
@@ -79,54 +93,45 @@ function Community1() {
                     <div className="online-indicator online-indicator-profile-menu"></div>
                   </div>
                   <div className="profile-menu-item-right">
-                    <div className="profile-menu-item-title">
-                      View Profile
-                    </div>
-                    <div className="profile-menu-item-info-extra">
-
-                    </div>
+                    <div className="profile-menu-item-title">View Profile</div>
                   </div>
                 </Link>
               </li>
+
               <li className="profile-menu-item">
                 <Link to="/edit-avatar" className="header-action-link">
                   <div className="profile-menu-item-icon">
                     <img src="../images/edit-avatar.svg" />
                   </div>
                   <div className="profile-menu-item-info">
-                    <div className="profile-menu-item-title">
-                      Edit Avatar
-                    </div>
+                    <div className="profile-menu-item-title">Edit Avatar</div>
                   </div>
                 </Link>
               </li>
+
               <li className="profile-menu-item">
                 <div className="profile-menu-item-icon">
                   <img src="../images/achievements.svg" />
                 </div>
                 <div className="profile-menu-item-info">
-                  <div className="profile-menu-item-title">
-                    Achievements
-                  </div>
-                  <div className="profile-menu-item-info-extra">
-                    3 unlocked
-                  </div>
+                  <div className="profile-menu-item-title">Achievements</div>
+                  <div className="profile-menu-item-info-extra">3 unlocked</div>
                 </div>
               </li>
+
               <li className="profile-menu-item">
                 <div className="profile-menu-item-icon">
                   <img src="../images/dark-mode.svg" />
                 </div>
                 <div className="profile-menu-item-info">
-                  <div className="profile-menu-item-title">
-                    Dark Mode
-                  </div>
+                  <div className="profile-menu-item-title">Dark Mode</div>
                   <label className="toggle-switch">
                     <input type="checkbox" />
                     <span className="slider"></span>
                   </label>
                 </div>
               </li>
+
               <li className="profile-menu-item" style={{ cursor: "pointer" }}>
                 <Link to="/login" className="profile-menu-link">
                   <div className="profile-menu-item-icon">
@@ -137,76 +142,48 @@ function Community1() {
                   </div>
                 </Link>
               </li>
-
             </ul>
           </li>
         </ul>
       </div>
+
+      {/* ---------- SIDEBAR & MAIN ---------- */}
       <Sidebar />
+
       <div className="main">
         <CommunityHeader
-          banner="../images/community-banner.png"
-          avatar="../images/community-avatar1.jpg"
-          name="webdev"
+          banner={community.banner}
+          avatar={community.avatar}
+          name={community.name}
         />
+
         <div className="main-body">
           <div className="main-posts">
             <div className="post-container">
               <div className="post">
-                {/* 🆕 Dynamic posts appear first */}
-                {posts.length > 0 &&
-                  posts.map((p, index) => (
-                    <Post
-                      key={index}
-                      username={p.username}
-                      time={p.time}
-                      title={p.title}
-                      textPreview={p.textPreview}
-                      preview={p.preview}
-                      avatar={p.avatar || "../images/avatar.png"}
-                      initialVotes={0}
-                      initialComments={[]}
-                    />
-                  ))}
+                {/* dynamic posts */}
+                {posts.map((p, index) => (
+                  <Post
+                    key={index}
+                    username={p.username}
+                    time={p.time}
+                    title={p.title}
+                    textPreview={p.textPreview}
+                    preview={p.preview}
+                    avatar={p.avatar || "../images/avatar.png"}
+                    initialVotes={0}
+                    initialComments={[]}
+                  />
+                ))}
 
-                {/* Existing hardcoded posts */}
-
+                {/*  example static posts */}
                 <Post
-                  username="QuinnHannan1"
-                  time="5 days ago"
-                  title="I fired a great dev and wasted $50,000"
-                  textPreview="I almost killed my startup before it even launched..."
+                  username="ExampleUser"
+                  time="2 days ago"
+                  title={`Welcome to ${community.name}!`}
+                  textPreview="This is your first community post."
                   avatar="../images/avatar.png"
-                  initialVotes={443}
-                  initialComments={[
-                    { username: "techguru", text: "Oof, that sounds rough!" },
-                    { username: "startuplife", text: "Been there. Lessons learned!" },]}
-                />
-
-                <Post
-                  username="deathsowhat"
-                  time="1 day ago"
-                  title="I found the final boss guys"
-                  preview="../images/preview-9.jpg"
-                  avatar="../images/avatar-2.png"
-                  initialVotes={43}
-                  initialComments={[
-                    { username: "gamerchick", text: "LOL that’s hilarious" },
-                  ]}
-                />
-
-
-                <Post
-                  username="_Maximum"
-                  time="3 days ago"
-                  title="Click to cancel, now with more gamification"
-                  preview="../images/preview-3.gif"
-                  avatar="../images/avatar-7.png"
-                  initialVotes={563}
-                  initialComments={[
-                    { username: "uxfan", text: "That’s so true 😂" },
-                    { username: "maximillion", text: "Great post!" },
-                  ]}
+                  initialVotes={100}
                 />
               </div>
             </div>
@@ -217,4 +194,4 @@ function Community1() {
   );
 }
 
-export default Community1;
+export default Community;

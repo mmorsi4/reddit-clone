@@ -1,27 +1,29 @@
 
-// This acts like your "database" of all communities
 const allCommunities = [
   {
     name: "webdev",
-    image: "../images/community-avatar1.jpg",
-    link: "/community1",
+    avatar: "../images/community-avatar1.jpg",
+    link: "/community/webdev",
+    banner: "../images/community-banner.png",
   },
   {
     name: "harrypotter",
-    image: "../images/community-avatar2.jpg",
-    link: "/community2",
+    avatar: "../images/community-avatar2.jpg",
+    link: "/community/harrypotter",
+    banner: "../images/community-banner2.jpg",
   },
   {
     name: "playstation",
-    image: "../images/community-avatar3.jpg",
-    link: "/community3",
+    avatar: "../images/community-avatar3.jpg",
+    link: "/community/playstation",
+    banner: "../images/community-banner3.png",
   },
   {
     name: "GoodCoffeeGreatCoffee",
-    image: "../images/community-avatar4.jpg",
-    link: "/community4",
+    avatar: "../images/community-avatar4.jpg",
+    link: "/community/GoodCoffeeGreatCoffee",
+    banner: "../images/community-banner4.png",
   },
-  
 ];
 
 export default allCommunities;

@@ -31,7 +31,7 @@ function SearchBar() {
 
 
   const handleCommunityClick = (community) => {
-    navigate(community.link); // ✅ uses link from the database
+    navigate(community.link);
   };
 
   return (

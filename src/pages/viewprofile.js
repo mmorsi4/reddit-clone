@@ -1,7 +1,8 @@
 import React, { useEffect } from "react";
 import { Link } from "react-router-dom";
-import SearchBar from "./searchbar";
-import Sidebar from "./sidebar";
+import Sidebar from "../components/sidebar";
+import SearchBar from "../components/searchbar";
+
 
 
 
@@ -35,7 +36,7 @@ function ViewProfile() {
           <img src="../images/reddit-logo.png" className="reddit-logo" />
         </a>
 
-        <SearchBar />
+        <SearchBar/>
 
         <ul className="header-actions">
           <li className="header-action">

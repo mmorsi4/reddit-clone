@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import SearchBar from "./searchbar";
-import Sidebar from "./sidebar";
+import Sidebar from "../components/sidebar";
+import SearchBar from "../components/searchbar";
+
 
 
 
