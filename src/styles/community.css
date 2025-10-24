@@ -1,13 +1,14 @@
 
 .main-head-banner {
-  width: 1199px;
-  height: 243px;
+  width: 100%;         
+  max-width: 1200px;    
+  height: auto;        
+  aspect-ratio: 1199 / 243; 
   border-radius: 8px;
   object-fit: cover;
   object-position: center;
   display: block;
 }
-
 
 .main-head-info {
     display: flex;

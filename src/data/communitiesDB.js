@@ -1,11 +1,11 @@
 const allCommunities = [
   {
-    name: "webdev",
+    name: "reddit",
     avatar: "../images/community-avatar1.jpg",
     link: "/community/webdev",
     banner: "../images/community-banner.png",
     description:
-      "A place for web developers to share, learn, and grow together.",
+      "The original subreddit, now archived.",
     members: "450K",
     online: "2.3K",
     rank: "Top 5%",

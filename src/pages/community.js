@@ -4,13 +4,18 @@ import Sidebar from "../components/sidebar";
 import SearchBar from "../components/searchbar";
 import CommunityHeader from "../components/communityHeader";
 import React, { useState, useEffect } from "react";
-import allCommunities from "../data/communitiesDB"; 
+import allCommunities from "../data/communitiesDB";
+import postsDB from "../data/postsDB";
 import MainSidebar from "../components/main-sidebar";
 
 function Community() {
   const { name } = useParams();
   const [posts, setPosts] = useState([]);
   const [community, setCommunity] = useState(null);
+  const { name: communityName } = useParams();
+
+  const communityPosts = postsDB.filter((p) => p.community === communityName);
+
 
   useEffect(() => {
     const builtIn = allCommunities;
@@ -159,42 +164,43 @@ function Community() {
         />
         <div className="main-body">
           <div className="main-posts-container">
-          <div className="main-posts">
-            <div className="post-container">
-              <div className="post">
-                {/* dynamic posts */}
-                {posts.map((p, index) => (
-                  <Post
-                    key={index}
-                    username={p.username}
-                    time={p.time}
-                    title={p.title}
-                    textPreview={p.textPreview}
-                    preview={p.preview}
-                    avatar={p.avatar || "../images/avatar.png"}
-                    initialVotes={0}
-                    initialComments={[]}
-                  />
-                ))}
+            <div className="main-posts">
+              <div className="post-container">
+                <div className="post">
+                  {/* dynamic posts */}
+                  {communityPosts.map((p, index) => (
+                    <Post
+                      key={index}
+                      username={p.username}
+                      time={p.time}
+                      title={p.title}
+                      textPreview={p.textPreview || ""}
+                      preview={p.preview || ""}
+                      avatar={p.avatar || "../images/avatar.png"}
+                      initialVotes={p.initialVotes}
+                      initialComments={p.initialComments}
+                    />
+                  ))}
 
-                {/*  example static posts */}
-                <Post
-                  username="ExampleUser"
-                  time="2 days ago"
-                  title={`Welcome to ${community.name}!`}
-                  textPreview="This is your first community post."
-                  avatar="../images/avatar.png"
-                  initialVotes={100}
-                />
+
+                  {/*  example static posts */}
+                  <Post
+                    username="ExampleUser"
+                    time="2 days ago"
+                    title={`Welcome to ${community.name}!`}
+                    textPreview="This is your first community post."
+                    avatar="../images/avatar.png"
+                    initialVotes={100}
+                  />
+                </div>
               </div>
             </div>
           </div>
-        </div>
-        <MainSidebar community={community} />
+          <MainSidebar community={community} />
         </div>
       </div>
 
-      
+
     </>
   );
 }
