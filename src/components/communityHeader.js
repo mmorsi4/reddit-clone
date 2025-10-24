@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 
 function CommunityHeader({ banner, avatar, name }) {
   const storageKey = `joined_${name}`;
@@ -158,10 +159,12 @@ function CommunityHeader({ banner, avatar, name }) {
 
         {/* ✅ Actions */}
         <div className="community-actions">
-          <button className="community-action-create-post">
-            <img src="../images/plus.svg" alt="create post" />
-            Create a post
-          </button>
+          <Link to="/create_post" className="no-underline">
+            <button className="community-action-create-post">
+              <img src="../images/plus.svg" alt="create post" />
+              Create a post
+            </button>
+          </Link>
 
           <button
             className={`community-action-join ${joined ? "joined" : ""}`}
