@@ -1,9 +1,20 @@
 import React, { useState } from "react";
+import { Link } from "react-router-dom";
 
-function Post({ username, time, title, preview, textPreview, avatar, initialVotes = 0, initialComments = [] }) {
-  const [voteCount, setVoteCount] = useState(initialVotes);
+function Post({
+  username,
+  time,
+  title,
+  preview,
+  textPreview,
+  avatar,
+  initialVotes,
+  initialComments,
+  community,
+}) {
+  const [voteCount, setVoteCount] = useState(initialVotes || 0);
   const [vote, setVote] = useState(0);
-  const [comments, setComments] = useState(initialComments);
+  const [comments, setComments] = useState(initialComments || []);
   const [showComments, setShowComments] = useState(false);
   const [newComment, setNewComment] = useState("");
 
@@ -66,27 +77,44 @@ function Post({ username, time, title, preview, textPreview, avatar, initialVote
           <div className="post-vote post-activity-container">
             <div className="post-activity-button" onClick={handleUpvote}>
               <img
-                src={vote === 1 ? "../images/upvote-active.svg" : "../images/upvote.svg"}
+                src={
+                  vote === 1
+                    ? "../images/upvote-active.svg"
+                    : "../images/upvote.svg"
+                }
                 alt="upvote"
               />
             </div>
             <span className="post-vote-score">{voteCount}</span>
             <div className="post-activity-button" onClick={handleDownvote}>
               <img
-                src={vote === -1 ? "../images/downvote-active.svg" : "../images/downvote.svg"}
+                src={
+                  vote === -1
+                    ? "../images/downvote-active.svg"
+                    : "../images/downvote.svg"
+                }
                 alt="downvote"
               />
             </div>
           </div>
 
-          {/* 💬 COMMENTS */}
-          <div
-            className="post-comment post-activity-button post-activity-container"
-            onClick={() => setShowComments(!showComments)}
-          >
-            <img src="../images/comment.svg" alt="comment" />
-            <span className="post-comment-amount">{comments.length}</span>
-          </div>
+          {/* 💬 COMMENTS → Now links to full post */}
+          
+            <Link
+              to={
+                community && title
+                  ? `/community/${community}/${encodeURIComponent(title)}`
+                  : "#"
+              }
+              className="post-comment post-activity-button post-activity-container"
+              onClick={(e) => {
+                if (!community || !title) e.preventDefault(); 
+              }}
+            >
+              <img src="../images/comment.svg" alt="comment" />
+              <span className="post-comment-amount">{comments.length}</span>
+            </Link>
+          
 
           {/* 🔗 SHARE */}
           <div className="post-share post-activity-button post-activity-container">
@@ -95,35 +123,7 @@ function Post({ username, time, title, preview, textPreview, avatar, initialVote
           </div>
         </div>
 
-        {/* 🗨️ COMMENT SECTION */}
-        {showComments && (
-          <div className="post-comments-container">
-            <div className="comments-list">
-              {comments.length === 0 ? (
-                <p style={{ opacity: 0.6 }}>No comments yet...</p>
-              ) : (
-                comments.map((c, i) => (
-                  <p key={i}>
-                    <strong>u/{c.username}</strong>: {c.text}
-                  </p>
-                ))
-              )}
-            </div>
 
-            <div className="add-comment">
-              <input
-                type="text"
-                placeholder="Add a comment..."
-                className="comment-input"
-                value={newComment}
-                onChange={(e) => setNewComment(e.target.value)}
-              />
-              <button className="comment-submit" onClick={handleAddComment}>
-                Post
-              </button>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );
