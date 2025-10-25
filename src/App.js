@@ -8,6 +8,7 @@ import ViewProfile from "./pages/viewprofile";
 import Login from "./pages/Login";
 import AvatarCustomizer from "./pages/edit-avatar";
 import CreateCommunityPopup from "./components/create-community";
+import PostPage from "./pages/PostPage";
 
 
 function App() {
@@ -23,6 +24,7 @@ function App() {
         <Route path="/viewprofile"element={<ViewProfile/>}/>
         <Route path="/edit-avatar"element={<AvatarCustomizer/>}/>
         <Route path="/create-community"element={<CreateCommunityPopup/>}/>
+        <Route path="/community/:communityName/:postTitle" element={<PostPage />} />
       </Routes>
     </Router>
   );

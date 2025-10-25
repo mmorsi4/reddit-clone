@@ -177,12 +177,11 @@ function Community() {
                       textPreview={p.textPreview || ""}
                       preview={p.preview || ""}
                       avatar={p.avatar || "../images/avatar.png"}
-                      initialVotes={p.initialVotes}
-                      initialComments={p.initialComments}
+                      initialVotes={p.initialVotes || 0}
+                      initialComments={p.initialComments || []}
+                      community={p.community}
                     />
                   ))}
-
-
                   {/*  example static posts */}
                   <Post
                     username="ExampleUser"
