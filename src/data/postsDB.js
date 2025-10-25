@@ -19,8 +19,7 @@ const postsDB = [
     time: "1 day ago",
     title: "Bulletin board tips",
     textPreview:
-      "I recently have been doing the bulletin boards as I never really did them and have been doing the truck to make a bunch of drinks...",
-    avatar: "../images/avatar.png",
+      "I recently have been doing the bulletin boards as I never really did them and have been doing the truck to make a bunch of drinks in the beginning while the clock is frozen so that I can get the made and out super quickly to maximize profit, but I barely notice a different in my profit at the end of the day. I only made $155 and no ones happiness went below 87 and I have the mascot and the long hours. Did they patch this or something?",
     initialVotes: 12,
     initialComments: [
       { username: "PotionMaster", text: "Nice tip, thanks for sharing!" },

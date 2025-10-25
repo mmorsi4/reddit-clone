@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import allCommunities from "../data/communitiesDB";
 import CreateCommunityPopup from "./create-community";
+import CustomFeedPopup from "../pages/CustomFeedPopup";
 
 function Sidebar() {
   const [recent, setRecent] = useState([]);
@@ -9,6 +10,27 @@ function Sidebar() {
   const [showPopup, setShowPopup] = useState(false);
   const [customFeeds, setCustomFeeds] = useState([]);
   const location = useLocation();
+
+  // State to control the visibility of the CustomFeedPopup
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleOpenModal = (e) => {
+    // Prevent any default link/navigation behavior if an anchor tag is used
+    if (e && e.preventDefault) {
+        e.preventDefault();
+    }
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+  };
+
+  const handleFeedSubmission = (feedData) => {
+    console.log('New Feed Data Submitted:', feedData);
+    // Add your API call or state management logic here
+    handleCloseModal();
+  };
 
   // Load recent communities
   useEffect(() => {
@@ -105,8 +127,8 @@ function Sidebar() {
             Custom Feeds <img src="../images/down.svg" alt="Expand" />
           </label>
           <ul className="sidebar-section">
-            <li>
-              <a href="#" className="sidebar-link">
+            <li onClick={handleOpenModal}>
+              <a className="sidebar-link" href="#">
                 <img src="../images/plus.svg" alt="Create Feed" />
                 <div className="sidebar-section-item-details">
                   Create Custom Feed
@@ -296,7 +318,15 @@ function Sidebar() {
           onCreate={() => { }}
         />
       )}
+      {/* Conditionally render the popup */}
+      {isModalOpen && (
+        <CustomFeedPopup
+          onClose={handleCloseModal}
+          onSubmit={handleFeedSubmission}
+        />
+      )}
     </div>
+  
   );
 }
 
