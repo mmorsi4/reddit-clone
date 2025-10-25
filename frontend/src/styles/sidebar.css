@@ -1,0 +1,217 @@
+.sidebar {
+    position: fixed;
+    left: 0;
+    top: 57px;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    background-color: white;
+    width: 220px;
+    padding: 4px 16px;
+    border-right: 1px solid rgba(0, 0, 0, 0.2);
+    height: calc(100vh - 57px);
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: transparent  transparent;
+}
+
+.sidebar:hover {
+    scrollbar-color: auto;
+}
+
+.sidebar > li {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    padding: 12px 0;
+}
+
+.sidebar > li:last-child {
+    border-bottom: none;
+}
+
+
+.sidebar-section {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.sidebar-link {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 16px;
+    color: rgb(33, 39, 42);
+    font-size: 14px;
+    text-decoration: none;
+}
+
+.sidebar-link:hover {
+    background-color: rgb(246, 248, 249);
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.sidebar-link:active {
+    background-color: rgba(0, 0, 0, 0.16);
+}
+
+.sidebar-link > img {
+    padding: 6px;
+}
+
+.sidebar-collapse-checkbox {
+    display: none;
+}
+
+.sidebar-collapse-checkbox:checked ~ .sidebar-section {
+    display: none;
+}
+
+.sidebar-collapse-label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 16px;
+    font-size: 13px;
+    text-transform: uppercase;
+    color: rgb(87, 111, 118);
+}
+
+.sidebar-collapse-label:hover {
+    background-color: rgb(246, 248, 249);
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.sidebar-collapse-label:active {
+    background-color: rgba(0, 0, 0, 0.16);
+}
+
+.sidebar-collapse-label > img {
+    transform: rotateZ(180deg);
+    transition: transform 0.25s;
+}
+
+.sidebar-collapse-checkbox:checked ~ .sidebar-collapse-label > img {
+    transform: rotateZ(0);
+}
+
+.sidebar-link-icon-round {
+    width: 32px;
+    border-radius: 50%;
+}
+
+.sidebar-link > .sidebar-link-icon-round {
+    padding: 0;
+}
+
+.sidebar-section-item-details {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  overflow: hidden;
+  gap: 6px;
+}
+
+/* Make long community names truncate with ellipsis */
+.sidebar-section-item-details .community-name {
+  display: inline-block;
+  max-width: 120px; /* adjust to fit your sidebar width */
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  vertical-align: middle;
+}
+
+/* Prevent the star from shifting due to name overflow */
+.sidebar-section-item-details .make-favourite {
+  flex-shrink: 0;
+  margin-left: 6px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.sidebar-section-item-details .make-favourite img {
+  width: 16px;
+  height: 16px;
+  vertical-align: middle;
+  pointer-events: none; /* ensures only the button gets the click */
+}
+
+.sidebar-section-item-details .make-favourite:hover {
+    cursor: pointer;
+    background-color: rgb(219, 228, 233);
+}
+
+.sidebar-section-item-details .make-favourite:active {
+    background-color: rgba(0, 0, 0, 0.16);
+}
+
+.copyright-link {
+    display: block;
+    text-decoration: none;
+    color: rgb(67, 67, 67);
+    font-size: 10px;
+    padding: 24px 16px 0;
+}
+
+.copyright-link:hover {
+    text-decoration: underline;
+}
+
+.sidebar-link.active {
+  background-color: #e6f2ff; /* light blue highlight like Reddit */
+  border-radius: 8px;
+  font-weight: 600;
+}
+
+.sidebar-link.active img {
+  filter: brightness(0) saturate(100%) invert(36%) sepia(93%) saturate(2263%) hue-rotate(197deg) brightness(97%) contrast(94%);
+}
+
+.clear-recent-btn {
+  background: none;
+  border: none;
+  color: #888;
+  font-size: 12px;
+  cursor: pointer;
+  margin-left: 8px;
+  transition: color 0.2s;
+}
+
+.clear-recent-btn:hover {
+  color: #ff4500;
+}
+
+.sidebar-section-item-details::first-line {
+  text-overflow: ellipsis;
+}
+
+/* Make the Create Community button look exactly like sidebar links */
+.sidebar-link.create-btn {
+  background: none;
+  border: none;
+  width: 100%;
+  text-align: left;
+}
+
+.sidebar-link.create-btn:hover {
+  background-color: rgb(246, 248, 249);
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.sidebar-link.create-btn:active {
+  background-color: rgba(0, 0, 0, 0.16);
+}
+
+
+.sidebar-link-icon-round {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  object-fit: cover;
+}
