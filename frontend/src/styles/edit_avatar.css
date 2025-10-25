@@ -1,0 +1,141 @@
+.avatar-editor {
+  display: flex;
+  gap: 60px;
+  width: 100%;
+  max-width: 1200px;
+}
+
+/* Left side: avatar preview */
+.avatar-preview {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  background: #fafafa;
+  border-radius: 16px;
+  padding: 20px;
+}
+
+.save-btn {
+  margin-top: 20px;
+  background-color: #ff4500;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 24px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.save-btn:hover {
+  background-color: #e03e00;
+}
+
+/* Avatar container */
+#container {
+  width: 250px;
+  height: 320px;
+  position: relative;
+  background: #f9fafb;
+  border-radius: 16px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.default-avatar {
+  width: 74%;
+  height: auto;
+  object-fit: contain;
+  border-radius: 16px;
+  transition: 0.3s ease;
+  position: relative;
+  z-index: 0;
+  margin-left: 32px; /* move right */
+}
+
+
+
+/* Avatar layers (can overlay items, hair, eyes, etc.) */
+#container > div[data-asset-id] {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  z-index: 2;
+  opacity: 0; /* hidden by default to show the base image */
+}
+
+/* When applying a new layer image */
+#container > div[data-asset-id].active {
+  opacity: 1;
+}
+
+/* Right side (options) */
+.avatar-options {
+  flex: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.tab {
+  background: #f2f2f2;
+  border: none;
+  border-radius: 15px;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.tab.active {
+  background: #FF4500;
+  color: white;
+}
+
+.tab:hover {
+  background: #ddd;
+}
+
+/* Avatar grid */
+.avatar-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+  gap: 1rem;
+}
+
+.avatar-item {
+  background: #f9f9f9;
+  border-radius: 15px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0.5rem;
+  transition: 0.3s;
+}
+
+.avatar-item:hover {
+  background: #ffe6d8;
+  transform: scale(1.05);
+}
+
+.avatar-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* Highlight selected item */
+.avatar-item.selected {
+  border: 3px solid #FF4500;
+  background-color: #fff4ec;
+  transform: scale(1.05);
+}
