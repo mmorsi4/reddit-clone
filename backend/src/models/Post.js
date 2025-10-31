@@ -10,6 +10,7 @@ const PostSchema = new Schema({
   title: { type: String, required: true },
   body: String,
   url: String,
+  mediaUrl: String,
   author: { type: Schema.Types.ObjectId, ref: 'User', required: true },
   community: { type: Schema.Types.ObjectId, ref: 'Community' },
   votes: [VoteSchema],
