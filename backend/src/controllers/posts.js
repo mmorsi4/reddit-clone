@@ -1,5 +1,7 @@
 import Post from '../models/Post.js';
 import Comment from '../models/Comment.js';
+import Community from '../models/Community.js';
+
 
 // Create a new post
 export async function createPost(req, res) {
@@ -24,17 +26,24 @@ export async function createPost(req, res) {
   }
 }
 
-// Get posts (with optional community filter, pagination, sorting)
+
 export async function getPosts(req, res) {
   try {
-    const { community, limit = 20, page = 1, sort = 'hot' } = req.query;
-    const query = community ? { community } : {};
+    const { community: communityName, limit = 20, page = 1, sort = 'hot' } = req.query;
+    let query = {};
+
+    if (communityName) {
+      const comm = await Community.findOne({ name: communityName });
+      if (!comm) return res.status(404).json({ message: "Community not found" });
+      query.community = comm._id;
+    }
 
     const skip = (Number(page) - 1) * Number(limit);
+
     const posts = await Post.find(query)
       .populate('author', 'username displayName avatarUrl')
       .populate('community', 'name title')
-      .sort({ createdAt: -1 }) // You can change this based on `sort`
+      .sort({ createdAt: -1 })
       .skip(skip)
       .limit(Number(limit));
 
