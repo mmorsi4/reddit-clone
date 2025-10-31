@@ -1,21 +1,37 @@
-import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom"; 
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import Header from "../components/header";
 import Sidebar from "../components/sidebar";
-import SearchBar from "../components/searchbar";
-import allCommunities from "../data/communitiesDB";
-import Header from "../components/header"
 
 function CreatePost() {
   const [postType, setPostType] = useState("text");
   const [selectedCommunity, setSelectedCommunity] = useState(null);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [selectedFiles, setSelectedFiles] = useState([]);
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
+  const [selectedFiles, setSelectedFiles] = useState([]);
+  const [errors, setErrors] = useState({});
+  const [communities, setCommunities] = useState([]);
+  const navigate = useNavigate();
 
-  const navigate = useNavigate(); // ✅ added navigation after posting
+  useEffect(() => {
+    const loadCommunities = async () => {
+      try {
+        const res = await fetch("/api/communities");
+        if (!res.ok) throw new Error("Failed to load communities");
+        const data = await res.json();
+        setCommunities(data);
+      } catch {
+        alert("Network error while loading communities");
+      }
+    };
+    loadCommunities();
+  }, []);
 
-  const handleTypeSwitch = (type) => setPostType(type);
+  const handleTypeSwitch = (type) => {
+    setPostType(type);
+    setErrors({});
+  };
 
   const handleSelectCommunity = (community) => {
     setSelectedCommunity(community);
@@ -27,221 +43,208 @@ function CreatePost() {
     setSelectedFiles(files);
   };
 
-  // ✅ Fixed: Save Draft button now works
-  const handleSaveDraft = () => {
-    const draft = { title, content, selectedCommunity, postType, selectedFiles };
-    localStorage.setItem("draft_post", JSON.stringify(draft));
-    alert("Draft saved!");
+  const validate = () => {
+    const newErrors = {};
+    if (!selectedCommunity) newErrors.community = "Please select a community.";
+    if (!title.trim()) newErrors.title = "Title is required.";
+    if (postType === "link" && !content.trim())
+      newErrors.link = "Link URL is required.";
+    if (postType === "media" && selectedFiles.length === 0)
+      newErrors.media = "Please upload at least one image or video.";
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
-  // ✅ Fixed: Post button adds post to the selected community
-  const handlePost = () => {
-    if (!title.trim()) {
-      alert("Please add a title before posting!");
-      return;
+  const handlePost = async () => {
+    if (!validate()) return;
+
+    try {
+      const postData = {
+        title,
+        community: selectedCommunity._id || selectedCommunity.name,
+      };
+
+      if (postType === "text") postData.body = content;
+      if (postType === "link") postData.url = content;
+      if (postType === "media")
+        postData.url = "https://example.com/fake-media-link"; // placeholder
+
+      const res = await fetch("/api/posts", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          // Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+        body: JSON.stringify(postData),
+        credentials: "include"
+      });
+
+      if (!res.ok) {
+        const errText = await res.text();
+        console.log(errText);
+        throw new Error(errText || "Failed to create post");
+      }
+
+      const newPost = await res.json();
+      console.log("Post created:", newPost);
+
+      alert("Posted successfully!")
+      navigate(`/community/${selectedCommunity.name}`);
+    } catch (err) {
+      console.log("Error creating post:", err);
+      alert("Failed to create post. Please try again.");
     }
-    if (!selectedCommunity) {
-      alert("Please select a community before posting!");
-      return;
-    }
+  };
 
-    const communityKey = `posts_${selectedCommunity.name}`; // dynamic key per community
-
-    const newPost = {
-      username: "Mai", // change later when login system ready
-      time: "Just now",
-      title,
-      textPreview:
-        postType === "text"
-          ? content
-          : postType === "link"
-            ? content
-            : selectedFiles.length > 0
-              ? `Uploaded ${selectedFiles.length} file(s)`
-              : "",
-      avatar: "../images/avatar.png",
-      initialVotes: 0,
-      initialComments: [],
-    };
-
-    const existingPosts = JSON.parse(localStorage.getItem(communityKey)) || [];
-    const updatedPosts = [newPost, ...existingPosts];
-    localStorage.setItem(communityKey, JSON.stringify(updatedPosts));
-
-    alert(`Post added to r/${selectedCommunity.name}!`);
-    navigate(`/community1`); // ✅ redirect back to the community page
+  const isPostDisabled = () => {
+    if (!selectedCommunity) return true;
+    if (!title.trim()) return true;
+    if (postType === "link" && !content.trim()) return true;
+    if (postType === "media" && selectedFiles.length === 0) return true;
+    return false;
   };
 
   return (
     <>
-      {/* HEADER */}
       <Header />
       <Sidebar />
 
-      {/* MAIN */}
-      <div className="main">
-        <label className="create-label">Create post</label>
+      <div className="main create-post-page">
+        <h2 className="create-title">Create Post</h2>
 
-        {/* Community Dropdown */}
-        <div className="community-select">
-          <label htmlFor="community" className="community-label">
-            Select a community
-          </label>
-
+        {/* COMMUNITY PICKER */}
+        <div className="community-picker">
           <div
-            className={`custom-community-dropdown ${isDropdownOpen ? "open" : ""}`}
-            id="communityDropdown"
+            className={`community-select-box ${errors.community ? "input-error" : ""}`}
             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
           >
-            <div className="custom-selected">
-              {selectedCommunity ? (
-                <div className="custom-selected-content">
-                  <img
-                    src={selectedCommunity.image}
-                    alt={selectedCommunity.name}
-                    className="custom-avatar"
-                  />
-                  r/{selectedCommunity.name}
-                </div>
-              ) : (
-                "-- Choose a community --"
-              )}
-            </div>
-
-            {isDropdownOpen && (
-              <ul className="custom-dropdown-list">
-                {allCommunities.map((community, index) => (
-                  <li
-                    key={index}
-                    className="custom-dropdown-item"
-                    onClick={() => handleSelectCommunity(community)}
-                  >
-                    <img
-                      src={community.image}
-                      alt={community.name}
-                      className="custom-avatar"
-                    />
-                    r/{community.name}
-                  </li>
-                ))}
-              </ul>
-            )}
+            <span>
+              {selectedCommunity ? `r/${selectedCommunity.name}` : "Choose a community"}
+            </span>
           </div>
+          {errors.community && <p className="error-msg">{errors.community}</p>}
+
+          {isDropdownOpen && (
+            <ul className="community-dropdown">
+              {communities.map((c, i) => (
+                <li
+                  key={i}
+                  className="community-item"
+                  onClick={() => handleSelectCommunity(c)}
+                >
+                  <img src={c.avatar} alt={c.name} className="community-avatar" />
+                  <span>r/{c.name}</span>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
 
-        {/* Post Type Buttons */}
-        <div className="post-type-select">
-          <button
-            className={`type-btn ${postType === "text" ? "active" : ""}`}
-            onClick={() => handleTypeSwitch("text")}
-          >
-            Text
-          </button>
-          <button
-            className={`type-btn ${postType === "media" ? "active" : ""}`}
-            onClick={() => handleTypeSwitch("media")}
-          >
-            Images & Video
-          </button>
-          <button
-            className={`type-btn ${postType === "link" ? "active" : ""}`}
-            onClick={() => handleTypeSwitch("link")}
-          >
-            Link
-          </button>
+        {/* POST TYPE TABS */}
+        <div className="post-type-tabs">
+          {["text", "media", "link"].map((type) => (
+            <button
+              key={type}
+              className={`tab-btn ${postType === type ? "active" : ""}`}
+              onClick={() => handleTypeSwitch(type)}
+            >
+              {type === "media" ? "Images & Video" : type.charAt(0).toUpperCase() + type.slice(1)}
+            </button>
+          ))}
         </div>
 
-        {/* Post Form */}
-        <div id="post-form">
+        {/* FORM */}
+        <div className="post-body">
+          {/* TEXT POST */}
           {postType === "text" && (
-            <div className="post-section text-section">
+            <>
+              <label className="input-label">
+                Title<span className="required">*</span>
+              </label>
               <input
                 type="text"
-                className="input-title"
-                placeholder="Title"
+                className={`input-field ${errors.title ? "input-error" : ""}`}
                 value={title}
-                onChange={(e) => setTitle(e.target.value)} 
+                onChange={(e) => setTitle(e.target.value)}
               />
+              {errors.title && <p className="error-msg">{errors.title}</p>}
+
+              <label className="input-label">Body text (optional)</label>
               <textarea
-                className="input-description"
-                placeholder="Write your post..."
+                className="input-field input-textarea"
                 value={content}
-                onChange={(e) => setContent(e.target.value)} 
+                onChange={(e) => setContent(e.target.value)}
               ></textarea>
-            </div>
+            </>
           )}
 
+          {/* MEDIA POST */}
           {postType === "media" && (
-            <div className="post-section media-section">
+            <>
+              <label className="input-label">
+                Title<span className="required">*</span>
+              </label>
               <input
                 type="text"
-                className="input-title"
-                placeholder="Title"
+                className={`input-field ${errors.title ? "input-error" : ""}`}
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
               />
-              <div
-                className="upload-box"
-                id="uploadBox"
-                onClick={() => document.getElementById("fileInput").click()}
-              >
-                <p>
-                  Drag & drop images or videos here, or{" "}
-                  <span
-                    className="upload-text"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      document.getElementById("fileInput").click();
-                    }}
-                  >
-                    browse
-                  </span>
-                </p>
-                {selectedFiles.length > 0 && (
-                  <ul className="selected-files">
-                    {selectedFiles.map((file, index) => (
-                      <li key={index}>{file.name}</li>
-                    ))}
-                  </ul>
-                )}
-                <input
-                  type="file"
-                  id="fileInput"
-                  accept="image/*,video/*"
-                  multiple
-                  hidden
-                  onChange={handleFileChange}
-                />
-              </div>
-            </div>
+              {errors.title && <p className="error-msg">{errors.title}</p>}
+
+              <label className="input-label">Upload Files<span className="required">*</span></label>
+              <input
+                type="file"
+                multiple
+                accept="image/*,video/*"
+                onChange={handleFileChange}
+              />
+              {selectedFiles.length > 0 && (
+                <ul className="selected-files">
+                  {selectedFiles.map((file, idx) => (
+                    <li key={idx}>{file.name}</li>
+                  ))}
+                </ul>
+              )}
+              {errors.media && <p className="error-msg">{errors.media}</p>}
+            </>
           )}
 
+          {/* LINK POST */}
           {postType === "link" && (
-            <div className="post-section link-section">
+            <>
+              <label className="input-label">
+                Title<span className="required">*</span>
+              </label>
               <input
                 type="text"
-                className="input-title"
-                placeholder="Title"
+                className={`input-field ${errors.title ? "input-error" : ""}`}
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
               />
+              {errors.title && <p className="error-msg">{errors.title}</p>}
+
+              <label className="input-label">
+                Link URL<span className="required">*</span>
+              </label>
               <input
                 type="url"
-                className="input-link"
-                placeholder="Paste your link URL"
+                className={`input-field ${errors.link ? "input-error" : ""}`}
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
               />
-            </div>
+              {errors.link && <p className="error-msg">{errors.link}</p>}
+            </>
           )}
         </div>
 
-        {/* Buttons */}
-        <div className="post-actions">
-          <button className="btn-secondary" onClick={handleSaveDraft}>
-            Save Draft
-          </button>
-          <button className="btn-primary" id="postBtn" onClick={handlePost}>
+        {/* ACTION BUTTONS */}
+        <div className="action-row">
+          <button
+            className={`btn-post ${isPostDisabled() ? "disabled" : ""}`}
+            disabled={isPostDisabled()}
+            onClick={handlePost}
+          >
             Post
           </button>
         </div>

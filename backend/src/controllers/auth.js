@@ -21,5 +21,13 @@ export async function login(req,res){
   const ok = await bcrypt.compare(password, user.passwordHash);
   if(!ok) return res.status(401).json({message:'Invalid password'});
   const token = jwt.sign({id: user._id}, process.env.JWT_SECRET || 'secret', {expiresIn: JWT_EXPIRES});
+
+  res.cookie('token', token, {
+    httpOnly: true,
+    secure: false,   // works on HTTP and HTTPS
+    sameSite: 'lax', // allows sending cookies for same-site requests
+    maxAge: 7 * 24 * 60 * 60 * 1000
+  });
+
   res.json({user:{id:user._id,username:user.username,email:user.email}, token});
 }
