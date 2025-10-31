@@ -86,7 +86,7 @@ function Header() {return (
               </li>
 
               <li className="profile-menu-item">
-                <Link to="/login" className="profile-menu-link">
+                <Link to="/" className="profile-menu-link">
                   <div className="profile-menu-item-icon">
                     <img src="../images/logout.svg" alt="Logout icon" />
                   </div>

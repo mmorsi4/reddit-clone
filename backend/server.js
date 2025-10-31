@@ -19,6 +19,7 @@ const PORT = process.env.PORT || 5001;
 await connectDB();
 
 const app = express();
+app.set('trust proxy', 1);
 
 app.use(helmet());
 app.use(morgan('dev'));

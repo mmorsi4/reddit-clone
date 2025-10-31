@@ -93,7 +93,7 @@ function Sidebar() {
         <li>
           <ul className="sidebar-section">
             <li>
-              <Link to="/" className="sidebar-link active">
+              <Link to="/home" className="sidebar-link active">
                 <img src="../images/home.svg" alt="Home" />
                 <div className="sidebar-section-item-details">Home</div>
               </Link>
