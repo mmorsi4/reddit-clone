@@ -145,7 +145,7 @@ function Sidebar() {
                 <li key={index}>
                   <Link to={feed.link} className="sidebar-link">
                     <img
-                      src={feed.avatar || "../images/default-community.svg"}
+                      src={feed.avatar}
                       className="sidebar-link-icon-round"
                       alt={feed.name}
                     />
@@ -185,7 +185,7 @@ function Sidebar() {
                     className="sidebar-link"
                   >
                     <img
-                      src={community.avatar || "../images/default-community.svg"}
+                      src={community.avatar}
                       className="sidebar-link-icon-round"
                       alt={community.name}
                     />

@@ -8,7 +8,7 @@ function SearchBar() {
 
   const searchRef = useRef(null);
 
-  // Fetch communities from backend
+  // Fetch communities
   useEffect(() => {
     const loadCommunities = async () => {
       try {
@@ -18,21 +18,20 @@ function SearchBar() {
         setCommunities(data);
       } catch (err) {
         console.error(err);
-        alert("Network error while loading communities");
       }
     };
     loadCommunities();
   }, []);
 
-  // Filter communities based on search term
+  // Filter communities
   useEffect(() => {
-    const filtered = communities.filter((c) =>
-      c.name.toLowerCase().includes(searchTerm.toLowerCase())
+    const filtered = communities.filter(
+      (c) => c.name && c.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
     setFilteredResults(filtered);
   }, [searchTerm, communities]);
 
-  // Hide results when clicking outside
+  // Hide dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (searchRef.current && !searchRef.current.contains(event.target)) {
@@ -40,14 +39,12 @@ function SearchBar() {
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   const handleCommunityClick = (community) => {
     console.log("Clicked community:", community);
-    setShowResults(false); // hide results when clicking a community
+    setShowResults(false);
   };
 
   return (
@@ -59,28 +56,31 @@ function SearchBar() {
         className="search-input"
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
-        onFocus={() => setShowResults(true)} // show results when focused
+        onFocus={() => setShowResults(true)} // show on focus
       />
 
-      <div className={`search-results ${showResults && filteredResults.length > 0 ? "show" : ""}`}>
-        <div className="search-results-scrollable">
-          <ul className="recent-searches">
-            {filteredResults.map((community, index) => (
-              <li key={index} onClick={() => handleCommunityClick(community)}>
-                <img
-                  src={community.avatar || "../images/default-community.svg"}
-                  alt={community.name}
-                  className="community-image"
-                />
-                <span className="recent-search-value">{community.name}</span>
-                {community.joined && (
-                  <span style={{ marginLeft: "8px", color: "#888" }}>Joined</span>
-                )}
-              </li>
-            ))}
-          </ul>
+      {/* Show results only if showResults is true */}
+      {showResults && filteredResults.length > 0 && (
+        <div className="search-results show">
+          <div className="search-results-scrollable">
+            <ul className="recent-searches">
+              {filteredResults.map((community, index) => (
+                <li key={index} onClick={() => handleCommunityClick(community)}>
+                  <img
+                    src={community.avatar}
+                    alt={community.name || "Community"}
+                    className="community-image"
+                  />
+                  <span className="recent-search-value">{community.name || "Unnamed"}</span>
+                  {community.joined && (
+                    <span style={{ marginLeft: "8px", color: "#888" }}>Joined</span>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

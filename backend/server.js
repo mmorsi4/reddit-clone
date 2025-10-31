@@ -10,6 +10,7 @@ import authRoutes from './src/routes/auth.js';
 import postsRoutes from './src/routes/posts.js';
 import commentsRoutes from './src/routes/comments.js';
 import communitiesRoutes from './src/routes/communities.js';
+import membershipsRouter from "./src/routes/membershipRoute.js"
 import usersRoutes from './src/routes/users.js';
 import { errorHandler } from './src/middleware/errorHandler.js';
 
@@ -42,6 +43,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/posts', postsRoutes);
 app.use('/api/comments', commentsRoutes);
 app.use('/api/communities', communitiesRoutes);
+app.use("/api/memberships", membershipsRouter);
 app.use('/api/users', usersRoutes);
 
 // health
