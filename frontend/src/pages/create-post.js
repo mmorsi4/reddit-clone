@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Header from "../components/header";
 import Sidebar from "../components/sidebar";
 
-function CreatePost() {
+function CreatePost({ showToast }) {
   const [postType, setPostType] = useState("text");
   const [selectedCommunity, setSelectedCommunity] = useState(null);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -39,9 +39,10 @@ function CreatePost() {
   };
 
   const handleFileChange = (e) => {
-    const files = Array.from(e.target.files);
-    setSelectedFiles(files);
+    const file = e.target.files[0];
+    if (file) setSelectedFiles([file]); // store as single-item array
   };
+
 
   const validate = () => {
     const newErrors = {};
@@ -55,40 +56,32 @@ function CreatePost() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handlePost = async () => {
+    const handlePost = async () => {
     if (!validate()) return;
 
     try {
-      const postData = {
-        title,
-        community: selectedCommunity._id || selectedCommunity.name,
-      };
+      const formData = new FormData();
+      formData.append("title", title);
+      formData.append("community", selectedCommunity._id || selectedCommunity.name);
 
-      if (postType === "text") postData.body = content;
-      if (postType === "link") postData.url = content;
-      if (postType === "media")
-        postData.url = "https://example.com/fake-media-link"; // placeholder
+      if (postType === "text") formData.append("body", content);
+      if (postType === "link") formData.append("url", content);
+      if (postType === "media" && selectedFiles[0]) {
+        formData.append("file", selectedFiles[0]); // actual File object
+      }
 
       const res = await fetch("/api/posts", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          // Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-        body: JSON.stringify(postData),
+        body: formData, // dont set content-type manually or media wont uplaod to backend
         credentials: "include"
       });
 
       if (!res.ok) {
         const errText = await res.text();
-        console.log(errText);
         throw new Error(errText || "Failed to create post");
       }
 
-      const newPost = await res.json();
-      console.log("Post created:", newPost);
-
-      alert("Posted successfully!")
+      showToast("Post created successfully!");
       navigate(`/community/${selectedCommunity.name}`);
     } catch (err) {
       console.log("Error creating post:", err);
@@ -193,19 +186,45 @@ function CreatePost() {
               {errors.title && <p className="error-msg">{errors.title}</p>}
 
               <label className="input-label">Upload Files<span className="required">*</span></label>
-              <input
-                type="file"
-                multiple
-                accept="image/*,video/*"
-                onChange={handleFileChange}
-              />
-              {selectedFiles.length > 0 && (
-                <ul className="selected-files">
-                  {selectedFiles.map((file, idx) => (
-                    <li key={idx}>{file.name}</li>
-                  ))}
-                </ul>
-              )}
+
+              <div className="media-upload">
+                <label className="dropzone">
+                  <span className="plus-icon">+</span>
+                  <p>{selectedFiles.length === 0 ? "Drag & drop an image or video here, or click to upload" : "Replace file"}</p>
+                  <input
+                    type="file"
+                    accept="image/*,video/*"
+                    onChange={handleFileChange}
+                    hidden
+                  />
+                </label>
+
+                {selectedFiles.length > 0 && (
+                  <div className="file-preview">
+                    {selectedFiles[0].type.startsWith("image") ? (
+                      <img
+                        src={URL.createObjectURL(selectedFiles[0])}
+                        alt="preview"
+                        className="preview-media"
+                      />
+                    ) : (
+                      <video
+                        src={URL.createObjectURL(selectedFiles[0])}
+                        controls
+                        className="preview-media"
+                      />
+                    )}
+                    <button
+                      type="button"
+                      className="remove-btn"
+                      onClick={() => setSelectedFiles([])}
+                    >
+                      Remove
+                    </button>
+                  </div>
+                )}
+              </div>
+
               {errors.media && <p className="error-msg">{errors.media}</p>}
             </>
           )}

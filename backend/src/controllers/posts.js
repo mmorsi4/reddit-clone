@@ -3,7 +3,8 @@ import Comment from '../models/Comment.js';
 
 export async function createPost(req,res){
   const { title, body, url, community } = req.body;
-  const post = await Post.create({ title, body, url, community, author: req.userId });
+  const file = req.file;
+  const post = await Post.create({ title, body, url, community, author: req.userId, mediaUrl: file ? `/uploads/${file.filename}` : null, });
   res.status(201).json(post);
 }
 
