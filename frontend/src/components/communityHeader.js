@@ -159,7 +159,7 @@ function CommunityHeader({ banner, avatar, name }) {
 
         {/* ✅ Actions */}
         <div className="community-actions">
-          <Link to="/create_post" className="no-underline">
+          <Link to={`/create_post?community=${name}`} className="no-underline">
             <button className="community-action-create-post">
               <img src="../images/plus.svg" alt="create post" />
               Create a post

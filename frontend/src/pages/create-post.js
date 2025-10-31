@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import Header from "../components/header";
 import Sidebar from "../components/sidebar";
 
@@ -27,6 +27,19 @@ function CreatePost({ showToast }) {
     };
     loadCommunities();
   }, []);
+
+  const location = useLocation();
+  console.log(location);
+
+  const query = new URLSearchParams(location.search);
+  const preselectedCommunityName = query.get("community");
+
+  useEffect(() => {
+    if (preselectedCommunityName && communities.length > 0) {
+      const community = communities.find(c => c.name === preselectedCommunityName);
+      if (community) setSelectedCommunity(community);
+    }
+  }, [preselectedCommunityName, communities]);
 
   const handleTypeSwitch = (type) => {
     setPostType(type);
