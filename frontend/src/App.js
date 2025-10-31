@@ -17,9 +17,9 @@ function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Home />} />
+        <Route path="/" element={<Login />} />
         <Route path="/community/:name" element={<Community />} />
-        <Route path="/login" element={<Login />} />
+        <Route path="/home" element={<Home />} />
         <Route path="/manage_community" element={<ManageCommunity/>} />
         <Route path="/create_post"element={<CreatePost/>}/>
         <Route path="/viewprofile"element={<ViewProfile/>}/>

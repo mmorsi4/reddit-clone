@@ -5,8 +5,16 @@ const CommunitySchema = new Schema({
   name: { type: String, required: true, unique: true },
   title: String,
   description: String,
+  avatar: { type: String, default: "" }, 
+  banner: { type: String, default: "" }, 
+  url: { type: String },
   members: [{ type: Schema.Types.ObjectId, ref: 'User' }],
-  createdAt: { type: Date, default: Date.now }
+  createdAt: { type: Date, default: Date.now },
+});
+
+CommunitySchema.pre('save', function(next) {
+  this.url = `/community/${this.name}`;
+  next();
 });
 
 export default model('Community', CommunitySchema);
