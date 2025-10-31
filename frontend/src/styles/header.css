@@ -62,18 +62,31 @@
 
 .header-action-link:hover {
   background-color: rgb(219, 228, 233);
+  border-radius: 50%;
+}
+
+.header-action-link.rect:hover {
+  border-radius: 25%;
 }
 
 .header-action-link:active {
   background-color: transparent;
 }
 
-
+.header-action > button {
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+}
 
 .header-action > button:hover {
-    background-color: rgb(219, 228, 233);
-    cursor: pointer;
-    border-radius: 50%;
+  background-color: rgb(219, 228, 233);
+  cursor: pointer;
+  border-radius: 50%;
 }
 
 .header-action > button:active {
@@ -89,15 +102,10 @@
   display: block;
 }
 
-
-
-
-
-
-.notification-counter {
+.message-counter {
     position: absolute;
-    top: 4px;
-    right: 0;
+    top: 5px;
+    right: 6px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -130,7 +138,7 @@
     visibility: hidden;
     position: absolute;
     padding: 5px 15px;
-    background-color: #444444;
+    background-color: #1f1f1f;
     color: white;
     border-radius: 3px;
     font-size: 16px;
