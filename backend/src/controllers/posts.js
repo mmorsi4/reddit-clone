@@ -1,5 +1,7 @@
 import Post from '../models/Post.js';
 import Comment from '../models/Comment.js';
+import Community from '../models/Community.js';
+
 
 export async function createPost(req,res){
   const { title, body, url, community } = req.body;
@@ -8,31 +10,75 @@ export async function createPost(req,res){
   res.status(201).json(post);
 }
 
-export async function getPosts(req,res){
-  const { community, limit=20, page=1, sort='hot' } = req.query;
-  const q = community ? { community } : {};
-  const posts = await Post.find(q)
-    .populate('author','username displayName avatarUrl')
-    .populate('community','name title')
-    .sort({ createdAt: -1 })
-    .skip((page-1)*limit).limit(Number(limit));
-  res.json(posts);
+export async function getPosts(req, res) {
+  try {
+    const { community: communityName, limit = 20, page = 1, sort = 'hot' } = req.query;
+    let query = {};
+
+    if (communityName) {
+      const comm = await Community.findOne({ name: communityName });
+      if (!comm) return res.status(404).json({ message: "Community not found" });
+      query.community = comm._id;
+    }
+
+    const skip = (Number(page) - 1) * Number(limit);
+
+    const posts = await Post.find(query)
+      .populate('author', 'username displayName avatarUrl')
+      .populate('community', 'name title')
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(Number(limit));
+
+    res.json(posts);
+  } catch (err) {
+    console.error("Error fetching posts:", err);
+    res.status(500).json({ message: "Internal server error" });
+  }
 }
 
-export async function getPost(req,res){
-  const post = await Post.findById(req.params.id).populate('author','username displayName');
-  if(!post) return res.status(404).json({message:'Not found'});
-  const comments = await Comment.find({ post: post._id }).populate('author','username displayName');
-  res.json({ post, comments });
+// Get a single post with comments
+export async function getPost(req, res) {
+  try {
+    const post = await Post.findById(req.params.id)
+      .populate('author', 'username displayName');
+
+    if (!post) return res.status(404).json({ message: 'Post not found' });
+
+    const comments = await Comment.find({ post: post._id })
+      .populate('author', 'username displayName');
+
+    res.json({ post, comments });
+  } catch (err) {
+    console.error("Error fetching post:", err);
+    res.status(500).json({ message: "Internal server error" });
+  }
 }
 
-export async function votePost(req,res){
-  const { value } = req.body; // 1 or -1
-  if (![1,-1].includes(value)) return res.status(400).json({message:'Invalid vote'});
-  const post = await Post.findById(req.params.id);
-  if(!post) return res.status(404).json({message:'Not found'});
-  post.votes = post.votes.filter(v=>v.user.toString()!==req.userId);
-  post.votes.push({user: req.userId, value});
-  await post.save();
-  res.json({score: post.votes.reduce((s,v)=>s+v.value,0)});
+// Vote on a post
+export async function votePost(req, res) {
+  try {
+    const { value } = req.body; // 1 or -1
+    if (![1, -1].includes(value)) return res.status(400).json({ message: 'Invalid vote' });
+
+    const post = await Post.findById(req.params.id);
+    if (!post) return res.status(404).json({ message: 'Post not found' });
+
+    // Make sure votes array exists
+    post.votes = post.votes || [];
+
+    // Remove existing vote by this user
+    post.votes = post.votes.filter(v => v.user.toString() !== req.userId);
+
+    // Add new vote
+    post.votes.push({ user: req.userId, value });
+
+    await post.save();
+
+    const score = post.votes.reduce((s, v) => s + v.value, 0);
+    res.json({ score });
+  } catch (err) {
+    console.error("Error voting on post:", err);
+    res.status(500).json({ message: "Internal server error" });
+  }
 }

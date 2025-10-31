@@ -1,41 +1,57 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import allCommunities from "../data/communitiesDB";
+import React, { useState, useEffect, useRef } from "react";
 
 function SearchBar() {
-  const navigate = useNavigate();
+  const [communities, setCommunities] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
-  const [joinedCommunities, setJoinedCommunities] = useState([]);
   const [filteredResults, setFilteredResults] = useState([]);
+  const [showResults, setShowResults] = useState(false);
 
+  const searchRef = useRef(null);
+
+  // Fetch communities from backend
   useEffect(() => {
-    const saved = JSON.parse(localStorage.getItem("joinedCommunities")) || [];
-    setJoinedCommunities(saved);
+    const loadCommunities = async () => {
+      try {
+        const res = await fetch("http://localhost:5001/api/communities");
+        if (!res.ok) throw new Error("Failed to load communities");
+        const data = await res.json();
+        setCommunities(data);
+      } catch (err) {
+        console.error(err);
+        alert("Network error while loading communities");
+      }
+    };
+    loadCommunities();
   }, []);
 
+  // Filter communities based on search term
   useEffect(() => {
-    if (!searchTerm.trim()) {
-      setFilteredResults([]);
-      return;
-    }
+    const filtered = communities.filter((c) =>
+      c.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    setFilteredResults(filtered);
+  }, [searchTerm, communities]);
 
-    const results = allCommunities
-      .filter((c) => c.name.toLowerCase().includes(searchTerm.toLowerCase()))
-      .map((c) => ({
-        ...c,
-        joined: joinedCommunities.some((j) => j.name === c.name),
-      }));
-
-    setFilteredResults(results);
-  }, [searchTerm, joinedCommunities]);
-
+  // Hide results when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (searchRef.current && !searchRef.current.contains(event.target)) {
+        setShowResults(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   const handleCommunityClick = (community) => {
-    navigate(community.link);
+    console.log("Clicked community:", community);
+    setShowResults(false); // hide results when clicking a community
   };
 
   return (
-    <div className="search">
+    <div className="search" ref={searchRef}>
       <img src="../images/search.svg" alt="search" />
       <input
         type="text"
@@ -43,15 +59,16 @@ function SearchBar() {
         className="search-input"
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
+        onFocus={() => setShowResults(true)} // show results when focused
       />
 
-      <div className={`search-results ${filteredResults.length > 0 ? "show" : ""}`}>
+      <div className={`search-results ${showResults && filteredResults.length > 0 ? "show" : ""}`}>
         <div className="search-results-scrollable">
           <ul className="recent-searches">
             {filteredResults.map((community, index) => (
               <li key={index} onClick={() => handleCommunityClick(community)}>
                 <img
-                  src={community.image || "../images/default-community.svg"}
+                  src={community.avatar || "../images/default-community.svg"}
                   alt={community.name}
                   className="community-image"
                 />

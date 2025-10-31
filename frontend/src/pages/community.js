@@ -1,40 +1,72 @@
-import { Link, useParams } from "react-router-dom";
-import Post from "../components/post";
-import Sidebar from "../components/sidebar";
-import SearchBar from "../components/searchbar";
-import CommunityHeader from "../components/communityHeader";
+import { useParams } from "react-router-dom";
 import React, { useState, useEffect } from "react";
-import allCommunities from "../data/communitiesDB";
-import postsDB from "../data/postsDB";
+import Sidebar from "../components/sidebar";
 import MainSidebar from "../components/main-sidebar";
-import Header from "../components/header"
+import Header from "../components/header";
+import CommunityHeader from "../components/communityHeader";
+import Post from "../components/post";
 
 function Community() {
   const { name } = useParams();
-  const [posts, setPosts] = useState([]);
   const [community, setCommunity] = useState(null);
-  const { name: communityName } = useParams();
+  const [posts, setPosts] = useState([]);
+  const [loadingCommunity, setLoadingCommunity] = useState(true);
+  const [loadingPosts, setLoadingPosts] = useState(true);
 
-  const communityPosts = postsDB.filter((p) => p.community === communityName);
-
-
+  // Fetch community info from backend
   useEffect(() => {
-    const builtIn = allCommunities;
-    const custom = JSON.parse(localStorage.getItem("customCommunities")) || [];
-    const all = [...builtIn, ...custom];
-    const found = all.find(
-      (c) => c.name.toLowerCase() === name.toLowerCase()
-    );
-    setCommunity(found);
+    const fetchCommunity = async () => {
+      setLoadingCommunity(true);
+      try {
+        const res = await fetch(`http://localhost:5001/api/communities`, {
+          method: "GET",
+          credentials: "include",
+        });
+
+        if (!res.ok) throw new Error("Failed to fetch communities");
+        const data = await res.json();
+
+        // find the community by name
+        const found = data.find(c => c.name.toLowerCase() === name.toLowerCase());
+        setCommunity(found);
+      } catch (err) {
+        console.error("Error fetching community:", err);
+      } finally {
+        setLoadingCommunity(false);
+      }
+    };
+
+    fetchCommunity();
   }, [name]);
 
+  // Fetch posts for this community from backend
   useEffect(() => {
-    if (community) {
-      const savedPosts =
-        JSON.parse(localStorage.getItem(`posts_${name}`)) || [];
-      setPosts(savedPosts);
-    }
-  }, [name, community]);
+    if (!community) return;
+
+    const fetchPosts = async () => {
+      setLoadingPosts(true);
+      try {
+        const res = await fetch(`http://localhost:5001/api/posts?community=${community.name}`, {
+          method: "GET",
+          credentials: "include",
+        });
+
+        if (!res.ok) throw new Error("Failed to fetch posts");
+        const data = await res.json();
+        setPosts(data);
+      } catch (err) {
+        console.error("Error fetching posts:", err);
+      } finally {
+        setLoadingPosts(false);
+      }
+    };
+
+    fetchPosts();
+  }, [community]);
+
+  if (loadingCommunity) {
+    return <p>Loading community...</p>;
+  }
 
   if (!community) {
     return <h2 style={{ textAlign: "center", marginTop: "50px" }}>Community not found</h2>;
@@ -42,9 +74,7 @@ function Community() {
 
   return (
     <>
-      {/* ---------- HEADER ---------- */}
       <Header />
-      {/* ---------- SIDEBAR & MAIN ---------- */}
       <Sidebar />
 
       <div className="main">
@@ -53,44 +83,35 @@ function Community() {
           avatar={community.avatar}
           name={community.name}
         />
+
         <div className="main-body">
           <div className="main-posts-container">
             <div className="main-posts">
-              <div className="post-container">
-                <div className="post">
-                  {/* dynamic posts */}
-                  {communityPosts.map((p, index) => (
-                    <Post
-                      key={index}
-                      username={p.username}
-                      time={p.time}
-                      title={p.title}
-                      textPreview={p.textPreview || ""}
-                      preview={p.preview || ""}
-                      avatar={p.avatar || "../images/avatar.png"}
-                      initialVotes={p.initialVotes || 0}
-                      initialComments={p.initialComments || []}
-                      community={p.community}
-                    />
-                  ))}
-                  {/*  example static posts */}
+              {loadingPosts ? (
+                <p>Loading posts...</p>
+              ) : posts.length === 0 ? (
+                <p style={{ textAlign: "center", marginTop: "20px" }}>No posts yet in this community.</p>
+              ) : (
+                posts.map((p) => (
                   <Post
-                    username="ExampleUser"
-                    time="2 days ago"
-                    title={`Welcome to ${community.name}!`}
-                    textPreview="This is your first community post."
-                    avatar="../images/avatar.png"
-                    initialVotes={100}
+                    key={p._id}
+                    username={p.author?.username || "Unknown"}
+                    time={new Date(p.createdAt).toLocaleString()}
+                    title={p.title}
+                    textPreview={p.body || ""}
+                    preview={p.url || ""}
+                    avatar={p.author?.avatarUrl || "../images/avatar.png"}
+                    initialVotes={p.votes?.reduce((s,v)=>s+v.value,0) || 0}
+                    initialComments={p.comments || []}
+                    community={community.name}
                   />
-                </div>
-              </div>
+                ))
+              )}
             </div>
           </div>
           <MainSidebar community={community} />
         </div>
       </div>
-
-
     </>
   );
 }

@@ -1,13 +1,39 @@
 import Community from '../models/Community.js';
 
-export async function createCommunity(req,res){
-  const { name, title, description } = req.body;
-  const exists = await Community.findOne({ name });
-  if(exists) return res.status(409).json({message:'Community exists'});
-  const c = await Community.create({ name, title, description, members: [req.userId]});
-  res.status(201).json(c);
+// Create a new community
+export async function createCommunity(req, res) {
+  try {
+    const { name, title, description } = req.body;
+
+    
+    // Check if the community already exists
+    const exists = await Community.findOne({ name });
+    if (exists) {
+      return res.status(409).json({ message: 'Community already exists' });
+    }
+
+    // Create the new community
+    const community = await Community.create({
+      name,
+      title,
+      description,
+      members: [req.userId],
+    });
+
+    return res.status(201).json(community);
+  } catch (error) {
+    console.error("Error creating community:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
 }
-export async function listCommunities(req,res){
-  const cs = await Community.find().limit(50);
-  res.json(cs);
+
+// List communities
+export async function listCommunities(req, res) {
+  try {
+    const communities = await Community.find().limit(50);
+    return res.status(200).json(communities);
+  } catch (error) {
+    console.error("Error listing communities:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
 }
