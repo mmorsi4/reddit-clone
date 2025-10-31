@@ -14,35 +14,22 @@ function Header() {return (
         <SearchBar />
 
         <ul className="header-actions">
-          <li className="header-action">
-            <button>
-              <img src="../images/ads.svg" />
-              <div className="header-action-tooltip">Advertise on Reddit</div>
-            </button>
-          </li>
 
           <li className="header-action">
             <button>
               <a href="./chats.html" className="header-action-link">
                 <img src="../images/chat.svg" />
+                <div className="message-counter">1</div>
                 <div className="header-action-tooltip">Open chat</div>
               </a>
             </button>
           </li>
 
           <li className="header-action">
-            <Link to="/create_post" className="header-action-link">
+            <Link to="/create_post" className="header-action-link rect">
               <img src="../images/create-post.svg" /> Create
               <div className="header-action-tooltip">Create post</div>
             </Link>
-          </li>
-
-          <li className="header-action">
-            <button className="inbox-button">
-              <img src="../images/open-inbox.svg" />
-              <div className="notification-counter">1</div>
-              <div className="header-action-tooltip">Open inbox</div>
-            </button>
           </li>
 
           <li className="header-action">
