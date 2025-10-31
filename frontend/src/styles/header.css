@@ -205,13 +205,16 @@
 }
 
 .profile-menu-item-icon {
-    flex-shrink: 0;        
-    margin: 0;             
-    width: 32px;           
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center; /* not space-between */
+  position: relative;
+  flex-shrink: 0;
+  margin-right: 8px; /* adds spacing between icon and text */
 }
+
 
 .profile-menu-item-left {
     position: relative; 
@@ -236,16 +239,6 @@
 
 .profile-menu-item:active {
     background-color: rgba(0, 0, 0, 0.16);
-}
-
-.profile-menu-item-icon {
-    width: 32px;
-    height: 32px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    position: relative; 
-    flex-shrink: 0;    
 }
 
 .profile-menu-item-icon-avatar {
@@ -320,3 +313,4 @@
 .toggle-switch input:checked + .slider:before {
     transform: translateX(20px);
 }
+
