@@ -31,7 +31,7 @@ function Login() {
     }
 
     try {
-      const res = await fetch("/api/login", {
+      const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ usernameOrEmail, password })
@@ -90,7 +90,7 @@ function Login() {
     }
 
     try {
-      const res = await fetch("/api/signup", {
+      const res = await fetch("/api/auth/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, email, password })
