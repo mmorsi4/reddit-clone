@@ -15,18 +15,20 @@ function CreatePost({ showToast }) {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const loadCommunities = async () => {
-      try {
-        const res = await fetch("/api/communities");
-        if (!res.ok) throw new Error("Failed to load communities");
-        const data = await res.json();
-        setCommunities(data);
-      } catch {
-        alert("Network error while loading communities");
-      }
-    };
-    loadCommunities();
-  }, []);
+  const loadCommunities = async () => {
+    try {
+      const res = await fetch("/api/communities/joined", {
+        credentials: "include",
+      });
+      if (!res.ok) throw new Error("Failed to load joined communities");
+      const data = await res.json();
+      setCommunities(data);
+    } catch {
+      alert("Network error while loading communities");
+    }
+  };
+  loadCommunities();
+}, []);
 
   const location = useLocation();
   console.log(location);

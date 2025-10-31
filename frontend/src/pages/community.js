@@ -12,8 +12,25 @@ function Community() {
   const [posts, setPosts] = useState([]);
   const [loadingCommunity, setLoadingCommunity] = useState(true);
   const [loadingPosts, setLoadingPosts] = useState(true);
+  const [isMember, setIsMember] = useState(false);
 
-  // Fetch community info from backend
+  // Check if user is already a member
+  useEffect(() => {
+    const checkMembership = async () => {
+      if (!community) return;
+      try {
+        const res = await fetch(`/api/memberships/check?communityId=${community._id}`, {
+          credentials: "include",
+        });
+        const data = await res.json();
+        setIsMember(data.isMember);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    checkMembership();
+  }, [community]);
+
   useEffect(() => {
     const fetchCommunity = async () => {
       setLoadingCommunity(true);
@@ -26,9 +43,9 @@ function Community() {
         if (!res.ok) throw new Error("Failed to fetch communities");
         const data = await res.json();
 
-        // find the community by name
-        const found = data.find(c => c.name.toLowerCase() === name.toLowerCase());
-        setCommunity(found);
+        // find the community by name safely
+        const found = data.find(c => c?.name?.toLowerCase() === name.toLowerCase());
+        setCommunity(found || null);
       } catch (err) {
         console.error("Error fetching community:", err);
       } finally {
@@ -82,6 +99,7 @@ function Community() {
           banner={community.banner}
           avatar={community.avatar}
           name={community.name}
+          communityId={community._id}
         />
 
         <div className="main-body">
@@ -101,7 +119,7 @@ function Community() {
                     textPreview={p.body || ""}
                     preview={p.url || ""}
                     avatar={p.author?.avatarUrl || "../images/avatar.png"}
-                    initialVotes={p.votes?.reduce((s,v)=>s+v.value,0) || 0}
+                    initialVotes={p.votes?.reduce((s, v) => s + v.value, 0) || 0}
                     initialComments={p.comments || []}
                     community={community.name}
                   />

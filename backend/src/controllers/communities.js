@@ -1,4 +1,5 @@
-import Community from '../models/Community.js';
+import Membership from "../models/Membership.js";
+import Community from "../models/Community.js";
 
 // Create a new community
 export async function createCommunity(req, res) {
@@ -34,6 +35,18 @@ export async function listCommunities(req, res) {
     return res.status(200).json(communities);
   } catch (error) {
     console.error("Error listing communities:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+}
+
+
+export async function listJoinedCommunities(req, res) {
+  try {
+    const memberships = await Membership.find({ userId: req.userId }).populate("communityId");
+    const joinedCommunities = memberships.map(m => m.communityId);
+    return res.status(200).json(joinedCommunities);
+  } catch (error) {
+    console.error("Error listing joined communities:", error);
     return res.status(500).json({ message: "Internal server error" });
   }
 }
