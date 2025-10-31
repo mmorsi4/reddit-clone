@@ -132,7 +132,7 @@ function CreatePost() {
                   className="community-item"
                   onClick={() => handleSelectCommunity(c)}
                 >
-                  <img src={c.avatar} alt={c.name} className="community-avatar" />
+                  <img src={c.avatar} alt={c.name} className="create-community-avatar" />
                   <span>r/{c.name}</span>
                 </li>
               ))}

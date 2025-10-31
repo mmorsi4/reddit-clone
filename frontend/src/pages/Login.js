@@ -40,7 +40,7 @@ function Login() {
       const data = await res.json();
       if (res.ok) {
         alert(`Welcome back, ${data.user.username}!`);
-        navigate("/");
+        navigate("/home");
         //setTimeout(() => setActiveForm("login"), 1500);
       } else {
         alert(res.status || "Invalid credentials.");
