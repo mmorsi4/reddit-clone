@@ -1,85 +1,123 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
 import Sidebar from "../components/sidebar";
-import SearchBar from "../components/searchbar";
 import Header from "../components/header";
 
 function ManageCommunity() {
-  const [joinedCommunities, setJoinedCommunities] = useState([]);
+  const [communities, setCommunities] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
-    const communities = [];
+    const fetchJoinedCommunities = async () => {
+      try {
+        // 1️⃣ Fetch all communities
+        const res = await fetch("/api/communities", { credentials: "include" });
+        const allCommunities = await res.json();
 
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
+        // 2️⃣ Check membership for each community
+        const updated = await Promise.all(
+          allCommunities.map(async (community) => {
+            let isMember = false;
+            try {
+              const resCheck = await fetch(
+                `/api/memberships/check?communityId=${community._id}`,
+                { credentials: "include" }
+              );
+              const data = await resCheck.json();
+              isMember = data.isMember;
+            } catch (err) {
+              console.error(`Failed to fetch membership for ${community.name}:`, err);
+            }
+            return { ...community, joined: isMember };
+          })
+        );
 
-      if (key.startsWith("joined_")) {
-        const data = JSON.parse(localStorage.getItem(key));
-        if (data && data.joined) {
-          const name = key.replace("joined_", "");
-          communities.push({
-            name: name,
-            avatar: data.avatar || "../images/community-avatar1.jpg", // ✅ use stored avatar
-          });
-        }
+        // 3️⃣ Only keep joined communities
+        setCommunities(updated.filter((c) => c.joined));
+      } catch (err) {
+        console.error("Failed to fetch communities:", err);
       }
-    }
+    };
 
-    setJoinedCommunities(communities);
+    fetchJoinedCommunities();
   }, []);
 
-  // ✅ Filter communities based on search
-  const filtered = joinedCommunities.filter((c) =>
+  const handleJoinToggle = async (communityId, name, currentlyJoined) => {
+    try {
+      const endpoint = currentlyJoined
+        ? "/api/memberships/unjoin"
+        : "/api/memberships/join";
+
+      const res = await fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ communityId }),
+        credentials: "include",
+      });
+
+      if (!res.ok) {
+        const errText = await res.text();
+        throw new Error(errText);
+      }
+
+      // Update state: remove unjoined
+      setCommunities((prev) =>
+        prev
+          .map((c) =>
+            c._id === communityId ? { ...c, joined: !currentlyJoined } : c
+          )
+          .filter(c => c.joined)
+      );
+    } catch (err) {
+      console.error("Error toggling membership:", err);
+      alert("Failed to update membership. Please try again.");
+    }
+  };
+
+  const filtered = communities.filter((c) =>
     c.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
-
 
   return (
     <>
       <Header />
-      <Sidebar/>
+      <Sidebar />
       <div className="main">
         <h1>Manage communities</h1>
         <input
           type="text"
-          id="communitySearch"
           placeholder="Search communities..."
           className="search-bar"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
 
-        <div id="allCommunities" className="community-list">
-          {filtered.length === 0 ? (
-            <p>No joined communities found.</p>
-          ) : (
-            filtered.map((community, index) => (
-              <div className="community-card" key={index}>
+        {filtered.length === 0 ? (
+          <p>No joined communities found.</p>
+        ) : (
+          <div className="community-list">
+            {filtered.map((community) => (
+              <div className="community-card" key={community._id}>
                 <img src={community.avatar} alt={community.name} />
                 <span>r/{community.name}</span>
-
                 <button
-                  className="join-toggle joined"
-                  onClick={() => {
-                    // Unjoin functionality
-                    localStorage.setItem(`joined_${community.name}`, "false");
-                    setJoinedCommunities((prev) =>
-                      prev.filter((c) => c.name !== community.name)
-                    );
-                  }}
+                  className={`join-toggle ${community.joined ? "joined" : ""}`}
+                  onClick={() =>
+                    handleJoinToggle(
+                      community._id,
+                      community.name,
+                      community.joined
+                    )
+                  }
                 >
-                  Joined
+                  {community.joined ? "Joined" : "Join"}
                 </button>
               </div>
-            ))
-          )}
-        </div>
-
+            ))}
+          </div>
+        )}
       </div>
-
-
     </>
   );
 }
+
 export default ManageCommunity;
