@@ -13,6 +13,8 @@ import communitiesRoutes from './src/routes/communities.js';
 import membershipsRouter from "./src/routes/membershipRoute.js"
 import usersRoutes from './src/routes/users.js';
 import { errorHandler } from './src/middleware/errorHandler.js';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 dotenv.config();
 const PORT = process.env.PORT || 5001;
@@ -45,6 +47,12 @@ app.use('/api/comments', commentsRoutes);
 app.use('/api/communities', communitiesRoutes);
 app.use("/api/memberships", membershipsRouter);
 app.use('/api/users', usersRoutes);
+
+// media
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
 
 // health
 app.get('/', (req,res)=> res.send({ok:true, now: new Date().toISOString()}));
