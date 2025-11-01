@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 
 function Post({
+  postId,
   username,
   time,
   title,
@@ -99,22 +100,14 @@ function Post({
           </div>
 
           {/* 💬 COMMENTS → Now links to full post */}
-          
-            <Link
-              to={
-                community && title
-                  ? `/community/${community}/${encodeURIComponent(title)}`
-                  : "#"
-              }
-              className="post-comment post-activity-button post-activity-container"
-              onClick={(e) => {
-                if (!community || !title) e.preventDefault(); 
-              }}
-            >
-              <img src="../images/comment.svg" alt="comment" />
-              <span className="post-comment-amount">{comments.length}</span>
-            </Link>
-          
+
+          <Link
+            to={postId ? `/post/${postId}` : "#"}
+            className="post-comment post-activity-button post-activity-container"
+          >
+            <img src="../images/comment.svg" alt="comment" />
+            <span className="post-comment-amount">{comments.length}</span>
+          </Link>
 
           {/* 🔗 SHARE */}
           <div className="post-share post-activity-button post-activity-container">
