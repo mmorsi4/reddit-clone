@@ -1,10 +1,15 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import Sidebar from "../components/sidebar";
 import SearchBar from "../components/searchbar";
 import Header from "../components/header";
 
 function ViewProfile() {
+  const [activeTab, setActiveTab] = useState("overview");
+  const [user, setUser] = useState(null);
+  const [userComments, setUserComments] = useState([]);
+  const [loading, setLoading] = useState(false);
+
   useEffect(() => {
     // 🧠 Get current user data
     const fetchProfile = async () => {
@@ -16,25 +21,23 @@ function ViewProfile() {
 
       console.log(res)
 
-      // const user = JSON.parse(localStorage.getItem("currentUser"));
       const data = await res.json();
-      const user = data.user;
+      const userData = data.user;
+      setUser(userData);
 
-      console.log(user);
+      console.log(userData);
 
-      // const savedAvatar = localStorage.getItem("userAvatar");
-      const savedAvatar = user.avatarUrl || NaN;
+      const savedAvatar = userData.avatarUrl || NaN;
 
       const avatarEl = document.getElementById("profile-avatar");
       const nameEl = document.getElementById("profile-name");
       const usernameEl = document.getElementById("profile-username");
       const emptyTextEl = document.getElementById("empty-text");
 
-
-      if (user) {
-        nameEl.textContent = user.username;
-        usernameEl.textContent = `u/${user.username}`;
-        emptyTextEl.textContent = `u/${user.username} hasn't posted yet`;
+      if (userData) {
+        nameEl.textContent = userData.username;
+        usernameEl.textContent = `u/${userData.username}`;
+        emptyTextEl.textContent = `u/${userData.username} hasn't posted yet`;
       }
 
       // 🧩 If saved avatar exists, load it
@@ -45,8 +48,95 @@ function ViewProfile() {
 
     fetchProfile();
   }, []);
-  return (
 
+  // Fetch user's comments when Comments tab is clicked
+  const fetchUserComments = async () => {
+    setLoading(true);
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch("http://localhost:5001/api/comments/my", {
+        method: "GET",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json"
+        }
+      });
+
+      if (res.ok) {
+        const comments = await res.json();
+        setUserComments(comments);
+        console.log("User comments:", comments);
+      } else {
+        console.error("Failed to fetch comments");
+      }
+    } catch (error) {
+      console.error("Error fetching comments:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Function to render content based on active tab
+  const renderTabContent = () => {
+    if (activeTab === "comments") {
+      if (loading) {
+        return (
+          <div className="empty-state">
+            <p className="empty-text">Loading comments...</p>
+          </div>
+        );
+      }
+
+      if (userComments.length === 0) {
+        return (
+          <div className="empty-state">
+            <p className="empty-text">
+              {user ? `u/${user.username} hasn't commented yet` : "User hasn't commented yet"}
+            </p>
+          </div>
+        );
+      }
+
+      return (
+        <div className="comments-list">
+          {userComments.map((comment) => (
+            <div key={comment._id} className="comment-item">
+              <p className="comment-text">{comment.body || comment.text}</p>
+              <p className="comment-meta">
+                On post: {comment.post?.title || "Unknown post"} • 
+                {new Date(comment.createdAt).toLocaleDateString()}
+              </p>
+            </div>
+          ))}
+        </div>
+      );
+    }
+
+    const messages = {
+      overview: "hasn't posted yet",
+      posts: "hasn't posted yet", 
+      hidden: "has no hidden content",
+      upvoted: "hasn't upvoted anything yet",
+      downvoted: "hasn't downvoted anything yet"
+    };
+
+    return (
+      <div className="empty-state">
+        <p className="empty-text" id="empty-text">
+          {user ? `u/${user.username} ${messages[activeTab]}` : "User hasn't posted yet"}
+        </p>
+      </div>
+    );
+  };
+
+  const handleTabClick = (tabName) => {
+    setActiveTab(tabName);
+    if (tabName === "comments") {
+      fetchUserComments();
+    }
+  };
+
+  return (
     <>
       <Header />
       <Sidebar/>
@@ -69,19 +159,47 @@ function ViewProfile() {
         </div>
 
         <div className="profile-tabs">
-          <button className="tab active">Overview</button>
-          <button className="tab">Posts</button>
-          <button className="tab">Comments</button>
-          <button className="tab">Saved</button>
-          <button className="tab">History</button>
-          <button className="tab">Hidden</button>
-          <button className="tab">Upvoted</button>
-          <button className="tab">Downvoted</button>
+          <button 
+            className={`tab ${activeTab === "overview" ? "active" : ""}`}
+            onClick={() => handleTabClick("overview")}
+          >
+            Overview
+          </button>
+          <button 
+            className={`tab ${activeTab === "posts" ? "active" : ""}`}
+            onClick={() => handleTabClick("posts")}
+          >
+            Posts
+          </button>
+          <button 
+            className={`tab ${activeTab === "comments" ? "active" : ""}`}
+            onClick={() => handleTabClick("comments")}
+          >
+            Comments
+          </button>
+          <button 
+            className={`tab ${activeTab === "hidden" ? "active" : ""}`}
+            onClick={() => handleTabClick("hidden")}
+          >
+            Hidden
+          </button>
+          <button 
+            className={`tab ${activeTab === "upvoted" ? "active" : ""}`}
+            onClick={() => handleTabClick("upvoted")}
+          >
+            Upvoted
+          </button>
+          <button 
+            className={`tab ${activeTab === "downvoted" ? "active" : ""}`}
+            onClick={() => handleTabClick("downvoted")}
+          >
+            Downvoted
+          </button>
         </div>
 
         <div className="profile-content">
           <div className="showing-content">
-            <span>Showing all content</span>
+            <span>Showing {activeTab === "overview" ? "all" : activeTab} content</span>
           </div>
 
           <div className="create-post">
@@ -93,15 +211,11 @@ function ViewProfile() {
             </select>
           </div>
 
-          <div className="empty-state">
-            <p className="empty-text" id="empty-text">
-              User hasn’t posted yet
-            </p>
-          </div>
+          {renderTabContent()}
         </div>
       </div>
-
     </>
   );
 }
+
 export default ViewProfile;
