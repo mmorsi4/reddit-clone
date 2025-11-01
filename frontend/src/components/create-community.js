@@ -83,29 +83,42 @@ function CreateCommunityPopup({ onClose, onCreate }) {
 
     reader.readAsDataURL(file);
   };
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!name.trim()) {
       alert("Please enter a community name");
       return;
     }
 
-    const newCommunity = {
-      name: name.trim(),
-      description,
-      topics: selectedTopics,
-      type: communityType,
-      banner,
-      avatar,
-      link: `/community/${name.trim()}`,
-    };
+    try {
+      const res = await fetch("/api/communities/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          name: name.trim(),
+          title: name.trim(),
+          description,
+          banner,
+          avatar,
+          type: communityType,
+          topics: selectedTopics,
+        }),
+      });
 
-    const stored = JSON.parse(localStorage.getItem("customCommunities")) || [];
-    stored.push(newCommunity);
-    localStorage.setItem("customCommunities", JSON.stringify(stored));
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.message || "Failed to create community");
+      }
 
-    window.dispatchEvent(new Event("customCommunityUpdated"));
-    onCreate(newCommunity);
-    onClose();
+      const newCommunity = await res.json();
+      window.dispatchEvent(new Event("customCommunityUpdated"));
+      onCreate(newCommunity);
+      onClose();
+      alert("Community created successfully!");
+    } catch (err) {
+      console.error(err);
+      alert(err.message);
+    }
   };
 
   // Filter topics
@@ -241,7 +254,7 @@ function CreateCommunityPopup({ onClose, onCreate }) {
             <h2>Style your community</h2>
             <p>Add a banner and icon to make it unique!</p>
 
-            <label>Upload Avatar</label>
+
             <label>Upload Avatar</label>
             <input
               type="file"
@@ -254,9 +267,10 @@ function CreateCommunityPopup({ onClose, onCreate }) {
             <input
               type="file"
               accept="image/*"
-              onChange={(e) => handleFileChange(e, setAvatar, "avatar")}
+              onChange={(e) => handleFileChange(e, setBanner, "banner")} 
             />
-            {avatar && <img src={avatar} alt="Avatar preview" className="preview-img" />}
+            {banner && <img src={banner} alt="Banner preview" className="preview-img" />}
+
 
             <div className="popup-buttons">
               <button className="btn-secondary" onClick={() => setStep(3)}>
