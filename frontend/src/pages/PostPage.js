@@ -28,49 +28,61 @@ function PostPage() {
   }, [postId]);
 
   const handleAddComment = async () => {
-    if (!newComment.trim()) return;
+  if (!newComment.trim()) return;
 
-    try {
-      const token = localStorage.getItem("token");
-      
-      if (!token) {
-        alert("Please log in to comment");
-        return;
+  try {
+    console.log("📤 Sending comment to backend...");
+    
+    // Send comment to backend WITH credentials (cookies)
+    const res = await fetch("http://localhost:5001/api/comments", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify({
+        post: postId,
+        body: newComment,
+      }),
+    });
+
+    console.log("📥 Response status:", res.status);
+
+    // Get the response text first to see what the backend is sending
+    const responseText = await res.text();
+    console.log("📥 Response text:", responseText);
+
+    if (!res.ok) {
+      // Try to parse as JSON, but if it fails, use the raw text
+      let errorMessage = responseText;
+      try {
+        const errorData = JSON.parse(responseText);
+        errorMessage = errorData.message || responseText;
+      } catch (e) {
+        // If it's not JSON, use the raw text
       }
-
-      // Send comment to backend
-      const res = await fetch("http://localhost:5001/api/comments", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          post: postId,
-          body: newComment,
-        }),
-      });
-
-      if (!res.ok) throw new Error("Failed to save comment");
-
-      const savedComment = await res.json();
-      
-      // Add the new comment to display
-      const commentToDisplay = {
-        _id: savedComment._id,
-        author: { username: "You" },
-        text: newComment
-      };
-      
-      setComments(prev => [...prev, commentToDisplay]);
-      setNewComment("");
-
-    } catch (error) {
-      console.error("Error saving comment:", error);
-      alert("Failed to save comment. Please try again.");
+      throw new Error(`Failed to save comment: ${res.status} - ${errorMessage}`);
     }
-  };
 
+    // If we got here, the response was OK, so parse as JSON
+    const savedComment = JSON.parse(responseText);
+    console.log("✅ Comment saved successfully:", savedComment);
+    
+    // Add the new comment to display
+    const commentToDisplay = {
+      _id: savedComment._id,
+      author: { username: "You" },
+      text: newComment
+    };
+    
+    setComments(prev => [...prev, commentToDisplay]);
+    setNewComment("");
+
+  } catch (error) {
+    console.error("💥 Error saving comment:", error);
+    alert(error.message); // This will now show the actual backend error
+  }
+};
   if (!post) return <h2 style={{ textAlign: "center", marginTop: "50px" }}>Loading...</h2>;
 
   return (
@@ -80,7 +92,7 @@ function PostPage() {
       <div className="post-page">
         <div className="post-page-header">
           <Link
-            to={post.community?.title ? `/community/${post.community.title}` : "/home"}
+            to={post.community?.name ? `/community/${post.community.name}` : "/home"}
           >
             &larr; Back to r/{post.community?.name || "community"}
           </Link>
