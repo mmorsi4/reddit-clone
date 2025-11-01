@@ -1,36 +1,41 @@
 import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import allCommunities from "../data/communitiesDB";
 import CreateCommunityPopup from "./create-community";
 import CustomFeedPopup from "../pages/CustomFeedPopup";
+import customCommunities from "../data/communitiesDB.js";
 
 function Sidebar() {
   const [recent, setRecent] = useState([]);
-  const [customCommunities, setCustomCommunities] = useState([]);
+  const [communities, setCommunities] = useState([]); 
   const [showPopup, setShowPopup] = useState(false);
   const [customFeeds, setCustomFeeds] = useState([]);
   const location = useLocation();
-
-  // State to control the visibility of the CustomFeedPopup
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleOpenModal = (e) => {
-    // Prevent any default link/navigation behavior if an anchor tag is used
-    if (e && e.preventDefault) {
-        e.preventDefault();
-    }
+    if (e) e.preventDefault();
     setIsModalOpen(true);
   };
-
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-  };
-
+  const handleCloseModal = () => setIsModalOpen(false);
   const handleFeedSubmission = (feedData) => {
-    console.log('New Feed Data Submitted:', feedData);
-    // Add your API call or state management logic here
+    console.log("New Feed Data Submitted:", feedData);
     handleCloseModal();
   };
+
+  // Fetch communities from backend
+  useEffect(() => {
+    const fetchCommunities = async () => {
+      try {
+        const res = await fetch("/api/communities");
+        if (!res.ok) throw new Error("Failed to fetch communities");
+        const data = await res.json();
+        setCommunities(data);
+      } catch (err) {
+        console.error("Error fetching communities:", err);
+      }
+    };
+    fetchCommunities();
+  }, []);
 
   // Load recent communities
   useEffect(() => {
@@ -38,53 +43,35 @@ function Sidebar() {
     setRecent(recentData);
   }, []);
 
-
+  // Load custom feeds
   useEffect(() => {
     const storedFeeds = JSON.parse(localStorage.getItem("customFeeds")) || [];
     setCustomFeeds(storedFeeds);
+
     const updateFeeds = () => {
       const updated = JSON.parse(localStorage.getItem("customFeeds")) || [];
       setCustomFeeds(updated);
     };
 
     window.addEventListener("customFeedUpdated", updateFeeds);
-
     return () => window.removeEventListener("customFeedUpdated", updateFeeds);
-  }, [])
-
-  // Load all custom communities
-  useEffect(() => {
-    const loadCustom = () => {
-      const stored = JSON.parse(localStorage.getItem("customCommunities")) || [];
-      setCustomCommunities(stored);
-    };
-
-    loadCustom();
-    window.addEventListener("customCommunityUpdated", loadCustom);
-    return () => window.removeEventListener("customCommunityUpdated", loadCustom);
   }, []);
 
-  // Detect when user visits a community
+  // Update recent communities when visiting a community page
   useEffect(() => {
     if (location.pathname.startsWith("/community/")) {
       const communityName = location.pathname.split("/")[2];
-      const matched = [...allCommunities, ...customCommunities].find(
-        (c) => c.name === communityName
-      );
-
+      const matched = communities.find((c) => c.name === communityName);
       if (matched) {
         setRecent((prev) => {
-          let updated = [
-            matched,
-            ...prev.filter((c) => c.name !== matched.name),
-          ];
+          let updated = [matched, ...prev.filter((c) => c.name !== matched.name)];
           if (updated.length > 5) updated = updated.slice(0, 5);
           localStorage.setItem("recentCommunities", JSON.stringify(updated));
           return updated;
         });
       }
     }
-  }, [location.pathname, customCommunities]);
+  }, [location.pathname, communities]);
 
   return (
     <div className="sidebar-container">
@@ -234,43 +221,25 @@ function Sidebar() {
               </Link>
             </li>
 
-            {/* Default communities */}
-            {allCommunities.map((community, index) => (
-              <li key={`default-${index}`}>
-                <Link
-                  to={`/community/${community.name}`}
-                  className="sidebar-link"
-                >
-                  <img
-                    src={community.avatar || "../images/default-community.svg"}
-                    className="sidebar-link-icon-round"
-                    alt={community.name}
-                  />
-                  <div className="sidebar-section-item-details">
-                    {community.name}
-                  </div>
-                </Link>
+            {/* Render communities from DB */}
+            {communities.length === 0 ? (
+              <li className="sidebar-link">
+                <div className="sidebar-section-item-details">Loading communities...</div>
               </li>
-            ))}
-
-            {/* Custom-created communities */}
-            {customCommunities.map((community, index) => (
-              <li key={`custom-${index}`}>
-                <Link
-                  to={`/community/${community.name}`}
-                  className="sidebar-link"
-                >
-                  <img
-                    src={community.avatar || "../images/default-community.svg"}
-                    className="sidebar-link-icon-round"
-                    alt={community.name}
-                  />
-                  <div className="sidebar-section-item-details">
-                    {community.name}
-                  </div>
-                </Link>
-              </li>
-            ))}
+            ) : (
+              communities.map((community) => (
+                <li key={community._id}>
+                  <Link to={`/community/${community.name}`} className="sidebar-link">
+                    <img
+                      src={community.avatar || "../images/default-community.svg"}
+                      className="sidebar-link-icon-round"
+                      alt={community.name}
+                    />
+                    <div className="sidebar-section-item-details">{community.name}</div>
+                  </Link>
+                </li>
+              ))
+            )}
           </ul>
         </li>
 
@@ -326,7 +295,7 @@ function Sidebar() {
         />
       )}
     </div>
-  
+
   );
 }
 

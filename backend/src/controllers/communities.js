@@ -4,20 +4,23 @@ import Community from "../models/Community.js";
 // Create a new community
 export async function createCommunity(req, res) {
   try {
-    const { name, title, description } = req.body;
+    const { name, title, description, avatar, banner, type, topics } = req.body;
 
-    
     // Check if the community already exists
     const exists = await Community.findOne({ name });
     if (exists) {
-      return res.status(409).json({ message: 'Community already exists' });
+      return res.status(409).json({ message: "Community already exists" });
     }
 
-    // Create the new community
+    // Create the new community with avatar and banner
     const community = await Community.create({
       name,
       title,
       description,
+      avatar: avatar || "", // save Base64 string or default empty
+      banner: banner || "",
+      type: type || "public",
+      topics: topics || [],
       members: [req.userId],
     });
 
@@ -26,7 +29,7 @@ export async function createCommunity(req, res) {
     console.error("Error creating community:", error);
     return res.status(500).json({ message: "Internal server error" });
   }
-}
+};
 
 // List communities
 export async function listCommunities(req, res) {
@@ -50,3 +53,4 @@ export async function listJoinedCommunities(req, res) {
     return res.status(500).json({ message: "Internal server error" });
   }
 }
+

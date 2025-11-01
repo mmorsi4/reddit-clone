@@ -7,4 +7,5 @@ router.get('/', listCommunities); // all communities
 router.get('/joined', authMiddleware, listJoinedCommunities); // only joined
 router.post('/', authMiddleware, createCommunity);
 
+
 export default router;
