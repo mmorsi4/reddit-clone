@@ -8,6 +8,7 @@ function ViewProfile() {
   const [activeTab, setActiveTab] = useState("overview");
   const [user, setUser] = useState(null);
   const [userComments, setUserComments] = useState([]);
+  const [userPosts, setUserPosts] = useState([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -53,24 +54,63 @@ function ViewProfile() {
   const fetchUserComments = async () => {
     setLoading(true);
     try {
-      const token = localStorage.getItem("token");
+      console.log("🔍 Starting to fetch user comments...");
+      
       const res = await fetch("http://localhost:5001/api/comments/my", {
         method: "GET",
         headers: {
-          "Authorization": `Bearer ${token}`,
           "Content-Type": "application/json"
-        }
+        },
+        credentials: "include"
       });
+
+      console.log("📥 Comments response status:", res.status);
+      console.log("📥 Comments response ok:", res.ok);
 
       if (res.ok) {
         const comments = await res.json();
         setUserComments(comments);
-        console.log("User comments:", comments);
+        console.log("✅ User comments fetched:", comments);
       } else {
-        console.error("Failed to fetch comments");
+        const errorText = await res.text();
+        console.error("❌ Failed to fetch comments. Status:", res.status, "Error:", errorText);
       }
     } catch (error) {
-      console.error("Error fetching comments:", error);
+      console.error("💥 Error fetching comments:", error);
+      console.error("💥 Error details:", error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Fetch user's posts when Posts tab is clicked
+  const fetchUserPosts = async () => {
+    setLoading(true);
+    try {
+      console.log("🔍 Starting to fetch user posts...");
+      
+      const res = await fetch("http://localhost:5001/api/posts/my/posts", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        credentials: "include"
+      });
+
+      console.log("📥 Posts response status:", res.status);
+      console.log("📥 Posts response ok:", res.ok);
+
+      if (res.ok) {
+        const posts = await res.json();
+        setUserPosts(posts);
+        console.log("✅ User posts fetched:", posts);
+      } else {
+        const errorText = await res.text();
+        console.error("❌ Failed to fetch posts. Status:", res.status, "Error:", errorText);
+      }
+    } catch (error) {
+      console.error("💥 Error fetching posts:", error);
+      console.error("💥 Error details:", error.message);
     } finally {
       setLoading(false);
     }
@@ -112,9 +152,46 @@ function ViewProfile() {
       );
     }
 
+    if (activeTab === "posts") {
+      if (loading) {
+        return (
+          <div className="empty-state">
+            <p className="empty-text">Loading posts...</p>
+          </div>
+        );
+      }
+
+      if (userPosts.length === 0) {
+        return (
+          <div className="empty-state">
+            <p className="empty-text">
+              {user ? `u/${user.username} hasn't posted yet` : "User hasn't posted yet"}
+            </p>
+          </div>
+        );
+      }
+
+      return (
+        <div className="posts-list">
+          {userPosts.map((post) => (
+            <div key={post._id} className="post-item">
+              <Link to={`/post/${post._id}`} className="post-link">
+                <h4 className="post-title">{post.title}</h4>
+              </Link>
+              <p className="post-body">{post.body || "No content"}</p>
+              <p className="post-meta">
+                In r/{post.community?.name || "unknown"} • 
+                {new Date(post.createdAt).toLocaleDateString()} • 
+                {post.commentCount || 0} comments
+              </p>
+            </div>
+          ))}
+        </div>
+      );
+    }
+
     const messages = {
       overview: "hasn't posted yet",
-      posts: "hasn't posted yet", 
       hidden: "has no hidden content",
       upvoted: "hasn't upvoted anything yet",
       downvoted: "hasn't downvoted anything yet"
@@ -133,6 +210,8 @@ function ViewProfile() {
     setActiveTab(tabName);
     if (tabName === "comments") {
       fetchUserComments();
+    } else if (tabName === "posts") {
+      fetchUserPosts();
     }
   };
 
