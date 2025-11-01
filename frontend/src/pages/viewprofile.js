@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 import { Link } from "react-router-dom";
 import Sidebar from "../components/sidebar";
-import SearchBar from "../components/searchbar";
 import Header from "../components/header";
 
 function ViewProfile() {
@@ -10,45 +10,31 @@ function ViewProfile() {
   const [userComments, setUserComments] = useState([]);
   const [userPosts, setUserPosts] = useState([]);
   const [loading, setLoading] = useState(false);
+  const { username } = useParams(); // get username from url
 
   useEffect(() => {
     // 🧠 Get current user data
     const fetchProfile = async () => {
-      const res = await fetch("/api/view_profile", {
+      const res = await fetch(`/api/users/${username}`, {
         method: "GET",
         headers: { "Content-Type": "application/json" },
         credentials: "include"
       });
 
+      if (res.status === 404) {
+          setUser(null); // user not found
+          return;
+      }
+
       console.log(res)
 
       const data = await res.json();
-      const userData = data.user;
+      const userData = data;
       setUser(userData);
-
-      console.log(userData);
-
-      const savedAvatar = userData.avatarUrl || NaN;
-
-      const avatarEl = document.getElementById("profile-avatar");
-      const nameEl = document.getElementById("profile-name");
-      const usernameEl = document.getElementById("profile-username");
-      const emptyTextEl = document.getElementById("empty-text");
-
-      if (userData) {
-        nameEl.textContent = userData.username;
-        usernameEl.textContent = `u/${userData.username}`;
-        emptyTextEl.textContent = `u/${userData.username} hasn't posted yet`;
-      }
-
-      // 🧩 If saved avatar exists, load it
-      if (savedAvatar) {
-        avatarEl.src = savedAvatar;
-      }
     }
 
     fetchProfile();
-  }, []);
+  }, [username]);
 
   // Fetch user's comments when Comments tab is clicked
   const fetchUserComments = async () => {
@@ -215,6 +201,10 @@ function ViewProfile() {
     }
   };
 
+  if (user === undefined) return <p></p>; // loading
+  if (user === null) return <p>User not found</p>; // user not found
+
+
   return (
     <>
       <Header />
@@ -223,16 +213,16 @@ function ViewProfile() {
         <div className="profile-header">
           <img
             id="profile-avatar"
-            src="../images/default-avatar.png"
+            src={user.avatarUrl ? user.avatarUrl : "../images/avatar.png"}
             alt="Avatar"
             className="profile-avatar"
           />
           <div className="profile-info">
             <h2 id="profile-name" className="profile-name">
-              Username
+              {user.username}
             </h2>
             <p id="profile-username" className="profile-username">
-              u/username
+              u/{user.username}
             </p>
           </div>
         </div>
@@ -282,7 +272,9 @@ function ViewProfile() {
           </div>
 
           <div className="create-post">
-            <button className="create-post-btn">+ Create Post</button>
+            <Link to="/create_post">
+              <button className="create-post-btn">+ Create Post</button>
+            </Link>
             <select className="sort-select">
               <option>New</option>
               <option>Top</option>

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 
 function SearchBar() {
   const [communities, setCommunities] = useState([]);
@@ -7,6 +8,7 @@ function SearchBar() {
   const [showResults, setShowResults] = useState(false);
 
   const searchRef = useRef(null);
+  const navigate = useNavigate(); // hook to navigate programmatically
 
   // Fetch communities
   useEffect(() => {
@@ -43,8 +45,9 @@ function SearchBar() {
   }, []);
 
   const handleCommunityClick = (community) => {
-    console.log("Clicked community:", community);
     setShowResults(false);
+    // Navigate to community page
+    navigate(`/community/${community.name}`);
   };
 
   return (
@@ -56,10 +59,9 @@ function SearchBar() {
         className="search-input"
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
-        onFocus={() => setShowResults(true)} // show on focus
+        onFocus={() => setShowResults(true)}
       />
 
-      {/* Show results only if showResults is true */}
       {showResults && filteredResults.length > 0 && (
         <div className="search-results show">
           <div className="search-results-scrollable">
@@ -67,7 +69,7 @@ function SearchBar() {
               {filteredResults.map((community, index) => (
                 <li key={index} onClick={() => handleCommunityClick(community)}>
                   <img
-                    src={community.avatar}
+                    src={community.avatar || "../images/default-community.svg"}
                     alt={community.name || "Community"}
                     className="community-image"
                   />

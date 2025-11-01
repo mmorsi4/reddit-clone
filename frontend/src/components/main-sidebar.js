@@ -16,7 +16,7 @@ const MainSidebar = ({ community }) => {
           </div>
         </div>
 
-        <div className="main-sidebar-community-stats">
+        {/* <div className="main-sidebar-community-stats">
           <div className="main-sidebar-stats-overall">
             <div className="main-sidebar-stats-amount">
               {community.members}
@@ -40,7 +40,8 @@ const MainSidebar = ({ community }) => {
             </div>
             <div className="main-sidebar-stats-label">Rank by size</div>
           </div>
-        </div>
+        </div> */}
+
       </div>
     </div>
   );

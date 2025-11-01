@@ -5,7 +5,7 @@
     padding: 0;
     position: sticky;
     top: 80px;
-    height: calc(100vh - 70px);
+    height: auto;
     overflow-y: auto;
     scrollbar-width: thin;
     scrollbar-color: transparent  transparent;
@@ -17,7 +17,7 @@
 }
 
 .main-sidebar-community-info {
-    padding: 0 16px;
+    padding: 0 16px 12px;
 }
 
 .main-sidebar-description-title {

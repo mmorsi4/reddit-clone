@@ -8,7 +8,6 @@ const CommunitySchema = new Schema({
   avatar: { type: String, default: "" }, 
   banner: { type: String, default: "" }, 
   url: { type: String },
-  members: [{ type: Schema.Types.ObjectId, ref: 'User' }],
   createdAt: { type: Date, default: Date.now },
 });
 

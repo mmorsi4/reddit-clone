@@ -3,7 +3,31 @@ import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import SearchBar from "../components/searchbar";
 
-function Header() {return (
+function Header() {
+  const [currentUser, setCurrentUser] = useState(null);
+
+  useEffect(() => {
+    const fetchCurrentUser = async () => {
+      try {
+        const res = await fetch("/api/users/me", {
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setCurrentUser(data); // { username, avatarUrl, ... }
+        }
+      } catch (err) {
+        console.error("Failed to fetch current user", err);
+      }
+    };
+
+    fetchCurrentUser();
+  }, []);
+
+  const profileLink = currentUser ? `/profile/${currentUser.username}` : "#";
+  
+  return (
     <>
       {/* ---------- HEADER ---------- */}
       <div className="header">
@@ -44,7 +68,7 @@ function Header() {return (
             <ul className="profile-menu">
 
               <li className="profile-menu-item">
-              <Link to="/viewprofile" className="profile-menu-link">
+              <Link to={profileLink} className="profile-menu-link">
                 <div className="profile-menu-item-icon">
                   <img
                     src="../images/avatar.png"
