@@ -76,3 +76,30 @@ export const checkMembership = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+
+export async function toggleFavorite(req, res) {
+  try {
+    const userId = req.user._id;
+    const { communityId } = req.params;
+
+    // Validate ID
+    if (!mongoose.Types.ObjectId.isValid(communityId)) {
+      return res.status(400).json({ message: "Invalid communityId" });
+    }
+
+    // Find membership
+    const membership = await Membership.findOne({ userId, communityId });
+    if (!membership) {
+      return res.status(404).json({ message: "Membership not found" });
+    }
+
+    // Toggle favorite flag
+    membership.favorite = !membership.favorite;
+    await membership.save();
+
+    res.json({ favorite: membership.favorite });
+  } catch (err) {
+    console.error("Error toggling favorite:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+}

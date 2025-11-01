@@ -31,17 +31,15 @@ export async function createCommunity(req, res) {
   }
 };
 
-// List communities
 export async function listCommunities(req, res) {
   try {
-    const communities = await Community.find().limit(50);
-    return res.status(200).json(communities);
-  } catch (error) {
-    console.error("Error listing communities:", error);
-    return res.status(500).json({ message: "Internal server error" });
+    const communities = await Community.find().lean(); // returns array
+    res.status(200).json(communities);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
   }
 }
-
 
 export async function listJoinedCommunities(req, res) {
   try {
@@ -54,3 +52,21 @@ export async function listJoinedCommunities(req, res) {
   }
 }
 
+export async function listCommunitiesWithFavorites(req, res) {
+  try {
+    // Get memberships for this user and populate community info
+    const memberships = await Membership.find({ userId: req.userId }).populate("communityId").lean();
+
+    // Map to return only joined communities with favorite flag
+    const joinedWithFavorites = memberships.map(m => ({
+      ...m.communityId,         // all community fields
+      joined: true,             // since user is member
+      favorite: m.favorite || false
+    }));
+
+    res.status(200).json(joinedWithFavorites);
+  } catch (err) {
+    console.error("Error listing joined communities with favorites:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+}
