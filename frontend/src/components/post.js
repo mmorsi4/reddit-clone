@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { formatDistanceToNow } from 'date-fns'; // to have date in ago form
+import { formatDistanceToNow } from 'date-fns';
 
 function Post({
   postId,
@@ -15,32 +15,40 @@ function Post({
   community,
 }) {
   const [voteCount, setVoteCount] = useState(initialVotes || 0);
-  const [vote, setVote] = useState(0);
+  const [vote, setVote] = useState(0); // 0 = no vote, 1 = upvote, -1 = downvote
   const [comments, setComments] = useState(initialComments || []);
   const [showComments, setShowComments] = useState(false);
   const [newComment, setNewComment] = useState("");
 
   const handleUpvote = () => {
     if (vote === 1) {
+      // If already upvoted, remove the upvote
       setVote(0);
-      setVoteCount((prev) => Math.max(0, prev - 1));
-    } else {
-      const change = vote === -1 ? 2 : 1;
+      setVoteCount((prev) => prev - 1);
+    } else if (vote === -1) {
+      // If downvoted, switch to upvote (remove downvote and add upvote)
       setVote(1);
-      setVoteCount((prev) => prev + change);
+      setVoteCount((prev) => prev + 2); // +1 to remove downvote, +1 to add upvote
+    } else {
+      // If no vote, add upvote
+      setVote(1);
+      setVoteCount((prev) => prev + 1);
     }
   };
 
   const handleDownvote = () => {
     if (vote === -1) {
+      // If already downvoted, remove the downvote
       setVote(0);
-    } else {
-      if (vote === 1) {
-        setVoteCount((prev) => Math.max(0, prev - 2));
-      } else {
-        setVoteCount((prev) => Math.max(0, prev - 1));
-      }
+      setVoteCount((prev) => prev + 1);
+    } else if (vote === 1) {
+      // If upvoted, switch to downvote (remove upvote and add downvote)
       setVote(-1);
+      setVoteCount((prev) => prev - 2); // -1 to remove upvote, -1 to add downvote
+    } else {
+      // If no vote, add downvote
+      setVote(-1);
+      setVoteCount((prev) => prev - 1);
     }
   };
 
