@@ -17,10 +17,10 @@ function CreatePost({ showToast }) {
   useEffect(() => {
   const loadCommunities = async () => {
     try {
-      const res = await fetch("/api/communities/joined", {
+      const res = await fetch("/api/communities/", {
         credentials: "include",
       });
-      if (!res.ok) throw new Error("Failed to load joined communities");
+      if (!res.ok) throw new Error("Failed to load communities");
       const data = await res.json();
       setCommunities(data);
     } catch {

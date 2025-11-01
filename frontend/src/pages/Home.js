@@ -13,7 +13,6 @@ import "../styles/postpage.css";
 import "../styles/create_community.css";
 import { Link } from "react-router-dom";
 import Post from "../components/post";
-import SearchBar from "../components/searchbar";
 import Sidebar from "../components/sidebar";
 import Header from "../components/header"
 

@@ -113,6 +113,7 @@ function Community() {
                 posts.map((p) => (
                   <Post
                     key={p._id}
+                    postId={p._id}
                     username={p.author?.username || "Unknown"}
                     time={new Date(p.createdAt).toLocaleString()}
                     title={p.title}

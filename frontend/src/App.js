@@ -37,7 +37,7 @@ function App() {
         <Route path="/edit-avatar"element={<AvatarCustomizer/>}/>
         <Route path="/create-community"element={<CreateCommunityPopup/>}/>
         <Route path="/CustomFeedPopup"element={<CustomFeedPopup/>}/>
-        <Route path="/community/:communityName/:postTitle" element={<PostPage />} />
+        <Route path="/post/:postId" element={<PostPage />} />
       </Routes>
     </Router>
 
