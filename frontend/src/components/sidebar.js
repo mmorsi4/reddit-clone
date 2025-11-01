@@ -1,15 +1,22 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect , useCallback } from "react";
 import { Link, useLocation } from "react-router-dom";
 import CreateCommunityPopup from "./create-community";
 import CustomFeedPopup from "../pages/CustomFeedPopup";
 
 function Sidebar() {
   const [recent, setRecent] = useState([]);
-  const [communities, setCommunities] = useState([]); 
+  const [communities, setCommunities] = useState([]);
+  const [favorites, setFavorites] = useState([]);
   const [showPopup, setShowPopup] = useState(false);
   const [customFeeds, setCustomFeeds] = useState([]);
   const location = useLocation();
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const getLinkClass = (path) => {
+    if (path === "/home" && location.pathname === "/home") return "sidebar-link active";
+    if (location.pathname.startsWith(path)) return "sidebar-link active";
+    return "sidebar-link";
+  };
 
   const handleOpenModal = (e) => {
     if (e) e.preventDefault();
@@ -21,42 +28,30 @@ function Sidebar() {
     handleCloseModal();
   };
 
-  // Fetch communities from backend
-  useEffect(() => {
-    const fetchCommunities = async () => {
-      try {
-        const res = await fetch("/api/communities");
-        if (!res.ok) throw new Error("Failed to fetch communities");
-        const data = await res.json();
-        setCommunities(data);
-      } catch (err) {
-        console.error("Error fetching communities:", err);
-      }
-    };
-    fetchCommunities();
+ // ✅ Fetch all communities
+  const fetchCommunities = useCallback(async () => {
+    try {
+      const res = await fetch("/api/communities/with-favorites");
+      if (!res.ok) throw new Error("Failed to fetch communities");
+      const data = await res.json();
+      setCommunities(data);
+    } catch (err) {
+      console.error("Error fetching communities:", err);
+    }
   }, []);
 
-  // Load recent communities
+  // Initial load
+  useEffect(() => {
+    fetchCommunities();
+  }, [fetchCommunities]);
+
+  // Load recent
   useEffect(() => {
     const recentData = JSON.parse(localStorage.getItem("recentCommunities")) || [];
     setRecent(recentData);
   }, []);
 
-  // Load custom feeds
-  useEffect(() => {
-    const storedFeeds = JSON.parse(localStorage.getItem("customFeeds")) || [];
-    setCustomFeeds(storedFeeds);
-
-    const updateFeeds = () => {
-      const updated = JSON.parse(localStorage.getItem("customFeeds")) || [];
-      setCustomFeeds(updated);
-    };
-
-    window.addEventListener("customFeedUpdated", updateFeeds);
-    return () => window.removeEventListener("customFeedUpdated", updateFeeds);
-  }, []);
-
-  // Update recent communities when visiting a community page
+  // Update recent when navigating
   useEffect(() => {
     if (location.pathname.startsWith("/community/")) {
       const communityName = location.pathname.split("/")[2];
@@ -72,6 +67,25 @@ function Sidebar() {
     }
   }, [location.pathname, communities]);
 
+  // ✅ Toggle favorite and immediately re-fetch
+  const toggleFavorite = async (communityId) => {
+    try {
+      const res = await fetch(`/api/memberships/favorite/${communityId}`, { method: "POST" });
+      if (!res.ok) throw new Error("Failed to toggle favorite");
+      await res.json();
+      await fetchCommunities(); // refresh live
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  // ✅ After creating a community → refresh automatically
+  const handleCommunityCreated = async () => {
+    setShowPopup(false);
+    await fetchCommunities();
+  };
+
+
   return (
     <div className="sidebar-container">
       <ul className="sidebar">
@@ -79,22 +93,22 @@ function Sidebar() {
         <li>
           <ul className="sidebar-section">
             <li>
-              <Link to="/home" className="sidebar-link active">
+              <Link to="/home" className={getLinkClass("/home")}>
                 <img src="../images/home.svg" alt="Home" />
                 <div className="sidebar-section-item-details">Home</div>
               </Link>
             </li>
             <li>
-              <a href="#" className="sidebar-link">
+              <Link to="/popular" className={getLinkClass("/popular")}>
                 <img src="../images/popular.svg" alt="Popular" />
                 <div className="sidebar-section-item-details">Popular</div>
-              </a>
+              </Link>
             </li>
             <li>
-              <a href="#" className="sidebar-link">
+              <Link to="/all" className={getLinkClass("/all")}>
                 <img src="../images/all.svg" alt="All" />
                 <div className="sidebar-section-item-details">All</div>
-              </a>
+              </Link>
             </li>
           </ul>
         </li>
@@ -121,25 +135,6 @@ function Sidebar() {
                 </div>
               </a>
             </li>
-
-            {customFeeds.length === 0 ? (
-              <li className="sidebar-link">
-                <div className="sidebar-section-item-details">No custom feeds yet</div>
-              </li>
-            ) : (
-              customFeeds.map((feed, index) => (
-                <li key={index}>
-                  <Link to={feed.link} className="sidebar-link">
-                    <img
-                      src={feed.avatar}
-                      className="sidebar-link-icon-round"
-                      alt={feed.name}
-                    />
-                    <div className="sidebar-section-item-details">{feed.name}</div>
-                  </Link>
-                </li>
-              ))
-            )}
           </ul>
         </li>
 
@@ -221,23 +216,43 @@ function Sidebar() {
             </li>
 
             {/* Render communities from DB */}
-            {communities.length === 0 ? (
+            {(communities || []).length === 0 ? (
               <li className="sidebar-link">
                 <div className="sidebar-section-item-details">Loading communities...</div>
               </li>
             ) : (
-              communities.map((community) => (
-                <li key={community._id}>
-                  <Link to={`/community/${community.name}`} className="sidebar-link">
-                    <img
-                      src={community.avatar || "../images/default-community.svg"}
-                      className="sidebar-link-icon-round"
-                      alt={community.name}
-                    />
-                    <div className="sidebar-section-item-details">{community.name}</div>
-                  </Link>
-                </li>
-              ))
+              [...communities]
+                .sort((a, b) => {
+                  if (a.favorite && !b.favorite) return -1;
+                  if (!a.favorite && b.favorite) return 1;
+                  return 0;
+                })
+                .map((community) => (
+                  <li key={community._id} className="sidebar-link-wrapper">
+                    <Link to={`/community/${community.name}`} className="sidebar-link">
+                      <img
+                        src={community.avatar || "../images/default-community.svg"}
+                        className="sidebar-link-icon-round"
+                        alt={community.name}
+                      />
+                      <div className="sidebar-section-item-details">
+                        <span className="community-name">{community.name}</span>
+                        <button
+                          className="make-favourite"
+                          onClick={async (e) => {
+                            e.preventDefault();
+                            toggleFavorite(community._id);
+                          }}
+                        >
+                          <img
+                            src={community.favorite ? "/images/star-yellow.svg" : "/images/star.svg"}
+                            alt="favorite"
+                          />
+                        </button>
+                      </div>
+                    </Link>
+                  </li>
+                ))
             )}
           </ul>
         </li>
