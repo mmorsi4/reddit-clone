@@ -27,16 +27,51 @@ function PostPage() {
     fetchPost();
   }, [postId]);
 
-  const handleAddComment = () => {
+  const handleAddComment = async () => {
     if (!newComment.trim()) return;
 
-    const updated = [...comments, { author: { username: "You" }, text: newComment }];
-    setComments(updated);
-    setNewComment("");
-    // You can also POST to backend here to save permanently
+    try {
+      const token = localStorage.getItem("token");
+      
+      if (!token) {
+        alert("Please log in to comment");
+        return;
+      }
+
+      // Send comment to backend
+      const res = await fetch("http://localhost:5001/api/comments", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          post: postId,
+          body: newComment,
+        }),
+      });
+
+      if (!res.ok) throw new Error("Failed to save comment");
+
+      const savedComment = await res.json();
+      
+      // Add the new comment to display
+      const commentToDisplay = {
+        _id: savedComment._id,
+        author: { username: "You" },
+        text: newComment
+      };
+      
+      setComments(prev => [...prev, commentToDisplay]);
+      setNewComment("");
+
+    } catch (error) {
+      console.error("Error saving comment:", error);
+      alert("Failed to save comment. Please try again.");
+    }
   };
 
-  if (!post) return <h2 style={{ textAlign: "center", marginTop: "50px" }}>Post not found</h2>;
+  if (!post) return <h2 style={{ textAlign: "center", marginTop: "50px" }}>Loading...</h2>;
 
   return (
     <>
