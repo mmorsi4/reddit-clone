@@ -33,7 +33,7 @@ function App() {
         <Route path="/home" element={<Home />} />
         <Route path="/manage_community" element={<ManageCommunity/>} />
         <Route path="/create_post"element={<CreatePost showToast={showToastMessage} />}/>
-        <Route path="/viewprofile"element={<ViewProfile/>}/>
+        <Route path="/profile/:username"element={<ViewProfile/>}/>
         <Route path="/edit-avatar"element={<AvatarCustomizer/>}/>
         <Route path="/create-community"element={<CreateCommunityPopup/>}/>
         <Route path="/CustomFeedPopup"element={<CustomFeedPopup/>}/>

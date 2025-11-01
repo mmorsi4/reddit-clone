@@ -35,7 +35,7 @@ function Community() {
     const fetchCommunity = async () => {
       setLoadingCommunity(true);
       try {
-        const res = await fetch(`http://localhost:5001/api/communities`, {
+        const res = await fetch(`/api/communities`, {
           method: "GET",
           credentials: "include",
         });
@@ -63,7 +63,7 @@ function Community() {
     const fetchPosts = async () => {
       setLoadingPosts(true);
       try {
-        const res = await fetch(`http://localhost:5001/api/posts?community=${community.name}`, {
+        const res = await fetch(`/api/posts?community=${community.name}`, {
           method: "GET",
           credentials: "include",
         });
@@ -82,7 +82,7 @@ function Community() {
   }, [community]);
 
   if (loadingCommunity) {
-    return <p>Loading community...</p>;
+    // return <p>Loading community...</p>;
   }
 
   if (!community) {
