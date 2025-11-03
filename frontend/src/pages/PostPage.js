@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useParams, Link } from "react-router-dom";
 import Sidebar from "../components/sidebar";
 import Header from "../components/header";
@@ -10,79 +10,75 @@ function PostPage() {
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState("");
 
-  useEffect(() => {
-    async function fetchPost() {
-      try {
-        const res = await fetch(`/api/posts/${postId}`);
-        if (!res.ok) throw new Error("Post not found");
-        const data = await res.json();
-        setPost(data.post);
-        setComments(data.comments || []);
-      } catch (err) {
-        console.error(err);
-        setPost(null);
-      }
+  // ✅ Define fetchPost OUTSIDE useEffect using useCallback (so it's reusable)
+  const fetchPost = useCallback(async () => {
+    try {
+      const res = await fetch(`http://localhost:5001/api/posts/${postId}`);
+      if (!res.ok) throw new Error("Post not found");
+      const data = await res.json();
+      setPost(data.post);
+      setComments(data.comments || []);
+    } catch (err) {
+      console.error(err);
+      setPost(null);
     }
-
-    fetchPost();
   }, [postId]);
 
+  // ✅ useEffect now just calls it
+  useEffect(() => {
+    fetchPost();
+  }, [fetchPost]);
+
   const handleAddComment = async () => {
-  if (!newComment.trim()) return;
+    if (!newComment.trim()) return;
 
-  try {
-    console.log("📤 Sending comment to backend...");
-    
-    // Send comment to backend WITH credentials (cookies)
-    const res = await fetch("http://localhost:5001/api/comments", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      credentials: "include",
-      body: JSON.stringify({
-        post: postId,
-        body: newComment,
-      }),
-    });
+    try {
+      console.log("📤 Sending comment to backend...");
 
-    console.log("📥 Response status:", res.status);
+      const res = await fetch("http://localhost:5001/api/comments", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          post: postId,
+          body: newComment,
+        }),
+      });
 
-    // Get the response text first to see what the backend is sending
-    const responseText = await res.text();
-    console.log("📥 Response text:", responseText);
+      console.log("📥 Response status:", res.status);
+      const responseText = await res.text();
+      console.log("📥 Response text:", responseText);
 
-    if (!res.ok) {
-      // Try to parse as JSON, but if it fails, use the raw text
-      let errorMessage = responseText;
-      try {
-        const errorData = JSON.parse(responseText);
-        errorMessage = errorData.message || responseText;
-      } catch (e) {
-        // If it's not JSON, use the raw text
+      if (!res.ok) {
+        let errorMessage = responseText;
+        try {
+          const errorData = JSON.parse(responseText);
+          errorMessage = errorData.message || responseText;
+        } catch (e) {}
+        throw new Error(`Failed to save comment: ${res.status} - ${errorMessage}`);
       }
-      throw new Error(`Failed to save comment: ${res.status} - ${errorMessage}`);
+
+      const savedComment = JSON.parse(responseText);
+      console.log("✅ Comment saved successfully:", savedComment);
+
+      // Add the new comment locally
+      const commentToDisplay = {
+        _id: savedComment._id,
+        author: { username: "You" },
+        text: newComment,
+      };
+      setComments((prev) => [...prev, commentToDisplay]);
+      setNewComment("");
+
+      // ✅ Refresh post info (to update comment count)
+      await fetchPost();
+
+    } catch (error) {
+      console.error("💥 Error saving comment:", error);
+      alert(error.message);
     }
+  };
 
-    // If we got here, the response was OK, so parse as JSON
-    const savedComment = JSON.parse(responseText);
-    console.log("✅ Comment saved successfully:", savedComment);
-    
-    // Add the new comment to display
-    const commentToDisplay = {
-      _id: savedComment._id,
-      author: { username: "You" },
-      text: newComment
-    };
-    
-    setComments(prev => [...prev, commentToDisplay]);
-    setNewComment("");
-
-  } catch (error) {
-    console.error("💥 Error saving comment:", error);
-    alert(error.message); // This will now show the actual backend error
-  }
-};
   if (!post) return <h2 style={{ textAlign: "center", marginTop: "50px" }}>Loading...</h2>;
 
   return (
@@ -118,14 +114,14 @@ function PostPage() {
 
           {/* Comments */}
           <div className="post-comments-section">
-            <h3>Comments</h3>
+            <h3>Comments ({post.commentCount || comments.length})</h3>
             <div className="post-comments-container">
               <div className="comments-list">
                 {comments.length === 0 ? (
                   <p style={{ opacity: 0.6 }}>No comments yet...</p>
                 ) : (
                   comments.map((c, i) => (
-                    <CommentWithVotes key={i} username={c.author.username} text={c.text} />
+                    <CommentWithVotes key={i} username={c.author.username} text={c.body} />
                   ))
                 )}
               </div>
