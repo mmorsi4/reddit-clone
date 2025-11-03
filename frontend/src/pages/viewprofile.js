@@ -40,8 +40,7 @@ function ViewProfile() {
   const fetchUserComments = async () => {
     setLoading(true);
     try {
-      console.log("🔍 Starting to fetch user comments...");
-      
+     
       const res = await fetch("http://localhost:5001/api/comments/my", {
         method: "GET",
         headers: {
@@ -50,20 +49,17 @@ function ViewProfile() {
         credentials: "include"
       });
 
-      console.log("📥 Comments response status:", res.status);
-      console.log("📥 Comments response ok:", res.ok);
 
       if (res.ok) {
         const comments = await res.json();
         setUserComments(comments);
-        console.log("✅ User comments fetched:", comments);
+        
       } else {
         const errorText = await res.text();
-        console.error("❌ Failed to fetch comments. Status:", res.status, "Error:", errorText);
+        
       }
     } catch (error) {
-      console.error("💥 Error fetching comments:", error);
-      console.error("💥 Error details:", error.message);
+      
     } finally {
       setLoading(false);
     }
