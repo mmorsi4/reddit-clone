@@ -71,6 +71,11 @@
     border-radius: 18px;
 }
 
+.post-preview video {
+    width: 100%;
+    border-radius: 18px;
+}
+
 .post-activity {
     display: flex;
     gap: 8px;

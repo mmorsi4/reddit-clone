@@ -55,7 +55,25 @@ function CreatePost({ showToast }) {
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
-    if (file) setSelectedFiles([file]); // store as single-item array
+    if (!file) return;
+
+    const allowedTypes = [
+      "video/mp4",
+      "video/webm",
+      "image/jpeg",
+      "image/png",
+      "image/gif",
+      "image/webp",
+      "image/bmp",
+      "image/svg+xml"
+    ];
+
+    if (!allowedTypes.includes(file.type)) {
+      alert("Only images or .mp4/.webm videos are allowed.");
+      return;
+    }
+
+    setSelectedFiles([file]);
   };
 
 
@@ -208,7 +226,7 @@ function CreatePost({ showToast }) {
                   <p>{selectedFiles.length === 0 ? "Drag & drop an image or video here, or click to upload" : "Replace file"}</p>
                   <input
                     type="file"
-                    accept="image/*,video/*"
+                    accept="image/*,video/mp4,video/webm"
                     onChange={handleFileChange}
                     hidden
                   />
