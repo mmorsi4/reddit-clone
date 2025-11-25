@@ -39,19 +39,22 @@
   background: white;
   border: 1px solid #ccc;
   border-radius: 10px;
-  width: 40%;
+  width: 38.5%;
   margin-top: 5px;
   max-height: 150px;
   overflow-y: auto;
   z-index: 10;
+  list-style: none;
 }
 
 .community-item {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 8px 10px;
+  padding: 8px 0px;
   cursor: pointer;
+  list-style: none;
+  margin-left: -15px;
 }
 
 .community-item:hover {

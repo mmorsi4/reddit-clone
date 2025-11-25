@@ -21,3 +21,65 @@ export async function me(req,res){
   const user = await User.findById(req.userId).select('-passwordHash');
   res.json(user);
 }
+
+export async function getRecentCommunities(req, res){
+  try {
+    const userId = req.user._id;
+    const user = await User.findById(userId)
+      .populate('recentCommunityIds') // fill with recent communities data
+      .exec();
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const recentCommunities = user.recentCommunityIds.map(community => ({
+      _id: community._id,
+      name: community.name,
+      avatar: community.avatar,
+      image: community.avatar, // keep both for compatibility
+      link: `/community/${community.name}`
+    }));
+
+    res.status(200).json(recentCommunities);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+}
+
+export async function updateRecentCommunities(req, res){
+  try {
+    const { communityId } = req.body;
+    const userId = req.user._id;
+
+    await User.findByIdAndUpdate(userId, [
+      {
+        $set: {
+          recentCommunityIds: {
+            $concatArrays: [
+              [communityId], // push to the beginning
+              {
+                $filter: {
+                  input: "$recentCommunityIds",
+                  as: "id",
+                  cond: { $ne: ["$$id", communityId] } // remove any duplicates
+                }
+              }
+            ]
+          }
+        }
+      },
+      {
+        $set: {
+          recentCommunityIds: { $slice: ["$recentCommunityIds", 5] } // keep only 5
+        }
+      }
+    ]);
+
+    res.status(200).json({ message: "Recent communities updated" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+}
