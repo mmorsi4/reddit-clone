@@ -16,7 +16,7 @@ import { Link, useLocation } from "react-router-dom";
 import Post from "../components/post";
 import Sidebar from "../components/sidebar";
 import Header from "../components/header";
-import React, { useState, useEffect } from "react"; 
+import React, { useState, useEffect , useCallback } from "react"; 
 
 
 const HomeRightSidebar = () => {
@@ -50,20 +50,59 @@ const HomeRightSidebar = () => {
 function Home() {
   const [posts, setPosts] = useState([]);
   const [loadingPosts, setLoadingPosts] = useState(true);
+  const [joinedCommunityNames, setJoinedCommunityNames] = useState(new Set()); 
   
-  // 1. Get the current location object, which contains the query string
   const location = useLocation();
+  const isAllFeed = location.search === "?feed=all"; 
+
+  // --- Membership Logic ---
+
+  const fetchJoinedCommunities = useCallback(async () => {
+    try {
+      const res = await fetch("/api/memberships/joined", { credentials: "include" });
+      if (res.ok) {
+        const data = await res.json();
+        const names = new Set(data.map(comm => comm.name)); 
+        setJoinedCommunityNames(names);
+      }
+    } catch (err) {
+      console.error("Error fetching joined communities:", err);
+    }
+  }, []);
+
+  const handleToggleJoin = async (communityName, communityId, isCurrentlyJoined) => {
+    const endpoint = isCurrentlyJoined ? `/api/memberships/unjoin` : `/api/memberships/join`;
+    
+    try {
+      const res = await fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+      });
+
+      if (res.ok) {
+        setJoinedCommunityNames(prev => {
+          const newSet = new Set(prev);
+          if (isCurrentlyJoined) {
+            newSet.delete(communityName); 
+          } else {
+            newSet.add(communityName); 
+          }
+          return newSet;
+        });
+      } else {
+        throw new Error("Failed to toggle membership");
+      }
+    } catch (err) {
+      console.error("Error toggling membership:", err);
+    }
+  };
+
+
 
   useEffect(() => {
     const fetchHomeFeed = async () => {
       setLoadingPosts(true);
-      
-      // 2. Check the current query string to determine the API endpoint
-      const isAllFeed = location.search === "?feed=all";
-      
-      // Determine the API endpoint based on the query parameter
-      // - If ?feed=all is present, use the global feed (all-feed route).
-      // - Otherwise, use the personalized feed (feed route).
       const apiEndpoint = isAllFeed ? `/api/posts/all-feed` : `/api/posts/feed`;
       
       try {
@@ -82,21 +121,26 @@ function Home() {
       }
     };
 
-    fetchHomeFeed();
-    // 3. Dependency array: Re-run effect whenever the URL query string changes
-  }, [location.search]); 
+    if (isAllFeed) {
+        fetchJoinedCommunities(); 
+    } else {
+        setJoinedCommunityNames(new Set());
+    }
 
-  // Determine the correct message based on the current feed
-  const emptyFeedMessage = location.search === "?feed=all"
+    fetchHomeFeed();
+    
+  }, [location.search, isAllFeed, fetchJoinedCommunities]); 
+
+  const emptyFeedMessage = isAllFeed
     ? "No posts found in the 'All' feed."
     : "No posts available yet. Be the first to post!";
+
 
   return (
     <>
       <Header />
       <Sidebar />
       <div className="main">
-        {/* NEW Wrapper for Centering and Two-Column Layout */}
         <div className="home-layout-wrapper">
           
           {/* Main Posts Column */}
@@ -107,30 +151,37 @@ function Home() {
               ) : posts.length === 0 ? (
                 <p style={{ textAlign: "center", marginTop: "20px" }}>{emptyFeedMessage}</p>
               ) : (
-                posts.map((p) => (
-                  <Post
-                    key={p._id}
-                    postId={p._id}
-                    username={p.author?.username || "Unknown"}
-                    time={new Date(p.createdAt).toLocaleString()}
-                    title={p.title}
-                    textPreview={p.body || ""}
-                    preview={p.mediaUrl || ""}
-                    avatar={p.author?.avatarUrl || "../images/avatar.png"}
-                    initialVotes={p.votes?.reduce((s, v) => s + v.value, 0) || 0}
-                    initialComments={p.comments || []}
-                    community={p.community?.name || "[deleted]"}
-                  />
-                ))
+                posts.map((p) => {
+                    const communityName = p.community?.name || "[deleted]";
+                    const isJoined = isAllFeed ? joinedCommunityNames.has(communityName) : true;
+                    
+                    return (
+                      <Post
+                        key={p._id}
+                        postId={p._id}
+                        username={p.author?.username || "Unknown"}
+                        time={new Date(p.createdAt).toLocaleString()}
+                        title={p.title}
+                        textPreview={p.body || ""}
+                        preview={p.mediaUrl || ""}
+                        avatar={p.author?.avatarUrl || "../images/avatar.png"}
+                        initialVotes={p.votes?.reduce((s, v) => s + v.value, 0) || 0}
+                        initialComments={p.comments || []}
+                        community={communityName}
+                        isAllFeed={isAllFeed}
+                        communityAvatarUrl={p.community?.avatar || "../images/default-community.svg"}
+                        isJoined={isJoined}
+                        onToggleJoin={(name) => handleToggleJoin(name, p.community?._id, isJoined)}
+                      />
+                    );
+                })
               )}
             </div>
           </div>
           
-          {/* Right Sidebar Column */}
           <HomeRightSidebar />
 
         </div>
-        {/* END NEW Wrapper */}
       </div>
     </>
   );

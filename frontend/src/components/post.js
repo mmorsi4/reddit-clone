@@ -13,12 +13,16 @@ function Post({
   initialVotes,
   initialComments,
   community,
+  isAllFeed,           
+  communityAvatarUrl,  
+  isJoined,            
+  onToggleJoin,        
 }) {
   const [voteCount, setVoteCount] = useState(initialVotes || 0);
-  const [vote, setVote] = useState(0); // 0 = no vote, 1 = upvote, -1 = downvote
+  const [vote, setVote] = useState(0); 
   const [comments, setComments] = useState(initialComments || []);
   const [showComments, setShowComments] = useState(false);
-  const [newComment, setNewComment] = useState("");
+  const [newComment, setNewComment] = useState("")
 
   const handleUpvote = () => {
     if (vote === 1) {
@@ -59,44 +63,83 @@ function Post({
     setNewComment("");
   };
 
+  const imageStyle = { borderRadius: '50%', width: '20px', height: '20px', marginRight: '8px' };
+
   return (
     <div className="post-fullwidth">
       <div className="post">
 
-        {/* MAIN CLICKABLE AREA */}
-          <div className="post-meta">
-
-            <Link
-            to={username ? `/profile/${username}` : "#"}
-            style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}
-            >
-              <div className="post-user-info">
-                <img src={avatar} alt="avatar" />
-                <span className="post-user-name">u/{username}</span>
-              </div>
-            </Link>
-
-            <div className="post-created-at">
-              • {
-                (() => {
-                  const parsedTime = new Date(time);
-                  return !time || isNaN(parsedTime)
-                    ? 'Unknown time'
-                    : formatDistanceToNow(parsedTime, { addSuffix: true }).replace(/^about /, '');
-                })()
-              }
-            </div>
-
-          </div>
-
+        {/* POST HEADER/META SECTION */}
+        <div className="post-meta">
           <Link
+            to={isAllFeed ? `/community/${community}` : (username ? `/profile/${username}` : "#")}
+            style={{ textDecoration: 'none', color: 'inherit', display: 'flex', alignItems: 'center' }}
+          >
+            <div className="post-user-info">
+              {/* Display community info in All Feed, otherwise display user info */}
+              {isAllFeed ? (
+                <>
+                  <img src={communityAvatarUrl || "../images/default-community.svg"} alt="Community Avatar" style={imageStyle} />
+                  <span className="post-community-name">r/{community}</span>
+                  {/* You can optionally show post author here if needed, like: • u/{username} */}
+                  <div className="post-created-at post-separator-meta"> 
+                    • {
+                      (() => {
+                        const parsedTime = new Date(time);
+                        return !time || isNaN(parsedTime)
+                          ? 'Unknown time'
+                          : formatDistanceToNow(parsedTime, { addSuffix: true }).replace(/^about /, '');
+                      })()
+                    }
+                  </div>
+                </>
+              ) : (
+                <>
+                  <img src={avatar} alt="User Avatar" style={imageStyle} />
+                  <span className="post-user-name">u/{username}</span>
+                  <div className="post-created-at post-separator-meta">
+                    • {
+                      (() => {
+                        const parsedTime = new Date(time);
+                        return !time || isNaN(parsedTime)
+                          ? 'Unknown time'
+                          : formatDistanceToNow(parsedTime, { addSuffix: true }).replace(/^about /, '');
+                      })()
+                    }
+                  </div>
+                </>
+              )}
+            </div>
+          </Link>
+          
+          {/* === RIGHT SIDE: JOIN BUTTON (Only in All Feed) === */}
+          {isAllFeed && (
+            <div className="post-meta-actions">
+              <button 
+                className={`post-join-button ${isJoined ? 'joined' : 'not-joined'}`}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation(); 
+                  if(onToggleJoin) onToggleJoin(community);
+                }}
+              >
+                {isJoined ? 'Joined' : 'Join'}
+              </button>
+              {/* Optional: Add a 3-dot menu or other actions here */}
+              <img src="../images/three-dots.svg" alt="More options" className="post-meta-dots" />
+            </div>
+          )}
+
+        </div>
+
+        {/* POST CONTENT LINK */}
+        <Link
           to={postId ? `/post/${postId}` : "#"}
           className="post-link"
           style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}
-          >
-
+        >
           <h2 className="post-header">{title}</h2>
-
+          
           {preview ? (
             <div className="post-preview">
               {preview.endsWith(".mp4") || preview.endsWith(".webm") ? (
@@ -112,34 +155,36 @@ function Post({
           )}
         </Link>
 
-        {/* ACTIVITY SECTION */}
-        <div className="post-activity">
-          {/* VOTE SECTION */}
-          <div className="post-vote post-activity-container">
-            <div className="post-activity-button" onClick={handleUpvote}>
-              <img
-                src={vote === 1 ? "../images/upvote-active.svg" : "../images/upvote.svg"}
-                alt="upvote"
-              />
-            </div>
-            <span className="post-vote-score">{voteCount}</span>
-            <div className="post-activity-button" onClick={handleDownvote}>
-              <img
-                src={vote === -1 ? "../images/downvote-active.svg" : "../images/downvote.svg"}
-                alt="downvote"
-              />
-            </div>
-          </div>
+        {/* ACTIVITY SECTION (Only votes and comments remain here) */}
+        <div className="post-activity-wrapper">
+            <div className="post-activity">
+                {/* VOTE SECTION */}
+                <div className="post-vote post-activity-container">
+                    <div className="post-activity-button" onClick={handleUpvote}>
+                        <img
+                            src={vote === 1 ? "../images/upvote-active.svg" : "../images/upvote.svg"}
+                            alt="upvote"
+                        />
+                    </div>
+                    <span className="post-vote-score">{voteCount}</span>
+                    <div className="post-activity-button" onClick={handleDownvote}>
+                        <img
+                            src={vote === -1 ? "../images/downvote-active.svg" : "../images/downvote.svg"}
+                            alt="downvote"
+                        />
+                    </div>
+                </div>
 
-          {/* COMMENTS BUTTON */}
-          <Link
-            to={postId ? `/post/${postId}` : "#"}
-            className="post-comment post-activity-button post-activity-container"
-            style={{ textDecoration: "none", color: "inherit" }}
-          >
-            <img src="../images/comment.svg" alt="comment" />
-            <span className="post-comment-amount">{comments.length}</span>
-          </Link>
+                {/* COMMENTS BUTTON */}
+                <Link
+                    to={postId ? `/post/${postId}` : "#"}
+                    className="post-comment post-activity-button post-activity-container"
+                    style={{ textDecoration: "none", color: "inherit" }}
+                >
+                    <img src="../images/comment.svg" alt="comment" />
+                    <span className="post-comment-amount">{comments.length}</span>
+                </Link>
+            </div>
         </div>
 
       </div>

@@ -102,11 +102,11 @@ export async function getAllFeedPosts(req, res) {
     const query = { community: { $exists: true, $ne: null } }; 
 
     const posts = await Post.find(query) 
-      .populate('author', 'username displayName avatarUrl')
-      .populate('community', 'name title') 
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(Number(limit));
+  .populate('author', 'username displayName avatarUrl')
+  .populate('community', 'name title avatar _id') 
+  .sort({ createdAt: -1 })
+  .skip(skip)
+  .limit(Number(limit));
 
     res.json(posts);
   } catch (err) {
