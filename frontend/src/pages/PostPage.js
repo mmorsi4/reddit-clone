@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useParams, Link } from "react-router-dom";
 import Sidebar from "../components/sidebar";
 import Header from "../components/header";
@@ -10,64 +10,72 @@ function PostPage() {
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState("");
 
-  useEffect(() => {
-    async function fetchPost() {
-      try {
-        const res = await fetch(`/api/posts/${postId}`);
-        if (!res.ok) throw new Error("Post not found");
-        const data = await res.json();
-        setPost(data.post);
-        setComments(data.comments || []);
-      } catch (err) {
-        console.error(err);
-        setPost(null);
-      }
+  // ✅ Define fetchPost OUTSIDE useEffect using useCallback (so it's reusable)
+  const fetchPost = useCallback(async () => {
+    try {
+      const res = await fetch(`http://localhost:5001/api/posts/${postId}`);
+      if (!res.ok) throw new Error("Post not found");
+      const data = await res.json();
+      setPost(data.post);
+      setComments(data.comments || []);
+    } catch (err) {
+      console.error(err);
+      setPost(null);
     }
-
-    fetchPost();
   }, [postId]);
+
+  // ✅ useEffect now just calls it
+  useEffect(() => {
+    fetchPost();
+  }, [fetchPost]);
 
   const handleAddComment = async () => {
     if (!newComment.trim()) return;
 
     try {
-      const token = localStorage.getItem("token");
-      
-      if (!token) {
-        alert("Please log in to comment");
-        return;
-      }
+      console.log("📤 Sending comment to backend...");
 
-      // Send comment to backend
       const res = await fetch("http://localhost:5001/api/comments", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({
           post: postId,
           body: newComment,
         }),
       });
 
-      if (!res.ok) throw new Error("Failed to save comment");
+      console.log("📥 Response status:", res.status);
+      const responseText = await res.text();
+      console.log("📥 Response text:", responseText);
 
-      const savedComment = await res.json();
-      
-      // Add the new comment to display
+      if (!res.ok) {
+        let errorMessage = responseText;
+        try {
+          const errorData = JSON.parse(responseText);
+          errorMessage = errorData.message || responseText;
+        } catch (e) {}
+        throw new Error(`Failed to save comment: ${res.status} - ${errorMessage}`);
+      }
+
+      const savedComment = JSON.parse(responseText);
+      console.log("✅ Comment saved successfully:", savedComment);
+
+      // Add the new comment locally
       const commentToDisplay = {
         _id: savedComment._id,
         author: { username: "You" },
-        text: newComment
+        text: newComment,
       };
-      
-      setComments(prev => [...prev, commentToDisplay]);
+      setComments((prev) => [...prev, commentToDisplay]);
       setNewComment("");
 
+      // ✅ Refresh post info (to update comment count)
+      await fetchPost();
+
     } catch (error) {
-      console.error("Error saving comment:", error);
-      alert("Failed to save comment. Please try again.");
+      console.error("💥 Error saving comment:", error);
+      alert(error.message);
     }
   };
 
@@ -80,7 +88,7 @@ function PostPage() {
       <div className="post-page">
         <div className="post-page-header">
           <Link
-            to={post.community?.title ? `/community/${post.community.title}` : "/home"}
+            to={post.community?.name ? `/community/${post.community.name}` : "/home"}
           >
             &larr; Back to r/{post.community?.name || "community"}
           </Link>
@@ -106,14 +114,14 @@ function PostPage() {
 
           {/* Comments */}
           <div className="post-comments-section">
-            <h3>Comments</h3>
+            <h3>Comments ({post.commentCount || comments.length})</h3>
             <div className="post-comments-container">
               <div className="comments-list">
                 {comments.length === 0 ? (
                   <p style={{ opacity: 0.6 }}>No comments yet...</p>
                 ) : (
                   comments.map((c, i) => (
-                    <CommentWithVotes key={i} username={c.author.username} text={c.text} />
+                    <CommentWithVotes key={i} username={c.author.username} text={c.body} />
                   ))
                 )}
               </div>

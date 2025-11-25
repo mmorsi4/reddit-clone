@@ -41,7 +41,8 @@ export async function getPosts(req, res) {
 export async function getPost(req, res) {
   try {
     const post = await Post.findById(req.params.id)
-      .populate('author', 'username displayName');
+      .populate('author', 'username displayName avatarUrl')
+      .populate('community', 'name title'); // <-- populate name and title
 
     if (!post) return res.status(404).json({ message: 'Post not found' });
 
@@ -79,6 +80,20 @@ export async function votePost(req, res) {
     res.json({ score });
   } catch (err) {
     console.error("Error voting on post:", err);
+    res.status(500).json({ message: "Internal server error" });
+  }
+}
+// Add this function to your posts controller
+export async function getMyPosts(req, res) {
+  try {
+    const posts = await Post.find({ author: req.userId })
+      .populate('author', 'username displayName avatarUrl')
+      .populate('community', 'name title')
+      .sort({ createdAt: -1 }); // Newest first
+
+    res.json(posts);
+  } catch (err) {
+    console.error("Error fetching user posts:", err);
     res.status(500).json({ message: "Internal server error" });
   }
 }
