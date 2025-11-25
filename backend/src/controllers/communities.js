@@ -4,24 +4,23 @@ import Community from "../models/Community.js";
 // Create a new community
 export async function createCommunity(req, res) {
   try {
-    const { name, title, description, avatar, banner, type, topics } = req.body;
+    const { name, title, description, avatar, banner, topics } = req.body;
 
-    // Check if the community already exists
+    // check if the community already exists
     const exists = await Community.findOne({ name });
     if (exists) {
       return res.status(409).json({ message: "Community already exists" });
     }
 
-    // Create the new community with avatar and banner
+    // create the new community
     const community = await Community.create({
       name,
-      title,
+      title: title || name,
       description,
-      avatar: avatar || "", // save Base64 string or default empty
+      avatar: avatar || "",
       banner: banner || "",
-      type: type || "public",
       topics: topics || [],
-      members: [req.userId],
+      createdBy: req.userId,
     });
 
     return res.status(201).json(community);
