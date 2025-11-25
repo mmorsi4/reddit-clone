@@ -13,11 +13,23 @@ function Sidebar() {
   const location = useLocation();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const getLinkClass = (path) => {
-    if (path === "/home" && location.pathname === "/home") return "sidebar-link active";
-    if (location.pathname.startsWith(path)) return "sidebar-link active";
+
+const getLinkClass = (path) => {
+    const currentURL = location.pathname + location.search;
+    
+    if (path === "/home") {
+        return currentURL === "/home" ? "sidebar-link active" : "sidebar-link";
+    }
+
+    if (path === "/home?feed=all") {
+        return currentURL === "/home?feed=all" ? "sidebar-link active" : "sidebar-link";
+    }
+    if (location.pathname.startsWith(path)) {
+        return "sidebar-link active";
+    }
+
     return "sidebar-link";
-  };
+};
 
   const handleOpenModal = (e) => {
     if (e) e.preventDefault();
@@ -132,7 +144,7 @@ function Sidebar() {
               </Link>
             </li>
             <li>
-              <Link to="/all" className={getLinkClass("/all")}>
+             <Link to="/home?feed=all" className={getLinkClass("/home?feed=all")}>
                 <img src="../images/all.svg" alt="All" />
                 <div className="sidebar-section-item-details">All</div>
               </Link>
