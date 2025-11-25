@@ -1,6 +1,6 @@
 .create-post-page {
   width: 60%;
-  margin: 60px auto 40px auto; /* top margin added */
+  margin: 60px auto 40px auto; 
   font-family: Arial, sans-serif;
 }
 
@@ -9,7 +9,6 @@
   margin-bottom: 20px;
 }
 
-/* COMMUNITY PICKER */
 .community-picker {
   position: relative;
   margin-bottom: 20px;
@@ -164,7 +163,7 @@
 .create-post-page {
   width: 60%;
   margin: 60px auto 40px auto;
-  background-color: white; /* stays white */
+  background-color: white; 
   font-family: Arial, sans-serif;
 }
 

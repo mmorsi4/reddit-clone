@@ -76,12 +76,15 @@ function Post({
             style={{ textDecoration: 'none', color: 'inherit', display: 'flex', alignItems: 'center' }}
           >
             <div className="post-user-info">
-              {/* Display community info in All Feed, otherwise display user info */}
+              {/* Display community info in Custom/All Feed */}
               {isAllFeed ? (
                 <>
                   <img src={communityAvatarUrl || "../images/default-community.svg"} alt="Community Avatar" style={imageStyle} />
                   <span className="post-community-name">r/{community}</span>
-                  {/* You can optionally show post author here if needed, like: • u/{username} */}
+                  {/* FIX: Add the author and time display next to the community */}
+                  <span className="post-separator-meta post-separator">
+                    • Posted by u/{username}
+                  </span>
                   <div className="post-created-at post-separator-meta"> 
                     • {
                       (() => {
@@ -94,6 +97,7 @@ function Post({
                   </div>
                 </>
               ) : (
+                // This section remains for direct user profile/standard community views
                 <>
                   <img src={avatar} alt="User Avatar" style={imageStyle} />
                   <span className="post-user-name">u/{username}</span>
@@ -112,7 +116,6 @@ function Post({
             </div>
           </Link>
           
-          {/* === RIGHT SIDE: JOIN BUTTON (Only in All Feed) === */}
           {isAllFeed && (
             <div className="post-meta-actions">
               <button 
@@ -125,14 +128,12 @@ function Post({
               >
                 {isJoined ? 'Joined' : 'Join'}
               </button>
-              {/* Optional: Add a 3-dot menu or other actions here */}
               <img src="../images/three-dots.svg" alt="More options" className="post-meta-dots" />
             </div>
           )}
 
         </div>
 
-        {/* POST CONTENT LINK */}
         <Link
           to={postId ? `/post/${postId}` : "#"}
           className="post-link"
@@ -155,10 +156,8 @@ function Post({
           )}
         </Link>
 
-        {/* ACTIVITY SECTION (Only votes and comments remain here) */}
         <div className="post-activity-wrapper">
             <div className="post-activity">
-                {/* VOTE SECTION */}
                 <div className="post-vote post-activity-container">
                     <div className="post-activity-button" onClick={handleUpvote}>
                         <img
@@ -175,7 +174,6 @@ function Post({
                     </div>
                 </div>
 
-                {/* COMMENTS BUTTON */}
                 <Link
                     to={postId ? `/post/${postId}` : "#"}
                     className="post-comment post-activity-button post-activity-container"

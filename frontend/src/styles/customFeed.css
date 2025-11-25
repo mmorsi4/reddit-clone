@@ -1,0 +1,312 @@
+.main {
+    background-color: white; 
+}
+
+.custom-feed-content-wrapper {
+    display: flex;
+    justify-content: center; 
+    gap: 24px;
+    max-width: 1200px; 
+    margin: 0 auto;
+    padding-top: 16px;
+}
+
+.custom-feed-main-column {
+    flex-basis: 70%;
+    min-width: 0; 
+}
+
+.custom-feed-right-sidebar {
+    flex-basis: 30%;
+    max-width: 320px; 
+
+}
+
+/* ================================================= */
+/* 2. HEADER/BANNER AREA */
+/* ================================================= */
+.custom-feed-header {
+    background-color: white;
+    border-bottom: 1px solid #e6ecf0;
+    padding: 24px 0;
+    margin-bottom: 20px;
+}
+
+.custom-feed-info-wrapper {
+    display: flex;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 24px;
+}
+
+.custom-feed-icon img {
+    width: 64px;
+    height: 64px;
+    border-radius: 8px; 
+    margin-right: 16px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.custom-feed-title {
+    font-size: 28px;
+    font-weight: 700;
+    margin: 0;
+    color: #14171a;
+}
+
+.custom-feed-creator {
+    font-size: 14px;
+    color: #657786;
+    margin: 4px 0 0;
+}
+
+.custom-feed-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    position: absolute;
+    top: 24px;
+    right: 24px;
+}
+
+/* ================================================= */
+/* 3. EMPTY STATE STYLES */
+/* ================================================= */
+.custom-feed-empty-state {
+    background-color: white;
+    padding: 40px;
+    text-align: center;
+    margin-top: 20px;
+}
+
+.custom-feed-empty-state h2 {
+    font-size: 20px;
+    font-weight: 600;
+    margin: 0 0 10px 0;
+}
+
+.custom-feed-empty-state p {
+    font-size: 16px;
+    color: #657786;
+    margin-bottom: 20px;
+}
+
+.add-communities-button {
+    background-color: #045ea2; 
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 9999px; 
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.add-communities-button:hover {
+    background-color: #0079d3;
+}
+
+.custom-feed-details-card {
+    background-color: rgb(245, 245, 245); 
+    border-radius: 8px;
+    margin-bottom: 16px;
+    padding: 0; 
+}
+
+/* --- Section: Feed Info (Top Section) --- */
+.feed-info-section {
+    padding: 12px 16px 0 16px; 
+}
+
+.sidebar-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 8px; 
+}
+
+.sidebar-card-header h3 {
+    font-size: 16px;
+    color: #1a1a1b;
+    font-weight: 600;
+    margin: 0;
+    text-transform: none;
+}
+
+.edit-button-icon {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+}
+.edit-button-icon img {
+    width: 18px;
+    height: 18px;
+}
+
+.feed-private-status {
+    /* Updated for non-italic text and subtle color */
+    font-style: normal;
+    color: #555; 
+    font-size: 14px;
+    margin: 0 0 15px 0;
+    display: flex;
+    align-items: center;
+}
+.feed-private-status img {
+    width: 16px;
+    height: 16px;
+    margin-right: 5px;
+    opacity: 0.7;
+}
+
+.feed-description-text {
+    font-size: 14px;
+    color: #4a4a4a; 
+    margin: 5px 0 10px 0; 
+    line-height: 1.4;
+    word-wrap: break-word; 
+}
+
+.feed-private-status {
+    margin: 0 0 12px 0; 
+}
+
+
+/* --- Section: Stats Row --- */
+.feed-stats-row {
+    padding: 12px 16px;
+    display: flex;
+    justify-content: flex-start;
+    gap: 30px;
+    border-top: 1px solid #edeff1;
+}
+
+.feed-stat {
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+}
+
+.stat-number {
+    font-size: 16px;
+    font-weight: 700;
+    color: #1a1a1b;
+}
+
+.stat-label {
+    font-size: 12px;
+    color: #7c7c7c;
+    font-weight: 400;
+    text-transform: none;
+}
+
+
+/* --- Section: Communities Search --- */
+.communities-section {
+    padding: 12px 16px;
+    border-top: 1px solid #edeff1; 
+}
+
+.communities-section h3 {
+    font-size: 12px;
+    color: #7c7c7c;
+    text-transform: uppercase;
+    font-weight: 700;
+    margin: 0 0 10px 0;
+}
+
+.search-input-wrapper {
+    position: relative;
+    background-color: #e4e6e7;
+    border-radius: 20px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    border: 1px solid transparent; 
+    transition: border-color 0.2s;
+}
+
+.search-input-wrapper:focus-within {
+    border-color: #0079d3;
+    background-color: white;
+}
+
+.sidebar-search-input {
+    width: 100%;
+    padding: 8px 10px 8px 35px;
+    border: none;
+    border-radius: 20px;
+    font-size: 14px;
+    box-sizing: border-box;
+    background-color: transparent;
+    outline: none;
+    color: #1a1a1b;
+}
+
+.sidebar-search-input::placeholder {
+    color: #878a8c;
+}
+
+.search-icon {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 18px;
+    height: 18px;
+    opacity: 0.8;
+}
+
+
+/* --- Section: Creator Info (Bottom Section) --- */
+.creator-section {
+    padding: 12px 16px;
+    border-top: 1px solid #edeff1; /* Separator line */
+}
+
+.creator-section h3 {
+    font-size: 12px;
+    color: #7c7c7c;
+    text-transform: uppercase;
+    font-weight: 700;
+    margin: 0 0 10px 0;
+}
+
+.creator-section .creator-info {
+    display: flex;
+    align-items: center;
+    padding-bottom: 4px;
+}
+
+.creator-section .creator-info a {
+    text-decoration: none;
+    color: #1a1a1b;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    transition: color 0.2s;
+}
+
+.creator-section .creator-info a:hover {
+    color: #0079d3;
+}
+
+.creator-avatar {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    margin-right: 8px;
+    background-color: #dae0e6;
+}
+
+.copyright-text {
+    font-size: 10px; /* Decreased size */
+    line-height: 14px; /* Tighten up line spacing */
+    color: #878a8c;
+    margin-top: 15px; /* Decrease margin above the text */
+    padding: 0 16px 15px 16px; /* Reduced bottom padding */
+    text-align: left; /* Ensure text alignment is clean */
+
+}

@@ -10,6 +10,7 @@ import AvatarCustomizer from "./pages/edit-avatar";
 import CreateCommunityPopup from "./components/create-community";
 import PostPage from "./pages/PostPage";
 import CustomFeedPopup from "./pages/CustomFeedPopup";
+import CustomFeedPage from './pages/customFeedPage';
 
 function App() {
 
@@ -38,6 +39,7 @@ function App() {
         <Route path="/create-community"element={<CreateCommunityPopup/>}/>
         <Route path="/CustomFeedPopup"element={<CustomFeedPopup/>}/>
         <Route path="/post/:postId" element={<PostPage />} />
+        <Route path="/f/:feedName" element={<CustomFeedPage />} />
       </Routes>
     </Router>
 
