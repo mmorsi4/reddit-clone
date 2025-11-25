@@ -81,7 +81,6 @@ function Sidebar() {
       setRecent(data);
 
     } catch (err) {
-      console.log("WE FAILED NGA")
       console.error("Error fetching recent communities:", err);
     }
   }, []);
@@ -137,6 +136,18 @@ function Sidebar() {
                 <img src="../images/all.svg" alt="All" />
                 <div className="sidebar-section-item-details">All</div>
               </Link>
+            </li>
+            {/* Create Community button */}
+            <li>
+              <button
+                onClick={() => setShowPopup(true)}
+                className="sidebar-link create-btn"
+              >
+                <img src="../images/plus.svg" alt="Create" />
+                <div className="sidebar-section-item-details">
+                  Start a community
+                </div>
+              </button>
             </li>
           </ul>
         </li>
@@ -222,18 +233,6 @@ function Sidebar() {
             Communities <img src="../images/down.svg" alt="Expand" />
           </label>
           <ul className="sidebar-section">
-            {/* Create Community button */}
-            <li>
-              <button
-                onClick={() => setShowPopup(true)}
-                className="sidebar-link create-btn"
-              >
-                <img src="../images/plus.svg" alt="Create" />
-                <div className="sidebar-section-item-details">
-                  Create Community
-                </div>
-              </button>
-            </li>
             <li>
               <Link to="/manage_community" className="sidebar-link">
                 <img src="../images/settings.svg" alt="Manage Community" />
@@ -283,10 +282,13 @@ function Sidebar() {
                 ))
             )}
           </ul>
+          <a href="#" className="copyright-link">
+            Reddit, Inc. &copy;2025. All rights reserved.
+          </a>
         </li>
 
         {/* RESOURCES */}
-        <li>
+        {/* <li>
           <input
             type="checkbox"
             className="sidebar-collapse-checkbox"
@@ -316,11 +318,8 @@ function Sidebar() {
               </Link>
             </li>
           </ul>
-          <a href="#" className="copyright-link">
-            Reddit, Inc. &copy;2025. All rights reserved.
-          </a>
-        </li>
-      </ul>
+        </li>*/}
+        </ul>
 
       {/* Popup */}
       {showPopup && (
