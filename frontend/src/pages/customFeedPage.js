@@ -7,7 +7,7 @@ import CustomFeedPopup from './CustomFeedPopup';
 import Post from '../components/post';
 
 function CustomFeedPage() {
-  const { feedName } = useParams();
+  const { feedId } = useParams();
   const [feed, setFeed] = useState(null);
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -20,7 +20,7 @@ function CustomFeedPage() {
 
   const fetchJoinedCommunities = useCallback(async () => {
     try {
-      const res = await fetch('/api/memberships/joined', {
+      const res = await fetch('/api/user/joined', {
         credentials: "include",
       });
       if (!res.ok) throw new Error("Failed to fetch joined communities.");
@@ -38,29 +38,28 @@ function CustomFeedPage() {
     const method = isCurrentlyJoined ? 'DELETE' : 'POST';
     const apiEndpoint = isCurrentlyJoined ? '/api/memberships/unjoin' : '/api/memberships/join';
 
-    // Optimistic UI Update
+    // Optimistic UI update
     setJoinedCommunities(prev =>
-      isCurrentlyJoined
-        ? prev.filter(id => id !== communityId)
-        : [...prev, communityId]
+      isCurrentlyJoined ? prev.filter(id => id !== communityId) : [...prev, communityId]
     );
 
     try {
       const res = await fetch(apiEndpoint, {
-        method: method,
+        method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ communityId }), // Pass the string ID
+        body: JSON.stringify({ communityId }),
+        credentials: "include",
       });
 
       if (!res.ok) {
-        alert(`Failed to ${isCurrentlyJoined ? 'leave' : 'join'} r/${communityName}. Please try again.`);
-        fetchJoinedCommunities(); // Re-sync state on failure
+        alert(`Failed to ${isCurrentlyJoined ? 'leave' : 'join'} r/${communityName}`);
+        fetchJoinedCommunities(); // Re-sync state
       }
 
     } catch (err) {
       console.error("Error toggling join:", err);
       alert('An unexpected error occurred.');
-      fetchJoinedCommunities(); // Re-sync state on error
+      fetchJoinedCommunities(); // Re-sync state
     }
   }, [joinedCommunities, fetchJoinedCommunities]);
 
@@ -98,43 +97,53 @@ function CustomFeedPage() {
   }, []);
 
 
-  const fetchFeedDetails = useCallback(async (shouldFetchPosts = true) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await fetch(`/api/customfeeds/name/${feedName}`, {
-        credentials: "include",
-      });
+ const fetchFeedDetails = useCallback(async (shouldFetchPosts = true) => {
+  setLoading(true);
+  setError(null);
+  try {
+    if (!feedId) throw new Error("No feed ID provided");
 
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.message || "Feed not found or inaccessible.");
-      }
-      const data = await res.json();
-      setFeed(data);
+    const res = await fetch(`/api/customfeeds/${feedId}`, {
+      credentials: "include",
+    });
 
-      if (shouldFetchPosts) {
-        fetchPosts(data);
-      }
-
-    } catch (err) {
-      console.error("Error fetching custom feed:", err);
-      setError(err.message);
-    } finally {
-      setLoading(false);
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(errorData.message || "Feed not found or inaccessible.");
     }
-  }, [feedName, fetchPosts]);
+
+    const data = await res.json();
+    setFeed(data);
+
+    if (shouldFetchPosts) {
+      fetchPosts(data);
+    }
+
+  } catch (err) {
+    console.error("Error fetching custom feed:", err);
+    setError(err.message);
+  } finally {
+    setLoading(false);
+  }
+}, [feedId, fetchPosts]);
 
   const handleOpenEditFeedModal = () => setIsEditFeedModalOpen(true);
   const handleCloseEditFeedModal = () => setIsEditFeedModalOpen(false);
 
   const handleEditFeedSubmit = async (updatedFeedData) => {
     try {
-      const res = await fetch(`/api/customfeeds/name/${feedName}`, {
+      const res = await fetch(`/api/customfeeds/${feedId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updatedFeedData),
+        body: JSON.stringify({
+          name: updatedFeedData.name,
+          description: updatedFeedData.description,
+          image: updatedFeedData.image,
+          isPrivate: updatedFeedData.isPrivate
+        }),
+        credentials: "include"
       });
+
 
       if (!res.ok) throw new Error('Failed to update feed metadata.');
 
@@ -150,7 +159,7 @@ function CustomFeedPage() {
 
   useEffect(() => {
     fetchFeedDetails();
-    fetchJoinedCommunities(); 
+    fetchJoinedCommunities();
   }, [fetchFeedDetails, fetchJoinedCommunities]);
 
 
@@ -163,38 +172,34 @@ function CustomFeedPage() {
   };
 
   const handleCommunityAdded = useCallback(async (updatedFeedFromServer) => {
-  const currentFeedName = feedName; 
-    const communityIds = updatedFeedFromServer.communities.map(c => c._id); 
-  
-  try {
-    const url = `/api/customfeeds/name/${currentFeedName}/communities`; 
-    
-    console.log("Sending community update request to:", url);
-    console.log("Payload:", { communities: communityIds });
+    const communityIds = updatedFeedFromServer.communities.map(c => c._id);
 
-    const res = await fetch(url, {
+    try {
+      const url = `/api/customfeeds/${feedId}/communities`;
+
+      const res = await fetch(url, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ communities: communityIds }),
-    });
+        credentials: "include",
+      });
 
-    if (!res.ok) {
+      if (!res.ok) {
         const errorData = await res.json();
-        throw new Error(errorData.message || 'Failed to save communities list on the server.');
+        throw new Error(errorData.message || 'Failed to update communities.');
+      }
+
+      const newFeed = await res.json();
+      setFeed(newFeed);
+      fetchPosts(newFeed);
+      handleCloseModal();
+
+    } catch (err) {
+      console.error("Error updating communities:", err);
+      alert("Error updating communities: " + err.message);
     }
-    
-    const newFeed = await res.json();
-    
-    setFeed(newFeed);
-    fetchPosts(newFeed);
-    handleCloseModal(); 
+  }, [fetchPosts, handleCloseModal]);
 
-  } catch (err) {
-    console.error("Error updating communities:", err);
-    alert("Error updating communities: " + err.message);
-  }
-
-}, [feedName, fetchPosts, handleCloseModal]);
 
   if (loading) {
     return (
@@ -233,7 +238,7 @@ function CustomFeedPage() {
             </div>
           </div>
           <div className="custom-feed-header-actions">
-            <button className="icon-button"><img src="../images/dots.svg" alt="More" /></button>
+            <button className="icon-button"><img src="../images/three-dots.svg" alt="More" /></button>
             {isCreator && (
               <button className="icon-button" onClick={handleOpenEditFeedModal}>
                 <img src="../images/edit.svg" alt="Edit Metadata" />
@@ -304,7 +309,7 @@ function CustomFeedPage() {
                   {isCreator &&
                     <button
                       className="edit-button-icon"
-                      onClick={handleOpenEditFeedModal} 
+                      onClick={handleOpenEditFeedModal}
                     >
                       <img src="../images/edit.svg" alt="Edit Feed Details" />
                     </button>

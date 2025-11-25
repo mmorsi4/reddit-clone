@@ -8,38 +8,46 @@ function AddCommunitiesModal({ feed, onClose, onCommunityAdded }) {
     );
 
     const updateFeed = async (newCommunities) => {
-        const communityIds = newCommunities.map(c => c._id);
-        
-        try {
-            const res = await fetch(`/api/customfeeds/name/${feed.name}`, { 
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ communities: communityIds }),
-            });
+  if (!feed?._id) {
+    alert("Feed ID is missing. Cannot update feed.");
+    return;
+  }
 
-            if (!res.ok) {
-                const contentType = res.headers.get("content-type");
-                let errorMessage = `HTTP Error ${res.status}`;
-                
-                if (contentType && contentType.includes("application/json")) {
-                    const errorData = await res.json();
-                    errorMessage = errorData.message || errorMessage;
-                }
-                
-                throw new Error(errorMessage);
-            }
+  const communityIds = newCommunities.map(c => c._id);
 
-            const updatedFeedData = await res.json();
-            const feedObjectToPass = updatedFeedData.feed || updatedFeedData;
-                        onCommunityAdded(feedObjectToPass); 
+  try {
+    const res = await fetch(`/api/customfeeds/${feed._id}/communities`, { 
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ communities: communityIds }),
+      credentials: "include"
+    });
 
-        } catch (error) {
-            console.error("Error saving communities:", error);
-            alert(`Error updating feed: ${error.message}. Please try again.`);
-        }
-    };
+    if (!res.ok) {
+      const contentType = res.headers.get("content-type");
+      let errorMessage = `HTTP Error ${res.status}`;
+
+      if (contentType && contentType.includes("application/json")) {
+        const errorData = await res.json();
+        errorMessage = errorData.message || errorMessage;
+      }
+
+      throw new Error(errorMessage);
+    }
+
+    const updatedFeedData = await res.json();
+    // Sometimes the backend returns { feed: {...} }, sometimes just the object
+    const feedObjectToPass = updatedFeedData.feed || updatedFeedData;
+    onCommunityAdded(feedObjectToPass);
+
+  } catch (error) {
+    console.error("Error saving communities:", error);
+    alert(`Error updating feed: ${error.message}. Please try again.`);
+  }
+};
+
 
 
     const handleCommunitySelect = (communityToToggle) => {

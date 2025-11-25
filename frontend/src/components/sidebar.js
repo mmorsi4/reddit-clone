@@ -1,4 +1,4 @@
-import React, { useState, useEffect , useCallback } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Link, useLocation } from "react-router-dom";
 import CreateCommunityPopup from "./create-community";
 import CustomFeedPopup from "../pages/CustomFeedPopup";
@@ -14,30 +14,30 @@ function Sidebar() {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
 
-const getLinkClass = (path) => {
+  const getLinkClass = (path) => {
     const currentURL = location.pathname + location.search;
-    
+
     if (path === "/home") {
-        return currentURL === "/home" ? "sidebar-link active" : "sidebar-link";
+      return currentURL === "/home" ? "sidebar-link active" : "sidebar-link";
     }
 
     if (path === "/home?feed=all") {
-        return currentURL === "/home?feed=all" ? "sidebar-link active" : "sidebar-link";
+      return currentURL === "/home?feed=all" ? "sidebar-link active" : "sidebar-link";
     }
     if (location.pathname.startsWith(path)) {
-        return "sidebar-link active";
+      return "sidebar-link active";
     }
 
     return "sidebar-link";
-};
+  };
 
   const handleOpenModal = (e) => {
     if (e) e.preventDefault();
     setIsModalOpen(true);
   };
-const handleCloseModal = () => setIsModalOpen(false);
+  const handleCloseModal = () => setIsModalOpen(false);
 
- // ✅ Fetch all communities
+  // ✅ Fetch all communities
   const fetchCommunities = useCallback(async () => {
     try {
       const res = await fetch("/api/communities/");
@@ -84,7 +84,7 @@ const handleCloseModal = () => setIsModalOpen(false);
       const res = await fetch('/api/users/recent-communities', {
         credentials: "include"
       });
-      
+
       const data = await res.json();
       setRecent(data);
 
@@ -101,8 +101,8 @@ const handleCloseModal = () => setIsModalOpen(false);
   // ✅ Toggle favorite and immediately re-fetch
   const toggleFavorite = async (communityId) => {
     try {
-      setJoinedCommunities(prev => prev.map(community => 
-        community._id === communityId 
+      setJoinedCommunities(prev => prev.map(community =>
+        community._id === communityId
           ? { ...community, favorite: !community.favorite }
           : community
       ));
@@ -135,36 +135,36 @@ const handleCloseModal = () => setIsModalOpen(false);
     fetchCustomFeeds();
   }, [fetchCustomFeeds]);
 
-  const handleFeedSubmission = async (feedData) => { 
-    
-    const randomIndex = Math.floor(Math.random() * 11) + 1; 
-    const imageUrl = `../images/custom_feed_default_${randomIndex}.png`;
-    
-    try {
-        const res = await fetch("/api/customfeeds", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            credentials: "include",
-            body: JSON.stringify({ 
-                name: feedData.name, 
-                description: feedData.description, 
-                isPrivate: feedData.isPrivate,
-                showOnProfile: feedData.showOnProfile,
-                image: imageUrl, 
-            }),
-        });
+  const handleFeedSubmission = async (feedData) => {
 
-        if (!res.ok) {
-            const errorData = await res.json();
-            throw new Error(errorData.message || "Failed to create custom feed.");
-        }
-        
-        handleCloseModal();
-        await fetchCustomFeeds(); 
+    const randomIndex = Math.floor(Math.random() * 11) + 1;
+    const imageUrl = `../images/custom_feed_default_${randomIndex}.png`;
+
+    try {
+      const res = await fetch("/api/customfeeds", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          name: feedData.name,
+          description: feedData.description,
+          isPrivate: feedData.isPrivate,
+          showOnProfile: feedData.showOnProfile,
+          image: imageUrl,
+        }),
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.message || "Failed to create custom feed.");
+      }
+
+      handleCloseModal();
+      await fetchCustomFeeds();
 
     } catch (err) {
-        console.error("Error creating custom feed:", err);
-        alert(err.message || "An unknown error occurred during feed creation.");
+      console.error("Error creating custom feed:", err);
+      alert(err.message || "An unknown error occurred during feed creation.");
     }
   };
 
@@ -188,7 +188,7 @@ const handleCloseModal = () => setIsModalOpen(false);
               </Link>
             </li>
             <li>
-             <Link to="/home?feed=all" className={getLinkClass("/home?feed=all")}>
+              <Link to="/home?feed=all" className={getLinkClass("/home?feed=all")}>
                 <img src="../images/all.svg" alt="All" />
                 <div className="sidebar-section-item-details">All</div>
               </Link>
@@ -224,20 +224,16 @@ const handleCloseModal = () => setIsModalOpen(false);
           <ul className="sidebar-section">
             {/* Render dynamically created Custom Feeds */}
             {customFeeds.map((feed) => (
-              <li key={feed.id}>
-                <Link 
-                    to={`/f/${feed.name}`} 
-                    // You might need a more specific class match here later
-                    className={getLinkClass(`/f/${feed.name}`)} 
-                >
-                  <img 
-                    src={feed.image} 
+              <li key={feed._id}>
+                <Link to={`/f/${feed._id}`} className={getLinkClass(`/f/${feed._id}`)}>
+                  <img
+                    src={feed.image}
                     className="sidebar-link-icon-round" // Use existing style for community image
-                    alt={feed.name} 
+                    alt={feed.name}
                   />
                   <div className="sidebar-section-item-details">
                     {feed.name}
-                    {feed.isPrivate && <img src="../images/lock.svg" alt="Private" style={{width: '12px', marginLeft: '5px'}} />}
+                    {feed.isPrivate && <img src="../images/lock.svg" alt="Private" style={{ width: '12px', marginLeft: '5px' }} />}
                   </div>
                 </Link>
               </li>
@@ -397,7 +393,7 @@ const handleCloseModal = () => setIsModalOpen(false);
             </li>
           </ul>
         </li>*/}
-        </ul>
+      </ul>
 
       {/* Popup */}
       {showPopup && (
