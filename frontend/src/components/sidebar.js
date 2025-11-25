@@ -35,11 +35,7 @@ const getLinkClass = (path) => {
     if (e) e.preventDefault();
     setIsModalOpen(true);
   };
-  const handleCloseModal = () => setIsModalOpen(false);
-  const handleFeedSubmission = (feedData) => {
-    console.log("New Feed Data Submitted:", feedData);
-    handleCloseModal();
-  };
+const handleCloseModal = () => setIsModalOpen(false);
 
  // ✅ Fetch all communities
   const fetchCommunities = useCallback(async () => {
@@ -124,6 +120,54 @@ const getLinkClass = (path) => {
     await fetchCommunities();
   };
 
+  const fetchCustomFeeds = useCallback(async () => {
+    try {
+      const res = await fetch("/api/customfeeds", { credentials: "include" });
+      if (!res.ok) throw new Error("Failed to fetch custom feeds");
+      const data = await res.json();
+      setCustomFeeds(data);
+    } catch (err) {
+      console.error("Error fetching custom feeds:", err);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchCustomFeeds();
+  }, [fetchCustomFeeds]);
+
+  const handleFeedSubmission = async (feedData) => { 
+    
+    const randomIndex = Math.floor(Math.random() * 11) + 1; 
+    const imageUrl = `../images/custom_feed_default_${randomIndex}.png`;
+    
+    try {
+        const res = await fetch("/api/customfeeds", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify({ 
+                name: feedData.name, 
+                description: feedData.description, 
+                isPrivate: feedData.isPrivate,
+                showOnProfile: feedData.showOnProfile,
+                image: imageUrl, 
+            }),
+        });
+
+        if (!res.ok) {
+            const errorData = await res.json();
+            throw new Error(errorData.message || "Failed to create custom feed.");
+        }
+        
+        handleCloseModal();
+        await fetchCustomFeeds(); 
+
+    } catch (err) {
+        console.error("Error creating custom feed:", err);
+        alert(err.message || "An unknown error occurred during feed creation.");
+    }
+  };
+
 
   return (
     <div className="sidebar-container">
@@ -165,11 +209,13 @@ const getLinkClass = (path) => {
         </li>
 
         {/* CUSTOM FEEDS */}
+        {/* CUSTOM FEEDS */}
         <li>
           <input
             type="checkbox"
             className="sidebar-collapse-checkbox"
             id="sidebar-collapse-checkbox-custom-feeds"
+            defaultChecked // Add defaultChecked to keep the section open initially
           />
           <label
             className="sidebar-collapse-label"
@@ -178,6 +224,28 @@ const getLinkClass = (path) => {
             Custom Feeds <img src="../images/down.svg" alt="Expand" />
           </label>
           <ul className="sidebar-section">
+            {/* Render dynamically created Custom Feeds */}
+            {customFeeds.map((feed) => (
+              <li key={feed.id}>
+                <Link 
+                    to={`/f/${feed.name}`} 
+                    // You might need a more specific class match here later
+                    className={getLinkClass(`/f/${feed.name}`)} 
+                >
+                  <img 
+                    src={feed.image} 
+                    className="sidebar-link-icon-round" // Use existing style for community image
+                    alt={feed.name} 
+                  />
+                  <div className="sidebar-section-item-details">
+                    {feed.name}
+                    {feed.isPrivate && <img src="../images/lock.svg" alt="Private" style={{width: '12px', marginLeft: '5px'}} />}
+                  </div>
+                </Link>
+              </li>
+            ))}
+
+            {/* Create Custom Feed button (always remains at the bottom) */}
             <li onClick={handleOpenModal}>
               <a className="sidebar-link" href="#">
                 <img src="../images/plus.svg" alt="Create Feed" />

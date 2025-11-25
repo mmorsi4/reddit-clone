@@ -12,6 +12,7 @@ import commentsRoutes from './src/routes/comments.js';
 import communitiesRoutes from './src/routes/communities.js';
 import membershipsRouter from "./src/routes/membershipRoute.js"
 import usersRoutes from './src/routes/users.js';
+import customFeedRoutes from './src/routes/customFeed.js';
 import { errorHandler } from './src/middleware/errorHandler.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -47,6 +48,7 @@ app.use('/api/comments', commentsRoutes);
 app.use('/api/communities', communitiesRoutes);
 app.use("/api/memberships", membershipsRouter);
 app.use('/api/users', usersRoutes);
+app.use('/api/customfeeds', customFeedRoutes);
 
 // media
 const __filename = fileURLToPath(import.meta.url);
