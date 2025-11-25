@@ -3,16 +3,18 @@ import { authMiddleware } from '../middleware/auth.js';
 import { 
     createCustomFeed, 
     getMyCustomFeeds,
-    getCustomFeedByName,
+    getCustomFeedById,
     updateCustomFeedMetadata,
-    updateCustomFeedCommunitiesList 
+    updateCustomFeedCommunitiesList,
+    updateCustomFeedCommunities
 } from '../controllers/customFeed.js';
 
 const router = express.Router();
 
 router.post('/', authMiddleware, createCustomFeed);
 router.get('/', authMiddleware, getMyCustomFeeds);
-router.get('/name/:feedName', authMiddleware, getCustomFeedByName); 
-router.put('/name/:feedName', authMiddleware, updateCustomFeedMetadata);
-router.put('/name/:feedName/communities', authMiddleware, updateCustomFeedCommunitiesList);
+router.get('/:feedId', authMiddleware, getCustomFeedById);
+router.put("/:feedId/communities", authMiddleware, updateCustomFeedCommunities);
+router.put('/name/:feedId', authMiddleware, updateCustomFeedMetadata);
+router.put('/name/:feedId/communities', authMiddleware, updateCustomFeedCommunitiesList);
 export default router;

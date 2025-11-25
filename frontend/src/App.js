@@ -39,7 +39,7 @@ function App() {
         <Route path="/create-community"element={<CreateCommunityPopup/>}/>
         <Route path="/CustomFeedPopup"element={<CustomFeedPopup/>}/>
         <Route path="/post/:postId" element={<PostPage />} />
-        <Route path="/f/:feedName" element={<CustomFeedPage />} />
+        <Route path="/f/:feedId" element={<CustomFeedPage />} />
       </Routes>
     </Router>
 

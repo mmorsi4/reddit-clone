@@ -14,22 +14,10 @@ function CommunitySearchSelector({ onSelectCommunity, currentSelectedCommunities
   const fetchCommunities = useCallback(async () => {
     setLoading(true);
     try {
-      const allRes = await fetch("/api/communities");
-      if (!allRes.ok) throw new Error("Failed to load all communities");
-      const allData = await allRes.json();
-      
-      const joinedRes = await fetch("/api/user/joinedCommunities", {
-        credentials: "include", 
-      });
-      const joinedData = joinedRes.ok ? await joinedRes.json() : [];
-      const joinedMap = new Set(joinedData.map(c => c._id));
-      
-      const communitiesWithStatus = allData.map(c => ({
-        ...c,
-        joined: joinedMap.has(c._id)
-      }));
-
-      setAllCommunities(communitiesWithStatus);
+      const res = await fetch("/api/communities");
+      if (!res.ok) throw new Error("Failed to load communities");
+      const data = await res.json();
+      setAllCommunities(data);
     } catch (err) {
       console.error("Error fetching communities:", err);
     } finally {
@@ -76,7 +64,6 @@ function CommunitySearchSelector({ onSelectCommunity, currentSelectedCommunities
 
   return (
     <div className="community-search-selector" ref={searchRef}>
-      
       <div className="search-input-area">
         <img src="../images/search.svg" alt="search" className="search-icon-selector" />
         <input
@@ -113,11 +100,6 @@ function CommunitySearchSelector({ onSelectCommunity, currentSelectedCommunities
                       className="community-image-selector"
                     />
                     <span className="community-name-selector">{community.name || "Unnamed"}</span>
-                    <span className="community-status-info">
-                       {community.joined && (
-                          <span className="joined-tag">Joined</span>
-                       )}
-                    </span>
                     <button className={`select-button ${isSelected ? 'selected' : ''}`}>
                       {isSelected ? 'Remove' : 'Add'}
                     </button>
