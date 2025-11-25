@@ -91,7 +91,11 @@ function Post({
 
           {preview ? (
             <div className="post-preview">
-              <img src={preview} alt="preview" />
+              {preview.endsWith(".mp4") || preview.endsWith(".webm") ? (
+                <video src={preview} controls className="post-media" />
+              ) : (
+                <img src={preview} alt="preview" className="post-media" />
+              )}
             </div>
           ) : (
             <div className="post-preview">

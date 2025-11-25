@@ -118,7 +118,7 @@ function Community() {
                     time={new Date(p.createdAt).toLocaleString()}
                     title={p.title}
                     textPreview={p.body || ""}
-                    preview={p.url || ""}
+                    preview={p.mediaUrl || ""}
                     avatar={p.author?.avatarUrl || "../images/avatar.png"}
                     initialVotes={p.votes?.reduce((s, v) => s + v.value, 0) || 0}
                     initialComments={p.comments || []}
