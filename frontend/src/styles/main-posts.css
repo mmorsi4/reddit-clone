@@ -227,4 +227,80 @@
 }
 
 
+.post-meta {
+    display: flex;
+    justify-content: space-between; 
+    align-items: center;
+    padding: 8px 16px;
+    font-size: 12px;
+}
+
+.post-meta-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.post-user-info {
+    display: flex;
+    align-items: center;
+}
+
+.post-community-name {
+    font-weight: bold;
+    color: #1c1c1c; 
+    margin-right: 8px;
+}
+
+.post-separator-meta {
+    color: #7c7c7c;
+    font-weight: normal;
+    white-space: nowrap;
+}
+
+.post-meta-dots {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+}
+
+
+.post-join-button {
+    padding: 4px 10px;    
+    border-radius: 9999px; 
+    font-size: 12px; 
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+    min-width: 10px; 
+}
+
+.post-join-button.not-joined {
+    background-color: #035a9c; 
+    color: white;
+    border: 1px solid #035a9c;
+}
+
+.post-join-button.not-joined:hover {
+    background-color: #1484D6;
+}
+
+/* Style for the 'Joined' state */
+.post-join-button.joined {
+    background-color: white;
+    color: #0079D3;
+    border: 1px solid #0079D3;
+}
+
+.post-join-button.joined:hover {
+    background-color: #F7F8F9; /* Slight grey background on hover */
+    color: #1484D6;
+}
+
+/* Small visual adjustment for the "Posted by" line */
+.post-separator {
+    font-size: 12px;
+    color: #777; /* Subtle text */
+    margin-left: 8px;
+}
 
