@@ -2,6 +2,7 @@ import Post from '../models/Post.js';
 import Comment from '../models/Comment.js';
 import Community from '../models/Community.js';
 import Membership from '../models/Membership.js';
+import mongoose from 'mongoose';
 
 
 export async function createPost(req,res){
@@ -141,6 +142,53 @@ export async function getHomeFeedPosts(req, res) {
     res.json(posts);
   } catch (err) {
     console.error("Error fetching home feed posts:", err);
+    res.status(500).json({ message: "Internal server error" });
+  }
+}
+
+
+export async function getCustomFeedPosts(req, res) {
+  try {
+    const { communityIds } = req.body; 
+
+    // 1. Ensure communityIds exist and are an array
+    if (!Array.isArray(communityIds) || communityIds.length === 0) {
+      return res.status(200).json([]);
+    }
+
+    // 2. CRITICAL STEP: Convert string IDs to Mongoose ObjectId types
+    const objectCommunityIds = communityIds.map(id => {
+      try {
+        return new mongoose.Types.ObjectId(id);
+      } catch (e) {
+        console.error("Invalid ID encountered:", id, e);
+        return null; 
+      }
+    }).filter(id => id !== null);
+    
+    // If all IDs were invalid, stop here
+    if (objectCommunityIds.length === 0) {
+        return res.status(200).json([]);
+    }
+
+    const { limit = 20, page = 1 } = req.query; 
+    const skip = (Number(page) - 1) * Number(limit);
+
+    const query = { 
+      // 3. Use the converted ObjectIds in the $in query
+      community: { $in: objectCommunityIds } 
+    }; 
+
+    const posts = await Post.find(query) 
+      .populate('author', 'username displayName avatarUrl')
+      .populate('community', 'name title avatar _id') 
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(Number(limit));
+
+    res.json(posts);
+  } catch (err) {
+    console.error("Error fetching custom feed posts:", err);
     res.status(500).json({ message: "Internal server error" });
   }
 }

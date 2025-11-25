@@ -1,20 +1,12 @@
-/* --- home-layout.css --- */
 
-/* Wrapper to center the main content block (Posts + Right Sidebar) and set max width */
 .home-layout-wrapper {
-    /* Max width set for 640px post column + 310px sidebar + 24px gap = 974px. We use 1000px for safety. */
     max-width: 1000px;
     margin: 0 auto;
-    /* Center the content horizontally */
-
-    /* Flexbox for the two columns */
     display: flex;
     justify-content: flex-start;
     align-items: flex-start;
     gap: 24px;
-    /* Space between the post column and the right sidebar */
     padding-top: 8px;
-    /* Slight top padding */
 }
 
 /* Posts Column Styling */

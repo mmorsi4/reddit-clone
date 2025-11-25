@@ -1,0 +1,167 @@
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.6); /* Dark translucent background */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000; /* Ensure it's above everything else */
+}
+
+/* Modal Content Box */
+.add-communities-modal {
+    background-color: white;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 600px; /* Standard modal size */
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+    display: flex;
+    flex-direction: column;
+    max-height: 80vh; /* Limit height for scrollability */
+}
+
+/* Modal Header */
+.modal-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid #edeff1;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h2 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #1a1a1b;
+    margin: 0;
+}
+
+.close-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 50%;
+    transition: background-color 0.15s;
+}
+
+.close-button:hover {
+    background-color: #f0f0f0;
+}
+
+.close-button img {
+    width: 20px;
+    height: 20px;
+}
+
+/* Search Wrapper (Container for your SearchBar) */
+.modal-search-wrapper {
+    padding: 20px;
+
+}
+
+
+/* Selected Communities List */
+.selected-communities-list {
+    padding: 0 20px 20px 20px;
+    overflow-y: auto; 
+    flex-grow: 1;
+}
+
+.selected-communities-list h3 {
+    display: none; 
+}
+
+.selected-communities-list ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.selected-communities-list li .community-info {
+    display: flex; 
+    /* ❌ REMOVED: align-items: center. Using flex-start for top alignment. */
+    align-items: flex-start; /* Aligns content to the top of the flex container */
+    font-size: 14px;
+    font-weight: 500;
+    color: #1a1a1b;
+}
+
+/* Also ensure the <li> itself has a default alignment to the top if needed */
+.selected-communities-list li {
+    display: flex;
+    /* Explicitly use flex-start (top) for vertical alignment of the list item's content */
+    align-items: flex-start; 
+    justify-content: space-between;
+    padding: 8px 0;
+}
+
+.selected-communities-list li .community-info img,
+.selected-communities-list li .community-info span {
+    display: inline-block; /* Force them to be inline elements */
+    vertical-align: middle; /* Helps with vertical positioning */
+}
+
+.selected-communities-list li img {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    /* 🛠️ Keep margin-right to space the image from the name */
+    margin-right: 10px; 
+    /* The image element is almost always correctly displayed by flex */
+}
+
+.selected-communities-list li button {
+    background: none;
+    border: 1px solid #0079D3;
+    color: #0079D3;
+    padding: 4px 10px;
+    border-radius: 9999px;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.selection-tip {
+    text-align: center;
+    color: #878a8c;
+    padding: 40px 0;
+}
+
+
+/* Modal Footer (Save/Cancel Buttons) */
+.modal-footer {
+    padding: 16px 20px;
+    border-top: 1px solid #edeff1;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.cancel-button {
+    background: white;
+    color: #0079D3;
+    border: 1px solid #0079D3;
+    padding: 8px 16px;
+    border-radius: 9999px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.save-button {
+    background-color: #0079D3;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 9999px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.save-button:disabled {
+    background-color: #e3e3e3;
+    cursor: not-allowed;
+    color: #999;
+}

@@ -1,18 +1,15 @@
 import Membership from "../models/Membership.js";
 import Community from "../models/Community.js";
 
-// Create a new community
 export async function createCommunity(req, res) {
   try {
     const { name, title, description, avatar, banner, topics } = req.body;
 
-    // check if the community already exists
     const exists = await Community.findOne({ name });
     if (exists) {
       return res.status(409).json({ message: "Community already exists" });
     }
 
-    // create the new community
     const community = await Community.create({
       name,
       title: title || name,
@@ -53,13 +50,10 @@ export async function listJoinedCommunities(req, res) {
 
 export async function listCommunitiesWithFavorites(req, res) {
   try {
-    // Get memberships for this user and populate community info
     const memberships = await Membership.find({ userId: req.userId }).populate("communityId").lean();
-
-    // Map to return only joined communities with favorite flag
     const joinedWithFavorites = memberships.map(m => ({
-      ...m.communityId,         // all community fields
-      joined: true,             // since user is member
+      ...m.communityId,         
+      joined: true,            
       favorite: m.favorite || false
     }));
 
@@ -69,3 +63,4 @@ export async function listCommunitiesWithFavorites(req, res) {
     res.status(500).json({ message: "Server error" });
   }
 }
+

@@ -8,7 +8,8 @@ import {
     votePost,
     getMyPosts,
     getAllFeedPosts,
-    getHomeFeedPosts 
+    getHomeFeedPosts,
+    getCustomFeedPosts
 } from '../controllers/posts.js';
 
 const router = express.Router();
@@ -20,6 +21,7 @@ router.get('/', getPosts);
 router.post('/', authMiddleware, upload.single('file'), createPost);
 router.get('/:id', getPost); 
 router.post('/:id/vote', authMiddleware, votePost);
+router.post('/custom-feed-posts', authMiddleware, getCustomFeedPosts);
 
 
 export default router;

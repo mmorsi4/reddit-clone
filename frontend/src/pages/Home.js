@@ -12,6 +12,7 @@ import "../styles/create_post.css";
 import "../styles/edit_avatar.css";
 import "../styles/postpage.css";
 import "../styles/create_community.css";
+import "../styles/customFeed.css";
 import { Link, useLocation } from "react-router-dom";
 import Post from "../components/post";
 import Sidebar from "../components/sidebar";
