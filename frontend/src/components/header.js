@@ -50,8 +50,8 @@ function Header() {
           </li>
 
           <li className="header-action">
-            <Link to="/create_post" className="header-action-link rect">
-              <img src="../images/create-post.svg" /> Create
+            <Link to="/create_post" className="header-action-link">
+              <img src="../images/create-post.svg" />Create
               <div className="header-action-tooltip">Create post</div>
             </Link>
           </li>

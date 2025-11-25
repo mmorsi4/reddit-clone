@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import Sidebar from "../components/sidebar";
 import Header from "../components/header";
 
@@ -7,38 +8,21 @@ function ManageCommunity() {
   const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
-    const fetchJoinedCommunities = async () => {
+    const fetchJoined = async () => {
       try {
-        // 1️⃣ Fetch all communities
-        const res = await fetch("/api/communities", { credentials: "include" });
-        const allCommunities = await res.json();
+        const res = await fetch("/api/memberships/joined", {
+          credentials: "include",
+        });
 
-        // 2️⃣ Check membership for each community
-        const updated = await Promise.all(
-          allCommunities.map(async (community) => {
-            let isMember = false;
-            try {
-              const resCheck = await fetch(
-                `/api/memberships/check?communityId=${community._id}`,
-                { credentials: "include" }
-              );
-              const data = await resCheck.json();
-              isMember = data.isMember;
-            } catch (err) {
-              console.error(`Failed to fetch membership for ${community.name}:`, err);
-            }
-            return { ...community, joined: isMember };
-          })
-        );
+        const data = await res.json();
+        setCommunities(data.map(c => ({ ...c, joined: true }))); // set joined to true to be consistent with ui
 
-        // 3️⃣ Only keep joined communities
-        setCommunities(updated.filter((c) => c.joined));
       } catch (err) {
-        console.error("Failed to fetch communities:", err);
+        console.error("Failed to load joined communities:", err);
       }
     };
 
-    fetchJoinedCommunities();
+    fetchJoined();
   }, []);
 
   const handleJoinToggle = async (communityId, name, currentlyJoined) => {
@@ -59,17 +43,33 @@ function ManageCommunity() {
         throw new Error(errText);
       }
 
-      // Update state: remove unjoined
-      setCommunities((prev) =>
-        prev
-          .map((c) =>
-            c._id === communityId ? { ...c, joined: !currentlyJoined } : c
-          )
-          .filter(c => c.joined)
+      // change join button
+      setCommunities(prev =>
+        prev.map(c =>
+          c._id === communityId ? { ...c, joined: !currentlyJoined } : c
+        )
       );
+      
     } catch (err) {
       console.error("Error toggling membership:", err);
       alert("Failed to update membership. Please try again.");
+    }
+  };
+
+  const handleFavoriteToggle = async (id) => {
+    try {
+      setCommunities((prev) =>
+        prev.map((c) =>
+          c._id === id ? { ...c, favorite: !c.favorite } : c
+        )
+      );
+
+      await fetch(`/api/memberships/favorite/${id}`, {
+        method: "POST",
+        credentials: "include",
+      });
+    } catch (err) {
+      console.error("Favorite toggle failed:", err);
     }
   };
 
@@ -98,7 +98,26 @@ function ManageCommunity() {
             {filtered.map((community) => (
               <div className="community-card" key={community._id}>
                 <img src={community.avatar} alt={community.name} />
-                <span>r/{community.name}</span>
+                <div className="community-info"> {/* Add this wrapper */}
+                  <p className="community-name">
+                      <Link className="community-link" to={`/community/${community.name}`}>
+                        r/{community.name}
+                      </Link>
+                  </p>
+                  <p className="community-description">{community.description}</p>
+                </div>
+                <button
+                  className="make-favouriteMC"
+                  onClick={async (e) => {
+                    e.preventDefault();
+                    handleFavoriteToggle(community._id);
+                  }}
+                >
+                  <img
+                    src={community.favorite ? "/images/star-black.svg" : "/images/star.svg"}
+                    alt="favorite"
+                  />
+                </button>
                 <button
                   className={`join-toggle ${community.joined ? "joined" : ""}`}
                   onClick={() =>

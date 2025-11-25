@@ -12,24 +12,6 @@ function Community() {
   const [posts, setPosts] = useState([]);
   const [loadingCommunity, setLoadingCommunity] = useState(true);
   const [loadingPosts, setLoadingPosts] = useState(true);
-  const [isMember, setIsMember] = useState(false);
-
-  // Check if user is already a member
-  useEffect(() => {
-    const checkMembership = async () => {
-      if (!community) return;
-      try {
-        const res = await fetch(`/api/memberships/check?communityId=${community._id}`, {
-          credentials: "include",
-        });
-        const data = await res.json();
-        setIsMember(data.isMember);
-      } catch (err) {
-        console.error(err);
-      }
-    };
-    checkMembership();
-  }, [community]);
 
   useEffect(() => {
     const fetchCommunity = async () => {

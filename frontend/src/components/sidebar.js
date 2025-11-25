@@ -6,6 +6,7 @@ import CustomFeedPopup from "../pages/CustomFeedPopup";
 function Sidebar() {
   const [recent, setRecent] = useState([]);
   const [communities, setCommunities] = useState([]);
+  const [joinedCommunities, setJoinedCommunities] = useState([]);
   const [favorites, setFavorites] = useState([]);
   const [showPopup, setShowPopup] = useState(false);
   const [customFeeds, setCustomFeeds] = useState([]);
@@ -31,7 +32,7 @@ function Sidebar() {
  // ✅ Fetch all communities
   const fetchCommunities = useCallback(async () => {
     try {
-      const res = await fetch("/api/communities/with-favorites");
+      const res = await fetch("/api/communities/");
       if (!res.ok) throw new Error("Failed to fetch communities");
       const data = await res.json();
       setCommunities(data);
@@ -45,35 +46,62 @@ function Sidebar() {
     fetchCommunities();
   }, [fetchCommunities]);
 
-  // Load recent
-  useEffect(() => {
-    const recentData = JSON.parse(localStorage.getItem("recentCommunities")) || [];
-    setRecent(recentData);
+  // fetch joined comms only to show under community section
+  const fetchJoinedCommunities = useCallback(async () => {
+    try {
+      const res = await fetch("/api/memberships/joined");
+      if (!res.ok) throw new Error("Failed to fetch joined communities");
+      const data = await res.json();
+      console.log(data)
+      setJoinedCommunities(data);
+    } catch (err) {
+      console.error("Error fetching joined communities:", err);
+    }
   }, []);
 
-  // Update recent when navigating
+  // intial load joined communities
   useEffect(() => {
-    if (location.pathname.startsWith("/community/")) {
-      const communityName = location.pathname.split("/")[2];
-      const matched = communities.find((c) => c.name === communityName);
-      if (matched) {
-        setRecent((prev) => {
-          let updated = [matched, ...prev.filter((c) => c.name !== matched.name)];
-          if (updated.length > 5) updated = updated.slice(0, 5);
-          localStorage.setItem("recentCommunities", JSON.stringify(updated));
-          return updated;
-        });
-      }
+    fetchJoinedCommunities();
+  }, [fetchJoinedCommunities]);
+
+  // // Load recent
+  // useEffect(() => {
+  //     const recentData = JSON.parse(localStorage.getItem("recentCommunities")) || [];
+  //     setRecent(recentData);
+  //   }, []);
+
+  // get recent communities
+  const fetchRecentCommunities = useCallback(async () => {
+    try {
+      const res = await fetch('/api/users/recent-communities', {
+        credentials: "include"
+      });
+      
+      const data = await res.json();
+      setRecent(data);
+
+    } catch (err) {
+      console.log("WE FAILED NGA")
+      console.error("Error fetching recent communities:", err);
     }
-  }, [location.pathname, communities]);
+  }, []);
+
+  // initial load
+  useEffect(() => {
+    fetchRecentCommunities();
+  }, [fetchRecentCommunities]);
 
   // ✅ Toggle favorite and immediately re-fetch
   const toggleFavorite = async (communityId) => {
     try {
+      setJoinedCommunities(prev => prev.map(community => 
+        community._id === communityId 
+          ? { ...community, favorite: !community.favorite }
+          : community
+      ));
+
       const res = await fetch(`/api/memberships/favorite/${communityId}`, { method: "POST" });
       if (!res.ok) throw new Error("Failed to toggle favorite");
-      await res.json();
-      await fetchCommunities(); // refresh live
     } catch (err) {
       console.error(err);
     }
@@ -166,7 +194,7 @@ function Sidebar() {
                     className="sidebar-link"
                   >
                     <img
-                      src={community.avatar}
+                      src={community.image}
                       className="sidebar-link-icon-round"
                       alt={community.name}
                     />
@@ -216,12 +244,12 @@ function Sidebar() {
             </li>
 
             {/* Render communities from DB */}
-            {(communities || []).length === 0 ? (
+            {(joinedCommunities || []).length === 0 ? (
               <li className="sidebar-link">
                 <div className="sidebar-section-item-details">Loading communities...</div>
               </li>
             ) : (
-              [...communities]
+              [...joinedCommunities]
                 .sort((a, b) => {
                   if (a.favorite && !b.favorite) return -1;
                   if (!a.favorite && b.favorite) return 1;
@@ -245,7 +273,7 @@ function Sidebar() {
                           }}
                         >
                           <img
-                            src={community.favorite ? "/images/star-yellow.svg" : "/images/star.svg"}
+                            src={community.favorite ? "/images/star-black.svg" : "/images/star.svg"}
                             alt="favorite"
                           />
                         </button>

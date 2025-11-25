@@ -8,5 +8,4 @@ router.get('/joined', authMiddleware, listJoinedCommunities); // only joined
 router.post('/', authMiddleware, createCommunity);
 router.get('/with-favorites', authMiddleware, listCommunitiesWithFavorites);
 
-
 export default router;

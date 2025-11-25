@@ -13,6 +13,7 @@ function CommunityHeader({ banner, avatar, name, communityId }) {
           credentials: "include",
         });
         const data = await res.json();
+        console.log(data.isMember)
         setJoined(data.isMember);
       } catch (err) {
         console.error("Failed to fetch membership status:", err);
@@ -47,13 +48,32 @@ function CommunityHeader({ banner, avatar, name, communityId }) {
   }
 };
 
-  // ✅ Add to RECENT communities
+  // // add to recent communities
+  // useEffect(() => {
+  //   const recent = JSON.parse(localStorage.getItem("recentCommunities")) || [];
+  //   const newCommunity = { name, image: avatar, link: `/community/${name}` };
+  //   const updated = [newCommunity, ...recent.filter(c => c.name !== name)].slice(0, 5);
+  //   localStorage.setItem("recentCommunities", JSON.stringify(updated));
+  // }, [name, avatar]);
+
   useEffect(() => {
-    const recent = JSON.parse(localStorage.getItem("recentCommunities")) || [];
-    const newCommunity = { name, image: avatar, link: `/community/${name}` };
-    const updated = [newCommunity, ...recent.filter(c => c.name !== name)].slice(0, 5);
-    localStorage.setItem("recentCommunities", JSON.stringify(updated));
-  }, [name, avatar]);
+  const updateRecentCommunity = async () => {
+    try {
+      await fetch('/api/users/recent-communities', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: "include",
+        body: JSON.stringify({ communityId }), // based on the community id
+      });
+    } catch (err) {
+      console.error('Failed to update recent communities:', err);
+    }
+  };
+
+  updateRecentCommunity();
+  }, [communityId]);
 
   return (
     <div className="main-head">

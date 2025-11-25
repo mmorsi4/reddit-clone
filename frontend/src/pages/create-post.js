@@ -14,10 +14,11 @@ function CreatePost({ showToast }) {
   const [communities, setCommunities] = useState([]);
   const navigate = useNavigate();
 
+  // note that the communities state here is actually the joined communities
   useEffect(() => {
   const loadCommunities = async () => {
     try {
-      const res = await fetch("/api/communities/", {
+      const res = await fetch("/api/communities/joined", {
         credentials: "include",
       });
       if (!res.ok) throw new Error("Failed to load communities");

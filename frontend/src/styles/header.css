@@ -57,15 +57,11 @@
   font-weight: 500;
   color: #333;
   text-decoration: none; /* removes underline */
-  border-radius: 50%;
+  border-radius: 25%;
 }
 
 .header-action-link:hover {
   background-color: rgb(219, 228, 233);
-  border-radius: 50%;
-}
-
-.header-action-link.rect:hover {
   border-radius: 25%;
 }
 
