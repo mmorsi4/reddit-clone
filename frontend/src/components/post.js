@@ -116,22 +116,22 @@ function Post({
             </div>
           </Link>
           
-          {isAllFeed && (
+         {isAllFeed && (
             <div className="post-meta-actions">
               <button 
                 className={`post-join-button ${isJoined ? 'joined' : 'not-joined'}`}
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation(); 
-                  if(onToggleJoin) onToggleJoin(community);
+                  if(onToggleJoin) onToggleJoin(community); // The handler now receives communityName and ID from parent
                 }}
               >
                 {isJoined ? 'Joined' : 'Join'}
               </button>
+              {/* Optional: Add a 3-dot menu or other actions here */}
               <img src="../images/three-dots.svg" alt="More options" className="post-meta-dots" />
             </div>
           )}
-
         </div>
 
         <Link

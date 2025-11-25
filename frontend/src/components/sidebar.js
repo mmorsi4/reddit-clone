@@ -209,13 +209,11 @@ const handleCloseModal = () => setIsModalOpen(false);
         </li>
 
         {/* CUSTOM FEEDS */}
-        {/* CUSTOM FEEDS */}
         <li>
           <input
             type="checkbox"
             className="sidebar-collapse-checkbox"
             id="sidebar-collapse-checkbox-custom-feeds"
-            defaultChecked // Add defaultChecked to keep the section open initially
           />
           <label
             className="sidebar-collapse-label"

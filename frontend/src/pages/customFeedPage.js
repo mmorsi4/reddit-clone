@@ -2,47 +2,98 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import Header from '../components/header';
 import Sidebar from '../components/sidebar';
-import AddCommunitiesModal from '../pages/addcommunitiesPopup'; 
+import AddCommunitiesModal from '../pages/addcommunitiesPopup';
+import CustomFeedPopup from './CustomFeedPopup';
 import Post from '../components/post';
 
 function CustomFeedPage() {
   const { feedName } = useParams();
   const [feed, setFeed] = useState(null);
-  const [posts, setPosts] = useState([]); 
+  const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [loadingPosts, setLoadingPosts] = useState(false); 
+  const [loadingPosts, setLoadingPosts] = useState(false);
   const [error, setError] = useState(null);
-  const [isModalOpen, setIsModalOpen] = useState(false); 
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEditFeedModalOpen, setIsEditFeedModalOpen] = useState(false);
+  const [joinedCommunities, setJoinedCommunities] = useState([]);
+
+
+  const fetchJoinedCommunities = useCallback(async () => {
+    try {
+      const res = await fetch('/api/memberships/joined', {
+        credentials: "include",
+      });
+      if (!res.ok) throw new Error("Failed to fetch joined communities.");
+
+      const data = await res.json();
+      // FIX: Ensure all fetched IDs are stored as strings for reliable comparison
+      setJoinedCommunities(data.map(comm => comm._id.toString()));
+    } catch (err) {
+      console.error("Error fetching joined communities:", err);
+    }
+  }, []);
+
+  const handleToggleJoin = useCallback(async (communityName, communityId) => {
+    const isCurrentlyJoined = joinedCommunities.includes(communityId);
+    const method = isCurrentlyJoined ? 'DELETE' : 'POST';
+    const apiEndpoint = isCurrentlyJoined ? '/api/memberships/unjoin' : '/api/memberships/join';
+
+    // Optimistic UI Update
+    setJoinedCommunities(prev =>
+      isCurrentlyJoined
+        ? prev.filter(id => id !== communityId)
+        : [...prev, communityId]
+    );
+
+    try {
+      const res = await fetch(apiEndpoint, {
+        method: method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ communityId }), // Pass the string ID
+      });
+
+      if (!res.ok) {
+        alert(`Failed to ${isCurrentlyJoined ? 'leave' : 'join'} r/${communityName}. Please try again.`);
+        fetchJoinedCommunities(); // Re-sync state on failure
+      }
+
+    } catch (err) {
+      console.error("Error toggling join:", err);
+      alert('An unexpected error occurred.');
+      fetchJoinedCommunities(); // Re-sync state on error
+    }
+  }, [joinedCommunities, fetchJoinedCommunities]);
+
 
   const fetchPosts = useCallback(async (feedData) => {
-    
+
     const communityIds = feedData.communities.map(c => {
-        return typeof c === 'object' && c !== null ? c._id : c;
-    }).filter(id => id); 
+      const id = typeof c === 'object' && c !== null ? c._id : c;
+      return id ? id.toString() : null; // Convert to string before filter
+    }).filter(id => id);
 
     if (communityIds.length === 0) {
-        setPosts([]);
-        return;
+      setPosts([]);
+      return;
     }
 
     setLoadingPosts(true);
     try {
-        // Use the POST route designed to accept a list of community IDs
-        const res = await fetch('/api/posts/custom-feed-posts', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ communityIds }),
-        });
-        
-        if (!res.ok) throw new Error('Failed to fetch custom feed posts');
-        
-        const data = await res.json();
-        setPosts(data);
-        
+      const res = await fetch('/api/posts/custom-feed-posts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ communityIds }),
+      });
+
+      if (!res.ok) throw new Error('Failed to fetch custom feed posts');
+
+      const data = await res.json();
+      setPosts(data);
+
     } catch (err) {
-        console.error("Failed to load posts:", err);
+      console.error("Failed to load posts:", err);
     } finally {
-        setLoadingPosts(false);
+      setLoadingPosts(false);
     }
   }, []);
 
@@ -61,9 +112,9 @@ function CustomFeedPage() {
       }
       const data = await res.json();
       setFeed(data);
-      
+
       if (shouldFetchPosts) {
-          fetchPosts(data);
+        fetchPosts(data);
       }
 
     } catch (err) {
@@ -74,11 +125,35 @@ function CustomFeedPage() {
     }
   }, [feedName, fetchPosts]);
 
+  const handleOpenEditFeedModal = () => setIsEditFeedModalOpen(true);
+  const handleCloseEditFeedModal = () => setIsEditFeedModalOpen(false);
+
+  const handleEditFeedSubmit = async (updatedFeedData) => {
+    try {
+      const res = await fetch(`/api/customfeeds/name/${feedName}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updatedFeedData),
+      });
+
+      if (!res.ok) throw new Error('Failed to update feed metadata.');
+
+      const newFeed = await res.json();
+      setFeed(newFeed);
+      handleCloseEditFeedModal();
+
+    } catch (err) {
+      console.error("Error updating feed:", err);
+      alert('Failed to save changes: ' + err.message);
+    }
+  };
+
   useEffect(() => {
     fetchFeedDetails();
-  }, [fetchFeedDetails]);
+    fetchJoinedCommunities(); 
+  }, [fetchFeedDetails, fetchJoinedCommunities]);
 
-  // 4. MODAL HANDLERS
+
   const handleOpenModal = () => {
     setIsModalOpen(true);
   };
@@ -86,12 +161,40 @@ function CustomFeedPage() {
   const handleCloseModal = () => {
     setIsModalOpen(false);
   };
-  
-  const handleCommunityAdded = useCallback((updatedFeedFromServer) => {
-    setFeed(updatedFeedFromServer); 
-    fetchPosts(updatedFeedFromServer);
-  }, [fetchPosts]);
 
+  const handleCommunityAdded = useCallback(async (updatedFeedFromServer) => {
+  const currentFeedName = feedName; 
+    const communityIds = updatedFeedFromServer.communities.map(c => c._id); 
+  
+  try {
+    const url = `/api/customfeeds/name/${currentFeedName}/communities`; 
+    
+    console.log("Sending community update request to:", url);
+    console.log("Payload:", { communities: communityIds });
+
+    const res = await fetch(url, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ communities: communityIds }),
+    });
+
+    if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.message || 'Failed to save communities list on the server.');
+    }
+    
+    const newFeed = await res.json();
+    
+    setFeed(newFeed);
+    fetchPosts(newFeed);
+    handleCloseModal(); 
+
+  } catch (err) {
+    console.error("Error updating communities:", err);
+    alert("Error updating communities: " + err.message);
+  }
+
+}, [feedName, fetchPosts, handleCloseModal]);
 
   if (loading) {
     return (
@@ -110,7 +213,7 @@ function CustomFeedPage() {
   }
 
   const communityCount = feed.communities ? feed.communities.length : 0;
-  const isCreator = true; 
+  const isCreator = true;
 
   return (
     <>
@@ -132,8 +235,8 @@ function CustomFeedPage() {
           <div className="custom-feed-header-actions">
             <button className="icon-button"><img src="../images/dots.svg" alt="More" /></button>
             {isCreator && (
-              <button className="icon-button" onClick={() => {/* Open edit modal */ }}>
-                <img src="../images/edit.svg" alt="Edit" />
+              <button className="icon-button" onClick={handleOpenEditFeedModal}>
+                <img src="../images/edit.svg" alt="Edit Metadata" />
               </button>
             )}
           </div>
@@ -147,40 +250,49 @@ function CustomFeedPage() {
                 <p>Add some and get this feed started</p>
                 <button
                   className="add-communities-button"
-                  onClick={handleOpenModal} 
+                  onClick={handleOpenModal}
                 >
                   Add Communities
                 </button>
               </div>
             ) : (
               <div className="posts-container">
-                  {loadingPosts ? (
-                      <p style={{ textAlign: "center" }}>Loading posts...</p>
-                  ) : posts.length === 0 ? (
-                      <p style={{ textAlign: "center" }}>No posts found in these communities.</p>
-                  ) : (
-                      posts.map(post => (
-                          <Post 
-                              key={post._id}
-                              postId={post._id}
-                              username={post.author?.username} 
-                              avatar={post.author?.avatarUrl} 
-                              time={post.createdAt}
-                              title={post.title}
-                              textPreview={post.body}
-                              preview={post.mediaUrl}
-                              initialVotes={post.score}
-                              initialComments={post.commentCount}
-                              
-                              // Since this is a Custom Feed, we treat the display similar to an All Feed:
-                              isAllFeed={true} 
-                              community={post.community?.name} 
-                              communityAvatarUrl={post.community?.avatar}
-                          />
-                      ))
-                  )}
+                {loadingPosts ? (
+                  <p style={{ textAlign: "center" }}>Loading posts...</p>
+                ) : posts.length === 0 ? (
+                  <p style={{ textAlign: "center" }}>No posts found in these communities.</p>
+                ) : (
+                  posts.map(post => {
+                    const communityIdString = post.community?._id?.toString();
+                    const isMember = communityIdString ? joinedCommunities.includes(communityIdString) : false;
+
+                    return (
+                      <Post
+                        key={post._id}
+                        postId={post._id}
+                        username={post.author?.username}
+                        avatar={post.author?.avatarUrl}
+                        time={post.createdAt}
+                        title={post.title}
+                        textPreview={post.body}
+                        preview={post.mediaUrl}
+                        initialVotes={post.score}
+                        initialComments={post.commentCount}
+
+                        isAllFeed={true}
+                        community={post.community?.name}
+                        communityAvatarUrl={post.community?.avatar}
+                        isJoined={isMember}
+                        onToggleJoin={() => handleToggleJoin(
+                          post.community?.name,
+                          communityIdString
+                        )}
+                      />
+                    );
+                  })
+                )}
               </div>
-            
+
             )}
           </div>
 
@@ -189,7 +301,14 @@ function CustomFeedPage() {
               <div className="feed-info-section">
                 <div className="sidebar-card-header">
                   <h3>{feed.name}</h3>
-                  {isCreator && <button className="edit-button-icon" onClick={handleOpenModal}><img src="../images/edit.svg" alt="Edit" /></button>}
+                  {isCreator &&
+                    <button
+                      className="edit-button-icon"
+                      onClick={handleOpenEditFeedModal} 
+                    >
+                      <img src="../images/edit.svg" alt="Edit Feed Details" />
+                    </button>
+                  }
                 </div>
                 {feed.description && (
                   <p className="feed-description-text">
@@ -214,14 +333,21 @@ function CustomFeedPage() {
               </div>
 
               <div className="communities-section">
-                <h3>COMMUNITIES</h3>
+                <div className="sidebar-card-header">
+                  <h3>COMMUNITIES</h3>
+                  {isCreator &&
+                    <button className="edit-button-icon" onClick={handleOpenModal}>
+                      <img src="../images/edit.svg" alt="Edit Communities" />
+                    </button>
+                  }
+                </div>
                 <div className="search-input-wrapper">
-                  <input 
-                    type="text" 
-                    placeholder="Search communities" 
-                    className="sidebar-search-input" 
-                    onFocus={handleOpenModal} 
-                    readOnly 
+                  <input
+                    type="text"
+                    placeholder="Search communities"
+                    className="sidebar-search-input"
+                    onFocus={handleOpenModal}
+                    readOnly
                   />
                   <img src="../images/search.svg" alt="Search" className="search-icon" />
                 </div>
@@ -242,15 +368,23 @@ function CustomFeedPage() {
               Reddit Rules Privacy Policy User Agreement<br /> Accessibility<br />
               Reddit, Inc. &copy; 2025. All rights reserved.
             </p>
-          </div> 
-        </div> 
-      </div> 
-      
+          </div>
+        </div>
+      </div>
+
       {isModalOpen && feed && (
         <AddCommunitiesModal
           feed={feed}
           onClose={handleCloseModal}
-          onCommunityAdded={handleCommunityAdded} 
+          onCommunityAdded={handleCommunityAdded}
+        />
+      )}
+
+      {isEditFeedModalOpen && feed && (
+        <CustomFeedPopup
+          initialFeed={feed}
+          onClose={handleCloseEditFeedModal}
+          onSubmit={handleEditFeedSubmit}
         />
       )}
     </>

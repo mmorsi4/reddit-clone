@@ -63,19 +63,75 @@ export async function getCustomFeedByName(req, res) {
   }
 }
 
-export async function updateCustomFeedCommunities(req, res) {
+export async function updateCustomFeedMetadata(req, res) {
+  try {
+    const { feedName } = req.params;
+    const { name, description, isPrivate, showOnProfile } = req.body;
+    
+    // Validation
+    if (!name) {
+        return res.status(400).json({ message: "Feed name is required." });
+    }
+
+    // 1. Find the feed and check authorization
+    // NOTE: We find by the current (old) feedName to ensure we get the correct document, 
+    // and check if the current user is the author.
+    let feed = await CustomFeed.findOne({ 
+        name: feedName, 
+        author: req.userId 
+    });
+
+    if (!feed) {
+        return res.status(404).json({ message: "Custom Feed not found or unauthorized access." });
+    }
+
+    // 2. Check for duplicate name if the name is being changed
+    if (name !== feed.name) {
+        const existingFeed = await CustomFeed.findOne({ name: name });
+        if (existingFeed) {
+            return res.status(409).json({ message: "A custom feed with this new name already exists." });
+        }
+    }
+    
+    // 3. Update fields
+    feed.name = name;
+    feed.description = description || ''; // Handle empty description
+    feed.isPrivate = isPrivate;
+    feed.showOnProfile = showOnProfile;
+
+    await feed.save();
+
+    // Re-fetch with populated author details to match the format expected by the frontend (getCustomFeedByName)
+    const updatedFeed = await CustomFeed.findById(feed._id)
+      .populate('author', 'username avatarUrl') 
+      .select('-__v'); 
+
+    // 4. Success Response
+    return res.status(200).json(updatedFeed);
+
+  } catch (error) {
+    console.error("Error updating custom feed metadata:", error);
+    return res.status(500).json({ 
+        message: "Internal server error during feed metadata update.",
+        details: error.message 
+    });
+  }
+}
+// --- END NEW FUNCTION ---
+
+// --- RENAMED FUNCTION: Update Community List ---
+export async function updateCustomFeedCommunitiesList(req, res) { // Renamed from updateCustomFeedCommunities
     try {
         const { feedName } = req.params;
         const { communities: communityIds } = req.body; 
 
-        // 🌟 FIX: Use 'author' instead of 'createdBy' to match the model 🌟
+        // 1. Find feed and check authorization
         const feed = await CustomFeed.findOne({ 
             name: feedName, 
-            author: req.userId // Changed from createdBy: req.userId
+            author: req.userId
         });
 
         if (!feed) {
-            // This error is now likely accurate: the user doesn't own this feed, or it doesn't exist.
             return res.status(404).json({ message: "Custom Feed not found or unauthorized access." });
         }
 
@@ -83,16 +139,18 @@ export async function updateCustomFeedCommunities(req, res) {
         feed.communities = communityIds;
         await feed.save();
 
-        // 3. Success Response
-        return res.status(200).json({ 
-            message: `Communities for feed '${feedName}' updated successfully.`,
-            feed: feed 
-        });
+        // 3. Re-fetch with populated author details to match the format expected by the frontend
+        const updatedFeed = await CustomFeed.findById(feed._id)
+          .populate('author', 'username avatarUrl') 
+          .select('-__v'); 
+
+        // 4. Success Response
+        return res.status(200).json(updatedFeed);
 
     } catch (error) {
         console.error("Error updating custom feed communities:", error);
         return res.status(500).json({ 
-            message: "Internal server error during feed update.",
+            message: "Internal server error during feed community update.",
             details: error.message 
         });
     }
