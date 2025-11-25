@@ -11,11 +11,12 @@ const BASE_BUTTON_STYLE = {
   border: 'none',
 };
 
-const CustomFeedPopup = ({ onClose, onSubmit }) => {
-  const [name, setName] = useState('');
-  const [description, setDescription] = useState('');
-  const [isPrivate, setIsPrivate] = useState(false);
-  const [showOnProfile, setShowOnProfile] = useState(true);
+const CustomFeedPopup = ({ onClose, onSubmit, initialFeed = null }) => {
+  const [name, setName] = useState(initialFeed?.name || '');
+  const [description, setDescription] = useState(initialFeed?.description || '');
+  const [isPrivate, setIsPrivate] = useState(initialFeed?.isPrivate || false);
+  const [showOnProfile, setShowOnProfile] = useState(initialFeed?.showOnProfile || true); // Assuming default is true
+  const isEditing = !!initialFeed;
 
   const handleTogglePrivate = (newIsPrivate) => {
     setIsPrivate(newIsPrivate);
@@ -30,8 +31,15 @@ const CustomFeedPopup = ({ onClose, onSubmit }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSubmit({ name, description, isPrivate, showOnProfile });
-    onClose();
+    onSubmit({ 
+      ...initialFeed,
+      name, 
+      description, 
+      isPrivate, 
+      showOnProfile 
+    });
+
+    onClose(); 
   };
 
   const styles = {
@@ -100,7 +108,7 @@ const CustomFeedPopup = ({ onClose, onSubmit }) => {
     }
   };
 
-  const ToggleSwitch = ({ checked, onChange, label, description }) => {
+const ToggleSwitch = ({ checked, onChange, label, description }) => {
     const isShowOnProfile = label === "Show on profile";
     
     const isDisabled = isShowOnProfile && isPrivate; 
@@ -141,11 +149,12 @@ const CustomFeedPopup = ({ onClose, onSubmit }) => {
     <div style={styles.backdrop} onClick={onClose}>
       <div style={styles.modal} onClick={e => e.stopPropagation()}>
         <div style={styles.header}>
-          <h2 style={styles.title}>Create custom feed</h2>
+          <h2 style={styles.title}>{isEditing ? 'Edit custom feed' : 'Create custom feed'}</h2>
           <button onClick={onClose} style={styles.closeButton}>×</button>
         </div>
 
         <form onSubmit={handleSubmit}>
+          {/* ... (Input fields and ToggleSwitches remain the same, using state: name, description, isPrivate, showOnProfile) ... */}
           <div style={styles.inputArea}>
             <input
               type="text"
@@ -182,6 +191,7 @@ const CustomFeedPopup = ({ onClose, onSubmit }) => {
               onChange={handleToggleShowOnProfile}
           />
 
+
           <div style={styles.footer}>
             <button
               type="button"
@@ -199,7 +209,7 @@ const CustomFeedPopup = ({ onClose, onSubmit }) => {
                 color: '#fff'
               }}
             >
-              Submit
+              {isEditing ? 'Save Changes' : 'Submit'}
             </button>
           </div>
         </form>
