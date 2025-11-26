@@ -16,7 +16,8 @@ function Post({
   isAllFeed,           
   communityAvatarUrl,  
   isJoined,            
-  onToggleJoin,        
+  onToggleJoin,
+  viewType,        
 }) {
   const [voteCount, setVoteCount] = useState(initialVotes || 0);
   const [vote, setVote] = useState(0); 
@@ -91,22 +92,20 @@ const updateVote = async (newVoteValue) => {
   const imageStyle = { borderRadius: '50%', width: '20px', height: '20px', marginRight: '8px' };
 
   return (
-    <div className="post-fullwidth">
+    <div className={`post-fullwidth ${viewType === 'compact' ? 'compact-view' : ''}`}>
       <div className="post">
 
-        {/* POST HEADER/META SECTION */}
         <div className="post-meta">
           <Link
             to={isAllFeed ? `/community/${community}` : (username ? `/profile/${username}` : "#")}
             style={{ textDecoration: 'none', color: 'inherit', display: 'flex', alignItems: 'center' }}
           >
             <div className="post-user-info">
-              {/* Display community info in Custom/All Feed */}
-              {isAllFeed ? (
+              {isAllFeed || community ? ( 
                 <>
                   <img src={communityAvatarUrl || "../images/default-community.svg"} alt="Community Avatar" style={imageStyle} />
                   <span className="post-community-name">r/{community}</span>
-                  {/* FIX: Add the author and time display next to the community */}
+                  {/* Show author and time */}
                   <span className="post-separator-meta post-separator">
                     • Posted by u/{username}
                   </span>
@@ -122,7 +121,6 @@ const updateVote = async (newVoteValue) => {
                   </div>
                 </>
               ) : (
-                // This section remains for direct user profile/standard community views
                 <>
                   <img src={avatar} alt="User Avatar" style={imageStyle} />
                   <span className="post-user-name">u/{username}</span>
@@ -148,11 +146,16 @@ const updateVote = async (newVoteValue) => {
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation(); 
-                  if(onToggleJoin) onToggleJoin(community); // The handler now receives communityName and ID from parent
+                  if(onToggleJoin) onToggleJoin(community); 
                 }}
               >
                 {isJoined ? 'Joined' : 'Join'}
               </button>
+              <img src="../images/three-dots.svg" alt="More options" className="post-meta-dots" />
+            </div>
+          )}
+          {!isAllFeed && (
+            <div className="post-meta-actions">
               <img src="../images/three-dots.svg" alt="More options" className="post-meta-dots" />
             </div>
           )}
@@ -165,18 +168,22 @@ const updateVote = async (newVoteValue) => {
         >
           <h2 className="post-header">{title}</h2>
           
-          {preview ? (
-            <div className="post-preview">
-              {preview.endsWith(".mp4") || preview.endsWith(".webm") ? (
-                <video src={preview} controls className="post-media" />
+          {/* POST PREVIEW / MEDIA (conditionally render based on viewType) */}
+          {viewType !== 'compact' && ( // <-- HIDE MEDIA IN COMPACT VIEW
+              preview ? (
+                <div className="post-preview">
+                  {/* ... media content ... */}
+                  {preview.endsWith(".mp4") || preview.endsWith(".webm") ? (
+                    <video src={preview} controls className="post-media" />
+                  ) : (
+                    <img src={preview} alt="preview" className="post-media" />
+                  )}
+                </div>
               ) : (
-                <img src={preview} alt="preview" className="post-media" />
-              )}
-            </div>
-          ) : (
-            <div className="post-preview">
-              <p>{textPreview}</p>
-            </div>
+                <div className="post-preview">
+                  <p>{textPreview}</p>
+                </div>
+              )
           )}
         </Link>
 

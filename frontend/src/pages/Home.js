@@ -52,6 +52,7 @@ function Home() {
   const [posts, setPosts] = useState([]);
   const [loadingPosts, setLoadingPosts] = useState(true);
   const [joinedCommunityNames, setJoinedCommunityNames] = useState(new Set());
+  const [viewType, setViewType] = useState("card");
   const [sortOpen, setSortOpen] = useState(false);
   const [viewOpen, setViewOpen] = useState(false);
   const [currentSort, setCurrentSort] = useState("Best");
@@ -81,6 +82,7 @@ function Home() {
       const res = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ communityId }),
         credentials: "include",
       });
 
@@ -94,11 +96,14 @@ function Home() {
           }
           return newSet;
         });
+        console.log(`${isCurrentlyJoined ? 'Left' : 'Joined'} community: ${communityName}`);
       } else {
-        throw new Error("Failed to toggle membership");
+        const errorData = await res.json();
+        throw new Error(errorData.message || "Failed to toggle membership");
       }
     } catch (err) {
       console.error("Error toggling membership:", err);
+      alert(`Could not complete action. Error: ${err.message}`);
     }
   };
 
@@ -125,7 +130,7 @@ function Home() {
       const res = await fetch(endpoint, { credentials: "include" });
       if (!res.ok) throw new Error("Failed to fetch posts");
       const data = await res.json();
-      setPosts(data); // update posts immediately
+      setPosts(data);
     } catch (err) {
       console.error(err);
     } finally {
@@ -134,7 +139,6 @@ function Home() {
   };
 
   useEffect(() => {
-    // Whenever feed changes, reset sort to "Best"
     setCurrentSort("Best");
 
     if (isAllFeed) {
@@ -198,22 +202,24 @@ function Home() {
                 </ul>
               </div>
 
-
-
               <div className="mini-view">
                 <button
                   className="mini-view-btn"
                   onClick={() => setViewOpen(prev => !prev)}
                 >
-                  <img src="../images/card-view.svg" alt="card-icon" className="card-view-icon" />
+                  <img 
+                    src={`../images/${viewType}-view.svg`} 
+                    alt={`${viewType}-icon`} 
+                    className={`${viewType}-view-icon`} 
+                  />
                   <img src="../images/down.svg" alt="down" className="down-icon" />
                 </button>
 
                 <ul className={`mini-view-menu ${viewOpen ? "open" : ""}`}>
-                  <li onClick={() => setViewOpen(false)}>
+                  <li onClick={() => { setViewType("card"); setViewOpen(false); }}>
                     <img src="../images/card-view.svg" alt="card-icon" className="card-view-icon" /> Card
                   </li>
-                  <li onClick={() => setViewOpen(false)}>
+                  <li onClick={() => { setViewType("compact"); setViewOpen(false); }}>
                     <img src="../images/compact-view.svg" alt="compact-icon" className="compact-view-icon" /> Compact
                   </li>
                 </ul>
@@ -248,6 +254,7 @@ function Home() {
                       communityAvatarUrl={p.community?.avatar || "../images/default-community.svg"}
                       isJoined={isJoined}
                       onToggleJoin={(name) => handleToggleJoin(name, p.community?._id, isJoined)}
+                      viewType={viewType}
                     />
                   );
                 })

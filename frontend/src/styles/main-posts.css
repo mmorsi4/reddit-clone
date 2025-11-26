@@ -17,11 +17,6 @@
     padding-top: 0;
 }
 
-.post:hover {
-    cursor: pointer;
-    background-color: rgb(239, 239, 239);
-     background-color: rgba(0, 120, 255, 0.06);
-}
 
 .post-meta {
     display: flex;
@@ -304,3 +299,128 @@
     margin-left: 8px;
 }
 
+/* main-posts.css or relevant styles file */
+
+/* --------------------------------------
+   DEFAULT/CARD VIEW STYLES
+   -------------------------------------- */
+.post {
+  width: 100%;
+  box-sizing: border-box;
+  border-radius: 18px;
+  padding: 4px 4px; 
+  transition: background-color 0.25s ease, box-shadow 0.25s ease;
+  overflow: hidden;
+  /* Removed margin-top and border from here as it's now on .post-fullwidth */
+  background-color: white; /* Card background */
+  border: none; /* REMOVED BORDER FOR CARD VIEW */
+}
+
+.post:hover {
+    cursor: pointer;
+    background-color: rgba(0, 120, 255, 0.06);
+}
+
+.post-header {
+    margin-top: 10px;
+    font-size: 18px;
+    font-weight: 500;
+}
+
+.post-preview {
+    margin-top: 15px;
+    margin-bottom: 12px;
+}
+
+/* --------------------------------------
+   COMPACT VIEW OVERRIDES
+   -------------------------------------- */
+
+/* Post Card/Fullwidth Container - Separator for Compact View */
+.post-fullwidth.compact-view {
+    border-bottom: 1px solid #e5e7eb; /* Separator line for compact mode */
+    margin-top: 0;
+    padding-bottom: 0;
+}
+.post-fullwidth.compact-view:last-child {
+    border-bottom: none; /* No separator after the last post */
+}
+
+.post-fullwidth.compact-view .post {
+    /* Make the post a single, narrow row */
+    display: grid;
+    grid-template-columns: min-content 1fr min-content; /* Activity | Content | Actions */
+    align-items: center;
+    padding: 8px 10px;
+    margin-top: 5px;
+    box-shadow: none; /* Remove box shadow for a flatter look */
+}
+
+.post-fullwidth.compact-view .post-activity-wrapper {
+    /* Place activity/votes column on the left */
+    grid-column: 1 / 2;
+    padding-right: 15px;
+}
+
+.post-fullwidth.compact-view .post-activity {
+    /* Align activity elements vertically */
+    flex-direction: column;
+    gap: 0; 
+}
+
+.post-fullwidth.compact-view .post-vote {
+    /* Customize vote container for vertical stacking */
+    flex-direction: column;
+    background-color: transparent;
+    padding: 0;
+    width: auto;
+    gap: 0;
+}
+
+.post-fullwidth.compact-view .post-vote-score {
+    padding: 2px 0; /* Space between up/downvote buttons */
+}
+
+.post-fullwidth.compact-view .post-link {
+    /* Main content area */
+    grid-column: 2 / 3;
+    display: flex; /* Use flex to align title and meta info */
+    flex-direction: column;
+}
+
+.post-fullwidth.compact-view .post-header {
+    /* Smaller, single-line title for compact view */
+    margin-top: 0;
+    font-size: 16px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    order: 2; /* Move title below meta info */
+}
+
+/* Hide or drastically minimize heavy elements */
+.post-fullwidth.compact-view .post-preview {
+    display: none; /* Already handled in Post.jsx, but good to keep */
+}
+
+/* Adjust meta info for the compact layout */
+.post-fullwidth.compact-view .post-meta {
+    /* Meta info inside the main content column */
+    grid-column: 2 / 3;
+    padding: 0; /* Remove padding */
+    margin-bottom: 4px;
+    font-size: 11px; /* Smaller font for details */
+    order: 1; /* Move meta info above the title */
+}
+
+.post-fullwidth.compact-view .post-meta-actions {
+    /* Actions like Join/Dots moved to the end of the meta row */
+    grid-column: 3 / 4;
+    align-self: flex-start;
+    padding-left: 10px;
+}
+
+.post-fullwidth.compact-view .post-activity-container.post-comment {
+    /* Hide comment count button entirely in compact view for simplicity */
+    display: none;
+}
