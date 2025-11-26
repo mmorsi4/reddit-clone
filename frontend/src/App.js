@@ -11,6 +11,7 @@ import CreateCommunityPopup from "./components/create-community";
 import PostPage from "./pages/PostPage";
 import CustomFeedPopup from "./pages/CustomFeedPopup";
 import CustomFeedPage from './pages/customFeedPage';
+import Explore from "./pages/Explore";
 
 function App() {
 
@@ -32,6 +33,7 @@ function App() {
         <Route path="/" element={<Login />} />
         <Route path="/community/:name" element={<Community />} />
         <Route path="/home" element={<Home />} />
+        <Route path="/explore" element={<Explore />} />
         <Route path="/manage_community" element={<ManageCommunity/>} />
         <Route path="/create_post"element={<CreatePost showToast={showToastMessage} />}/>
         <Route path="/profile/:username"element={<ViewProfile/>}/>
