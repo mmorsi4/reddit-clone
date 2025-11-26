@@ -105,6 +105,10 @@ function Community() {
                     initialVotes={p.votes?.reduce((s, v) => s + v.value, 0) || 0}
                     initialComments={p.comments || []}
                     community={community.name}
+                    isAllFeed={false}         
+                    isCommunityPage={true} 
+                    communityAvatarUrl={null} 
+                    viewType={"card"}
                   />
                 ))
               )}

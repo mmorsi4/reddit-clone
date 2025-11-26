@@ -17,7 +17,8 @@ function Post({
   communityAvatarUrl,  
   isJoined,            
   onToggleJoin,
-  viewType,        
+  viewType, 
+  isCommunityPage,
 }) {
   const [voteCount, setVoteCount] = useState(initialVotes || 0);
   const [vote, setVote] = useState(0); 
@@ -82,26 +83,30 @@ const updateVote = async (newVoteValue) => {
 };
 
 
-  const handleAddComment = () => {
+const handleAddComment = () => {
     if (newComment.trim() === "") return;
     const newC = { username: "You", text: newComment };
     setComments([...comments, newC]);
     setNewComment("");
-  };
+};
 
   const imageStyle = { borderRadius: '50%', width: '20px', height: '20px', marginRight: '8px' };
+  const showCommunityMeta = isAllFeed || (!isCommunityPage && community);
 
   return (
     <div className={`post-fullwidth ${viewType === 'compact' ? 'compact-view' : ''}`}>
       <div className="post">
 
+        {/* POST HEADER/META SECTION */}
         <div className="post-meta">
           <Link
-            to={isAllFeed ? `/community/${community}` : (username ? `/profile/${username}` : "#")}
+            to={isCommunityPage ? (username ? `/profile/${username}` : "#") : `/community/${community}`}
             style={{ textDecoration: 'none', color: 'inherit', display: 'flex', alignItems: 'center' }}
           >
             <div className="post-user-info">
-              {isAllFeed || community ? ( 
+              
+              {/* 1. Community Feed / All Feed Logic */}
+              {showCommunityMeta ? ( 
                 <>
                   <img src={communityAvatarUrl || "../images/default-community.svg"} alt="Community Avatar" style={imageStyle} />
                   <span className="post-community-name">r/{community}</span>
@@ -121,6 +126,7 @@ const updateVote = async (newVoteValue) => {
                   </div>
                 </>
               ) : (
+                /* 2. Community Page / Profile View Logic */
                 <>
                   <img src={avatar} alt="User Avatar" style={imageStyle} />
                   <span className="post-user-name">u/{username}</span>
@@ -139,7 +145,7 @@ const updateVote = async (newVoteValue) => {
             </div>
           </Link>
           
-         {isAllFeed && (
+         {isAllFeed && ( 
             <div className="post-meta-actions">
               <button 
                 className={`post-join-button ${isJoined ? 'joined' : 'not-joined'}`}
@@ -154,11 +160,19 @@ const updateVote = async (newVoteValue) => {
               <img src="../images/three-dots.svg" alt="More options" className="post-meta-dots" />
             </div>
           )}
-          {!isAllFeed && (
+          
+          {(!isAllFeed && !isCommunityPage) && ( // Show only dots on Home Feed
             <div className="post-meta-actions">
               <img src="../images/three-dots.svg" alt="More options" className="post-meta-dots" />
             </div>
           )}
+
+          {isCommunityPage && ( // Show only dots on Community Page
+            <div className="post-meta-actions">
+              <img src="../images/three-dots.svg" alt="More options" className="post-meta-dots" />
+            </div>
+          )}
+          
         </div>
 
         <Link
