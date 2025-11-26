@@ -64,3 +64,21 @@ export async function listCommunitiesWithFavorites(req, res) {
   }
 }
 
+export async function listCommunitiesByTopic(req, res) {
+  try {
+    const { topic } = req.query;
+    let communities;
+
+    if (topic && topic !== 'All') {
+      communities = await Community.find({ topics: topic }).lean();
+    } else {
+      communities = await Community.find().lean();
+    }
+
+
+    res.status(200).json(communities);
+  } catch (err) {
+    console.error("Error listing communities by topic:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+}

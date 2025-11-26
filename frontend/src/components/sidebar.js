@@ -188,11 +188,18 @@ function Sidebar() {
               </Link>
             </li>
             <li>
+              <Link to="/explore" className={getLinkClass("/explore")}>
+                <img src="../images/explore.svg" alt="Explore" />
+                <div className="sidebar-section-item-details">Explore</div>
+              </Link>
+            </li>
+            <li>
               <Link to="/home?feed=all" className={getLinkClass("/home?feed=all")}>
                 <img src="../images/all.svg" alt="All" />
                 <div className="sidebar-section-item-details">All</div>
               </Link>
             </li>
+            
             {/* Create Community button */}
             <li>
               <button
@@ -222,6 +229,15 @@ function Sidebar() {
             Custom Feeds <img src="../images/down.svg" alt="Expand" />
           </label>
           <ul className="sidebar-section">
+            {/* Create Custom Feed button (always remains at the bottom) */}
+            <li onClick={handleOpenModal}>
+              <a className="sidebar-link" href="#">
+                <img src="../images/plus.svg" alt="Create Feed" />
+                <div className="sidebar-section-item-details">
+                  Create Custom Feed
+                </div>
+              </a>
+            </li>
             {/* Render dynamically created Custom Feeds */}
             {customFeeds.map((feed) => (
               <li key={feed._id}>
@@ -239,15 +255,7 @@ function Sidebar() {
               </li>
             ))}
 
-            {/* Create Custom Feed button (always remains at the bottom) */}
-            <li onClick={handleOpenModal}>
-              <a className="sidebar-link" href="#">
-                <img src="../images/plus.svg" alt="Create Feed" />
-                <div className="sidebar-section-item-details">
-                  Create Custom Feed
-                </div>
-              </a>
-            </li>
+            
           </ul>
         </li>
 

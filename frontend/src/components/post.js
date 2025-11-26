@@ -153,7 +153,6 @@ const updateVote = async (newVoteValue) => {
               >
                 {isJoined ? 'Joined' : 'Join'}
               </button>
-              {/* Optional: Add a 3-dot menu or other actions here */}
               <img src="../images/three-dots.svg" alt="More options" className="post-meta-dots" />
             </div>
           )}
