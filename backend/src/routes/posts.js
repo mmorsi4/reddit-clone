@@ -8,13 +8,17 @@ import {
     votePost,
     getMyPosts,
     getAllFeedPosts,
-    getHomeFeedPosts,
-    getCustomFeedPosts
+    getCustomFeedPosts,
+    getHomeBestPosts,
+    getHomeNewPosts,
+    getHomeTopPosts
 } from '../controllers/posts.js';
 
 const router = express.Router();
 
-router.get('/feed', authMiddleware, getHomeFeedPosts);
+router.get('/best', getHomeBestPosts);
+router.get('/new', getHomeNewPosts);
+router.get('/top', getHomeTopPosts);
 router.get('/all-feed', getAllFeedPosts); 
 router.get('/my/posts', authMiddleware, getMyPosts); 
 router.get('/', getPosts);
@@ -22,6 +26,8 @@ router.post('/', authMiddleware, upload.single('file'), createPost);
 router.get('/:id', getPost); 
 router.post('/:id/vote', authMiddleware, votePost);
 router.post('/custom-feed-posts', authMiddleware, getCustomFeedPosts);
+
+
 
 
 export default router;

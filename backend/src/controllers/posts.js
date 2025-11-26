@@ -58,20 +58,24 @@ export async function getPost(req, res) {
   }
 }
 
-// Vote on a post
 export async function votePost(req, res) {
   try {
-    const { value } = req.body; 
-    if (![1, -1].includes(value)) return res.status(400).json({ message: 'Invalid vote' });
+    const { value } = req.body; // 1, -1, or 0
+    if (![1, -1, 0].includes(value)) return res.status(400).json({ message: 'Invalid vote' });
 
     const post = await Post.findById(req.params.id);
     if (!post) return res.status(404).json({ message: 'Post not found' });
+
     post.votes = post.votes || [];
+    // Remove any existing vote by this user
     post.votes = post.votes.filter(v => v.user.toString() !== req.userId);
-    post.votes.push({ user: req.userId, value });
+
+    // Only add new vote if it's not 0
+    if (value !== 0) {
+      post.votes.push({ user: req.userId, value });
+    }
 
     await post.save();
-
     const score = post.votes.reduce((s, v) => s + v.value, 0);
     res.json({ score });
   } catch (err) {
@@ -79,6 +83,7 @@ export async function votePost(req, res) {
     res.status(500).json({ message: "Internal server error" });
   }
 }
+
 // Add this function to your posts controller
 export async function getMyPosts(req, res) {
   try {
@@ -93,7 +98,6 @@ export async function getMyPosts(req, res) {
     res.status(500).json({ message: "Internal server error" });
   }
 }
-
 
 export async function getAllFeedPosts(req, res) {
   try {
@@ -113,35 +117,6 @@ export async function getAllFeedPosts(req, res) {
   } catch (err) {
     console.error("Error fetching home feed posts:", err);
 
-    res.status(500).json({ message: "Internal server error" });
-  }
-}
-
-export async function getHomeFeedPosts(req, res) {
-  try {
-    const { limit = 20, page = 1 } = req.query; 
-    const skip = (Number(page) - 1) * Number(limit);
-    const memberships = await Membership.find({ userId: req.userId }).select('communityId').lean();
-    const joinedCommunityIds = memberships.map(m => m.communityId);
-
-    if (joinedCommunityIds.length === 0) {
-      return res.json([]);
-    }
-
-    const query = { 
-      community: { $in: joinedCommunityIds } 
-    }; 
-
-    const posts = await Post.find(query) 
-      .populate('author', 'username displayName avatarUrl')
-      .populate('community', 'name title') 
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(Number(limit));
-
-    res.json(posts);
-  } catch (err) {
-    console.error("Error fetching home feed posts:", err);
     res.status(500).json({ message: "Internal server error" });
   }
 }
@@ -189,6 +164,93 @@ export async function getCustomFeedPosts(req, res) {
     res.json(posts);
   } catch (err) {
     console.error("Error fetching custom feed posts:", err);
+    res.status(500).json({ message: "Internal server error" });
+  }
+}
+
+// --- GET Best posts ---
+export async function getHomeBestPosts(req, res) {
+  try {
+    const { limit = 20, page = 1, home } = req.query;
+    const skip = (Number(page) - 1) * Number(limit);
+
+    let query = { community: { $exists: true, $ne: null } };
+
+    // Filter for home feed
+    if (home === "true" && req.userId) {
+      const memberships = await Membership.find({ userId: req.userId }).select('communityId').lean();
+      const joinedCommunityIds = memberships.map(m => m.communityId);
+      query.community = { $in: joinedCommunityIds };
+    }
+
+    const posts = await Post.find(query)
+      .populate('author', 'username displayName avatarUrl')
+      .populate('community', 'name title avatar _id')
+      .sort({ votesScore: -1, createdAt: -1 })
+      .skip(skip)
+      .limit(Number(limit));
+
+    res.json(posts);
+  } catch (err) {
+    console.error("Error fetching Best posts:", err);
+    res.status(500).json({ message: "Internal server error" });
+  }
+}
+
+// --- GET New posts ---
+export async function getHomeNewPosts(req, res) {
+  try {
+    const { limit = 20, page = 1, home } = req.query;
+    const skip = (Number(page) - 1) * Number(limit);
+
+    let query = { community: { $exists: true, $ne: null } };
+
+    // Filter for home feed
+    if (home === "true" && req.userId) {
+      const memberships = await Membership.find({ userId: req.userId }).select('communityId').lean();
+      const joinedCommunityIds = memberships.map(m => m.communityId);
+      query.community = { $in: joinedCommunityIds };
+    }
+
+    const posts = await Post.find(query)
+      .populate('author', 'username displayName avatarUrl')
+      .populate('community', 'name title avatar _id')
+      .sort({ createdAt: -1 }) // most recent first
+      .skip(skip)
+      .limit(Number(limit));
+
+    res.json(posts);
+  } catch (err) {
+    console.error("Error fetching New posts:", err);
+    res.status(500).json({ message: "Internal server error" });
+  }
+}
+
+// --- GET Top posts ---
+export async function getHomeTopPosts(req, res) {
+  try {
+    const { limit = 20, page = 1, home } = req.query;
+    const skip = (Number(page) - 1) * Number(limit);
+
+    let query = { community: { $exists: true, $ne: null } };
+
+    // Filter for home feed
+    if (home === "true" && req.userId) {
+      const memberships = await Membership.find({ userId: req.userId }).select('communityId').lean();
+      const joinedCommunityIds = memberships.map(m => m.communityId);
+      query.community = { $in: joinedCommunityIds };
+    }
+
+    const posts = await Post.find(query)
+      .populate('author', 'username displayName avatarUrl')
+      .populate('community', 'name title avatar _id')
+      .sort({ 'votes.length': -1, createdAt: -1 }) // most votes first
+      .skip(skip)
+      .limit(Number(limit));
+
+    res.json(posts);
+  } catch (err) {
+    console.error("Error fetching Top posts:", err);
     res.status(500).json({ message: "Internal server error" });
   }
 }

@@ -1,8 +1,6 @@
 import CustomFeed from '../models/CustomFeed.js';
 
-// ==========================
-// CREATE CUSTOM FEED
-// ==========================
+
 export async function createCustomFeed(req, res) {
   try {
     const { name, description, isPrivate, showOnProfile, image } = req.body;
@@ -31,9 +29,6 @@ export async function createCustomFeed(req, res) {
   }
 }
 
-// ==========================
-// GET MY CUSTOM FEEDS
-// ==========================
 export async function getMyCustomFeeds(req, res) {
   try {
     const feeds = await CustomFeed.find({ author: req.userId }).sort({ createdAt: 1 });
@@ -44,9 +39,7 @@ export async function getMyCustomFeeds(req, res) {
   }
 }
 
-// ==========================
-// GET CUSTOM FEED BY ID
-// ==========================
+
 export async function getCustomFeedById(req, res) {
   try {
     const { feedId } = req.params;
@@ -69,9 +62,6 @@ export async function getCustomFeedById(req, res) {
 }
 
 
-// ==========================
-// UPDATE CUSTOM FEED METADATA
-// ==========================
 export async function updateCustomFeedMetadata(req, res) {
   try {
     const { feedId } = req.params;
@@ -113,9 +103,7 @@ export async function updateCustomFeedMetadata(req, res) {
   }
 }
 
-// ==========================
-// UPDATE COMMUNITIES LIST
-// ==========================
+
 export async function updateCustomFeedCommunities(req, res) {
   try {
     const { feedId } = req.params;
@@ -146,7 +134,7 @@ export async function updateCustomFeedCommunities(req, res) {
 }
 
 
-export async function updateCustomFeedCommunitiesList(req, res) { // Renamed from updateCustomFeedCommunities
+export async function updateCustomFeedCommunitiesList(req, res) { 
     try {
         const { feedName } = req.params;
         const { communities: communityIds } = req.body; 

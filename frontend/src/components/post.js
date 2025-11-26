@@ -24,37 +24,62 @@ function Post({
   const [showComments, setShowComments] = useState(false);
   const [newComment, setNewComment] = useState("")
 
-  const handleUpvote = () => {
-    if (vote === 1) {
-      // If already upvoted, remove the upvote
-      setVote(0);
-      setVoteCount((prev) => prev - 1);
-    } else if (vote === -1) {
-      // If downvoted, switch to upvote (remove downvote and add upvote)
-      setVote(1);
-      setVoteCount((prev) => prev + 2); // +1 to remove downvote, +1 to add upvote
-    } else {
-      // If no vote, add upvote
-      setVote(1);
-      setVoteCount((prev) => prev + 1);
-    }
-  };
+const handleUpvote = async () => {
+  let newVoteValue;
 
-  const handleDownvote = () => {
-    if (vote === -1) {
-      // If already downvoted, remove the downvote
-      setVote(0);
-      setVoteCount((prev) => prev + 1);
-    } else if (vote === 1) {
-      // If upvoted, switch to downvote (remove upvote and add downvote)
-      setVote(-1);
-      setVoteCount((prev) => prev - 2); // -1 to remove upvote, -1 to add downvote
+  if (vote === 1) newVoteValue = 0;      // Remove upvote
+  else newVoteValue = 1;                 // Add upvote (or switch from downvote)
+
+  updateVote(newVoteValue);
+};
+
+const handleDownvote = async () => {
+  let newVoteValue;
+
+  if (vote === -1) newVoteValue = 0;    // Remove downvote
+  else newVoteValue = -1;                // Add downvote (or switch from upvote)
+
+  updateVote(newVoteValue);
+};
+
+// Helper function
+const updateVote = async (newVoteValue) => {
+  try {
+    // Optimistically update UI
+    const prevVote = vote;
+    let diff = newVoteValue - prevVote; // difference in score
+    setVote(newVoteValue);
+    setVoteCount(prev => prev + diff);
+
+    // Only send request if voting (not unvote)
+    if (newVoteValue !== 0) {
+      const res = await fetch(`/api/posts/${postId}/vote`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ value: newVoteValue }),
+      });
+
+      if (!res.ok) throw new Error("Vote failed");
+
+      const data = await res.json();
+      setVoteCount(data.score); // sync with backend
     } else {
-      // If no vote, add downvote
-      setVote(-1);
-      setVoteCount((prev) => prev - 1);
+      // If unvoting, send 0 to backend (optional)
+      await fetch(`/api/posts/${postId}/vote`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ value: 0 }),
+      });
     }
-  };
+  } catch (err) {
+    console.error(err);
+    // Rollback UI if failed
+    setVote(prev => prev);
+  }
+};
+
 
   const handleAddComment = () => {
     if (newComment.trim() === "") return;
