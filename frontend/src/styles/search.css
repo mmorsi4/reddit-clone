@@ -34,6 +34,7 @@
   top: 100%; /* position BELOW the search bar */
   left: 0;
   width: 100%;
+  max-height: 650px;
   margin-top: 6px; /* small gap between bar and results */
   z-index: 10;
   border-radius: 12px;
@@ -73,7 +74,7 @@
 .recent-searches > li {
   display: flex;
   align-items: center;
-  padding: 4px 24px;
+  padding: 10px 24px;
   gap: 14px;
 }
 
@@ -109,7 +110,7 @@
 }
 
 .community-image {
-  width: 16px;
-  height: 16px;
+  width: 24px;
+  height: 24px;
   border-radius: 8px;
 }
