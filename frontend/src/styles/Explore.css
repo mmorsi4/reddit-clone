@@ -104,6 +104,17 @@
     color: #000;
 }
 
+.explore-community-topics-desc {
+    margin: 0 0 0 0;
+    font-size: 12px;
+    color: #777;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-top: -13px;
+    margin-bottom: 5px;
+}
+
 .explore-community-topics-hint {
     margin: 2px 0 0 0;
     font-size: 12px;
