@@ -8,11 +8,12 @@
     background-color: white;
     width: 220px;
     padding: 4px 16px;
-    border-right: 1px solid rgba(0, 0, 0, 0.2);
+    border-right: 1px solid rgba(0, 0, 0, 0.2); 
     height: calc(100vh - 57px);
     overflow-y: auto;
     scrollbar-width: thin;
     scrollbar-color: transparent  transparent;
+    transition: transform 0.3s ease;
 }
 
 .sidebar:hover {
@@ -87,11 +88,6 @@
     background-color: rgba(0, 0, 0, 0.16);
 }
 
-.sidebar-collapse-label > img {
-    transform: rotateZ(180deg);
-    transition: transform 0.25s;
-}
-
 .sidebar-collapse-checkbox:checked ~ .sidebar-collapse-label > img {
     transform: rotateZ(0);
 }
@@ -114,17 +110,15 @@
   gap: 6px;
 }
 
-/* Make long community names truncate with ellipsis */
 .sidebar-section-item-details .community-name {
   display: inline-block;
-  max-width: 120px; /* adjust to fit your sidebar width */
+  max-width: 120px; 
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
   vertical-align: middle;
 }
 
-/* Prevent the star from shifting due to name overflow */
 .sidebar-section-item-details .make-favourite {
   flex-shrink: 0;
   margin-left: 6px;
@@ -138,7 +132,7 @@
   width: 16px;
   height: 16px;
   vertical-align: middle;
-  pointer-events: none; /* ensures only the button gets the click */
+  pointer-events: none;
 }
 
 .sidebar-section-item-details .make-favourite:hover {
@@ -164,7 +158,7 @@
 }
 
 .sidebar-link.active {
-  background-color: #e6f2ff; /* light blue highlight like Reddit */
+  background-color: #e6f2ff; 
   border-radius: 8px;
   font-weight: 600;
 }
@@ -191,12 +185,15 @@
   text-overflow: ellipsis;
 }
 
-/* Make the Create Community button look exactly like sidebar links */
 .sidebar-link.create-btn {
+  width: 100%; 
+  text-align: left;
   background: none;
   border: none;
-  width: 100%;
-  text-align: left;
+  display: flex; 
+  align-items: center;
+  padding: 4px 16px;
+  color: rgb(33, 39, 42);
 }
 
 .sidebar-link.create-btn:hover {
@@ -214,4 +211,54 @@
   height: 30px;
   border-radius: 50%;
   object-fit: cover;
+}
+
+.main {
+    margin-left: 250px; 
+    transition: margin-left 0.3s ease;
+}
+
+.sidebar-container.collapsed ~ .main {
+    margin-left: 20px; 
+}
+
+.sidebar-container {
+    position: fixed; 
+    top: 0;
+    left: 0;
+    width: 250px; 
+    height: 100vh;
+    transition: transform 0.3s ease; 
+    z-index: 10;
+    border-right: none; 
+}
+
+.sidebar-collapse-toggle {
+    position: absolute;
+    top: 80px; 
+    right: -17px; 
+    padding: 8px; 
+    border: 1px solid rgba(0, 0, 0, 0.2); 
+    background-color: white; 
+    border-radius: 100%; 
+    cursor: pointer;
+    z-index: 11;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); 
+    transition: none; 
+}
+
+.sidebar-container.collapsed .sidebar-collapse-toggle {
+    transform: none; 
+    right: -18px;
+}
+
+.sidebar-collapse-toggle img {
+    width: 15px;
+    height: 15px;
+    vertical-align: middle; 
+    transition: transform 0.3s ease;
+}
+.sidebar-container.collapsed {
+    transform: translateX(calc(17px - 250px)); 
+    width: 250px; 
 }

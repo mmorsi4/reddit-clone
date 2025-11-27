@@ -12,7 +12,7 @@ function Sidebar() {
   const [customFeeds, setCustomFeeds] = useState([]);
   const location = useLocation();
   const [isModalOpen, setIsModalOpen] = useState(false);
-
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
   const getLinkClass = (path) => {
     const currentURL = location.pathname + location.search;
@@ -168,9 +168,23 @@ function Sidebar() {
     }
   };
 
+   const toggleCollapse = () => {
+    setIsCollapsed(prev => !prev);
+  };
+
 
   return (
-    <div className="sidebar-container">
+  <div className={`sidebar-container ${isCollapsed ? 'collapsed' : ''}`}>
+    <button 
+      className="sidebar-collapse-toggle"
+      onClick={toggleCollapse} 
+    >
+      <img 
+        src="../images/collapse.svg" 
+        alt="Collapse Sidebar" 
+      />
+    </button>
+
       <ul className="sidebar">
         {/* HOME / POPULAR / ALL */}
         <li>
