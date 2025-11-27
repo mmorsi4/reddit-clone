@@ -342,8 +342,8 @@ function CustomFeedPage() {
                         textPreview={post.body}
                         preview={post.mediaUrl}
                         initialVotes={post.score}
+                        initialVote={post.userVote}
                         initialComments={post.commentCount}
-
                         isAllFeed={true}
                         community={post.community?.name}
                         communityAvatarUrl={post.community?.avatar}

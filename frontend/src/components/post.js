@@ -11,6 +11,7 @@ function Post({
   textPreview,
   avatar,
   initialVotes,
+  initialVote,
   initialComments,
   community,
   isAllFeed,           
@@ -21,7 +22,7 @@ function Post({
   isCommunityPage,
 }) {
   const [voteCount, setVoteCount] = useState(initialVotes || 0);
-  const [vote, setVote] = useState(0); 
+  const [vote, setVote] = useState(initialVote || 0); 
   const [comments, setComments] = useState(initialComments || []);
   const [showComments, setShowComments] = useState(false);
   const [newComment, setNewComment] = useState("")
@@ -44,44 +45,27 @@ const handleDownvote = async () => {
   updateVote(newVoteValue);
 };
 
-// Helper function
 const updateVote = async (newVoteValue) => {
   try {
-    // Optimistically update UI
-    const prevVote = vote;
-    let diff = newVoteValue - prevVote; // difference in score
+    const res = await fetch(`/api/posts/${postId}/vote`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ value: newVoteValue }),
+    });
+
+    if (!res.ok) throw new Error("Vote failed");
+
+    const data = await res.json();
+
+    // update state only after backend confirms
     setVote(newVoteValue);
-    setVoteCount(prev => prev + diff);
+    setVoteCount(data.score);
 
-    // Only send request if voting (not unvote)
-    if (newVoteValue !== 0) {
-      const res = await fetch(`/api/posts/${postId}/vote`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ value: newVoteValue }),
-      });
-
-      if (!res.ok) throw new Error("Vote failed");
-
-      const data = await res.json();
-      setVoteCount(data.score); // sync with backend
-    } else {
-      // If unvoting, send 0 to backend (optional)
-      await fetch(`/api/posts/${postId}/vote`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ value: 0 }),
-      });
-    }
   } catch (err) {
     console.error(err);
-    // Rollback UI if failed
-    setVote(prev => prev);
   }
 };
-
 
 const handleAddComment = () => {
     if (newComment.trim() === "") return;
