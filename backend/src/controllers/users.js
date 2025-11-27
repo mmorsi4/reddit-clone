@@ -83,3 +83,17 @@ export async function updateRecentCommunities(req, res){
     res.status(500).json({ message: "Server error" });
   }
 }
+
+export async function getUsers(req, res) {
+  try {
+    const users = await User.find()
+      .select('-passwordHash -email') // Exclude sensitive fields
+      .sort({ createdAt: -1 }) // Most recent first\
+      .lean();
+
+    res.status(200).json(users);
+  } catch (err) {
+    console.error('Error fetching users:', err);
+    res.status(500).json({ message: 'Server error while fetching users' });
+  }
+}
