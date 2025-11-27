@@ -2,9 +2,11 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import SearchBar from "../components/searchbar";
+import Chat from "../components/Chat";
 
 function Header() {
   const [currentUser, setCurrentUser] = useState(null);
+  const [isChatOpen, setIsChatOpen] = useState(false);
 
   useEffect(() => {
     const fetchCurrentUser = async () => {
@@ -25,6 +27,11 @@ function Header() {
     fetchCurrentUser();
   }, []);
 
+  const toggleChat = (event) => {
+    event.preventDefault(); // Prevent default link/button action
+    setIsChatOpen(prev => !prev);
+  };
+
   const profileLink = currentUser ? `/profile/${currentUser.username}` : "#";
   
   return (
@@ -40,12 +47,12 @@ function Header() {
         <ul className="header-actions">
 
           <li className="header-action">
-            <button>
-              <a href="./chats.html" className="header-action-link">
+            <button onClick={toggleChat}>
+              <div className="header-action-link"> 
                 <img src="../images/chat.svg" />
                 <div className="message-counter">1</div>
                 <div className="header-action-tooltip">Open chat</div>
-              </a>
+              </div>
             </button>
           </li>
 
@@ -124,7 +131,8 @@ function Header() {
           </li>
         </ul>
       </div>
-      </>
+      {isChatOpen && <Chat onClose={() => setIsChatOpen(false)} />} 
+    </>
 )};
 
 export default Header;
