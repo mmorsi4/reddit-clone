@@ -102,7 +102,8 @@ function Community() {
                     textPreview={p.body || ""}
                     preview={p.mediaUrl || ""}
                     avatar={p.author?.avatarUrl || "../images/avatar.png"}
-                    initialVotes={p.votes?.reduce((s, v) => s + v.value, 0) || 0}
+                    initialVotes={p.score}
+                    initialVote={p.userVote}
                     initialComments={p.comments || []}
                     community={community.name}
                     isAllFeed={false}         
