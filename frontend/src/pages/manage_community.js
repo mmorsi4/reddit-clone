@@ -95,7 +95,13 @@ function ManageCommunity() {
           <p>No joined communities found.</p>
         ) : (
           <div className="community-list">
-            {filtered.map((community) => (
+            {filtered
+            .sort((a, b) => {
+              if (a.favorite && !b.favorite) return -1;
+              if (!a.favorite && b.favorite) return 1;
+              return 0;
+            })
+            .map((community) => (
               <div className="community-card" key={community._id}>
                 <img src={community.avatar} alt={community.name} />
                 <div className="community-info"> {/* Add this wrapper */}
