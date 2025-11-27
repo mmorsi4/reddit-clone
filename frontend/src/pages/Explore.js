@@ -147,8 +147,9 @@ function Explore() {
             
             <div className="explore-community-info">
                 <h3 className="explore-community-name">r/{community.name}</h3>
+                <p className="explore-community-topics-desc">{community.description}</p>
                 <p className="explore-community-topics-hint">
-                    {community.topics && community.topics.length > 0 ? community.topics.slice(0, 2).join(' • ') : 'General'}
+                    {community.topics && community.topics.length > 0 ? community.topics.slice(0, 3).join(' • ') : 'General'}
                 </p>
             </div>
             
