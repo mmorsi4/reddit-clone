@@ -22,7 +22,7 @@ function CustomFeedPage() {
 
   const fetchJoinedCommunities = useCallback(async () => {
     try {
-      const res = await fetch('/api/user/joined', {
+      const res = await fetch('/api/memberships/joined', {
         credentials: "include",
       });
       if (!res.ok) throw new Error("Failed to fetch joined communities.");
