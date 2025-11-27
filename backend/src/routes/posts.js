@@ -16,14 +16,14 @@ import {
 
 const router = express.Router();
 
-router.get('/best', getHomeBestPosts);
-router.get('/new', getHomeNewPosts);
-router.get('/top', getHomeTopPosts);
-router.get('/all-feed', getAllFeedPosts); 
+router.get('/best', authMiddleware, getHomeBestPosts);
+router.get('/new', authMiddleware, getHomeNewPosts);
+router.get('/top', authMiddleware, getHomeTopPosts);
+router.get('/all-feed', authMiddleware, getAllFeedPosts); 
 router.get('/my/posts', authMiddleware, getMyPosts); 
-router.get('/', getPosts);
+router.get('/', authMiddleware, getPosts);
 router.post('/', authMiddleware, upload.single('file'), createPost);
-router.get('/:id', getPost); 
+router.get('/:id', authMiddleware, getPost); 
 router.post('/:id/vote', authMiddleware, votePost);
 router.post('/custom-feed-posts', authMiddleware, getCustomFeedPosts);
 

@@ -14,8 +14,8 @@ export async function createCommunity(req, res) {
       name,
       title: title || name,
       description,
-      avatar: avatar || "",
-      banner: banner || "",
+      avatar: avatar || "/images/community-avatar-placeholder.png",
+      banner: banner || "/images/community-banner-placeholder.png",
       topics: topics || [],
       createdBy: req.userId,
     });
