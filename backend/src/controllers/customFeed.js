@@ -65,7 +65,7 @@ export async function getCustomFeedById(req, res) {
 export async function updateCustomFeedMetadata(req, res) {
   try {
     const { feedId } = req.params;
-    const { name, description, isPrivate, showOnProfile } = req.body;
+    const { name, description, isPrivate, showOnProfile, image } = req.body; 
 
     if (!name) {
       return res.status(400).json({ message: "Feed name is required." });
@@ -76,7 +76,6 @@ export async function updateCustomFeedMetadata(req, res) {
       return res.status(404).json({ message: "Feed not found or unauthorized." });
     }
 
-    // Check for duplicate name if changing
     if (name !== feed.name) {
       const existingFeed = await CustomFeed.findOne({ name });
       if (existingFeed) {
@@ -88,6 +87,10 @@ export async function updateCustomFeedMetadata(req, res) {
     feed.description = description || '';
     feed.isPrivate = isPrivate;
     feed.showOnProfile = showOnProfile;
+    
+    if (image) { 
+        feed.image = image;
+    }
 
     await feed.save();
 
@@ -102,7 +105,6 @@ export async function updateCustomFeedMetadata(req, res) {
     res.status(500).json({ message: "Internal server error", details: err.message });
   }
 }
-
 
 export async function updateCustomFeedCommunities(req, res) {
   try {
@@ -139,7 +141,6 @@ export async function updateCustomFeedCommunitiesList(req, res) {
         const { feedName } = req.params;
         const { communities: communityIds } = req.body; 
 
-        // 1. Find feed and check authorization
         const feed = await CustomFeed.findOne({ 
             name: feedName, 
             author: req.userId
@@ -149,16 +150,13 @@ export async function updateCustomFeedCommunitiesList(req, res) {
             return res.status(404).json({ message: "Custom Feed not found or unauthorized access." });
         }
 
-        // 2. Update the communities array
         feed.communities = communityIds;
         await feed.save();
 
-        // 3. Re-fetch with populated author details to match the format expected by the frontend
         const updatedFeed = await CustomFeed.findById(feed._id)
           .populate('author', 'username avatarUrl') 
           .select('-__v'); 
 
-        // 4. Success Response
         return res.status(200).json(updatedFeed);
 
     } catch (error) {
@@ -168,4 +166,59 @@ export async function updateCustomFeedCommunitiesList(req, res) {
             details: error.message 
         });
     }
+}
+
+export async function deleteCustomFeed(req, res) {
+  try {
+    const { feedId } = req.params;
+
+    const feed = await CustomFeed.findById(feedId);
+
+    // Check if feed exists and the user is the author
+    if (!feed || feed.author.toString() !== req.userId) {
+      return res.status(404).json({ message: "Feed not found or unauthorized to delete." });
+    }
+
+    // Delete the feed
+    await CustomFeed.findByIdAndDelete(feedId);
+
+    res.status(200).json({ message: "Custom feed deleted successfully." });
+  } catch (err) {
+    console.error("Error deleting custom feed:", err);
+    res.status(500).json({ message: "Internal server error during deletion." });
+  }
+}
+
+export async function copyCustomFeed(req, res) {
+  try {
+    const { feedId } = req.params;
+
+    const originalFeed = await CustomFeed.findById(feedId);
+
+    if (!originalFeed) {
+      return res.status(404).json({ message: "Original feed not found." });
+    }
+
+    let newName = `${originalFeed.name} (Copy)`;
+    let counter = 1;
+    while (await CustomFeed.findOne({ name: newName })) {
+      counter++;
+      newName = `${originalFeed.name} (Copy ${counter})`;
+    }
+
+    const newFeed = await CustomFeed.create({
+      name: newName,
+      description: originalFeed.description,
+      isPrivate: true, 
+      showOnProfile: originalFeed.showOnProfile,
+      image: originalFeed.image,
+      author: req.userId, 
+      communities: originalFeed.communities,
+    });
+
+    res.status(201).json(newFeed);
+  } catch (err) {
+    console.error("Error copying custom feed:", err);
+    res.status(500).json({ message: "Internal server error during copy." });
+  }
 }

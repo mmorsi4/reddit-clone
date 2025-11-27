@@ -33,31 +33,50 @@ function Explore() {
   const fetchCommunities = useCallback(async (topic) => {
     setLoading(true);
     setError(null);
+
+    // 1. Determine URL for ALL communities (filtered by topic)
+    const allCommunitiesUrl = topic === 'All' 
+        ? `${API_BASE_URL}` 
+        : `${API_BASE_URL}/filter?topic=${topic}`;
+    
+    // 2. URL for the CURRENT USER's joined communities
+    const joinedCommunitiesUrl = `${MEMBERSHIP_API_URL}/joined`; 
+
     try {
-      let url;
-      if (topic === 'All') {
-        url = `${API_BASE_URL}`; 
-      } else {
-        url = `${API_BASE_URL}/filter?topic=${topic}`;
-      }
+      // Execute both fetches concurrently
+      const [allResponse, joinedResponse] = await Promise.all([
+        // Fetch All Communities (Does not require auth, but may need it depending on your backend)
+        fetch(allCommunitiesUrl),
+        
+        // Fetch Joined Communities (MUST INCLUDE CREDENTIALS)
+        fetch(joinedCommunitiesUrl, { credentials: "include" }) // <--- CRITICAL FIX HERE
+      ]);
 
-      const response = await fetch(url);
+      if (!allResponse.ok) {
+        throw new Error(`Failed to fetch all communities! Status: ${allResponse.status}`);
+      }
       
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      const communitiesWithState = data.map(c => ({ 
-          ...c, 
-          isMember: c.isMember || false 
+      // Joined communities fetch might return 401/403 if auth fails, but 
+      // if it fails, we treat the user as having no joined communities for now.
+      const joinedData = joinedResponse.ok ? await joinedResponse.json() : [];
+      const allData = await allResponse.json();
+      
+      // Create a Set for fast lookup of joined community IDs
+      // Use the _id field from the joined communities data
+      const joinedIds = new Set(joinedData.map(c => c._id));
+      
+      // Merge the status into the main list
+      const mergedCommunities = allData.map(community => ({
+        ...community,
+        // Check if the community's ID exists in the joinedIds Set
+        isMember: joinedIds.has(community._id) 
       }));
 
-      setCommunities(communitiesWithState);
+      setCommunities(mergedCommunities);
 
     } catch (err) {
       console.error("Error fetching communities:", err);
-      setError("Failed to load communities. Please check your network or API connection.");
+      setError("Failed to load communities or check membership status.");
       setCommunities([]);
     } finally {
       setLoading(false);
