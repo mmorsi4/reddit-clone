@@ -23,9 +23,6 @@ function Post({
 }) {
   const [voteCount, setVoteCount] = useState(initialVotes || 0);
   const [vote, setVote] = useState(initialVote || 0); 
-  const [comments, setComments] = useState(initialComments || []);
-  const [showComments, setShowComments] = useState(false);
-  const [newComment, setNewComment] = useState("")
 
 const handleUpvote = async () => {
   let newVoteValue;
@@ -65,13 +62,6 @@ const updateVote = async (newVoteValue) => {
   } catch (err) {
     console.error(err);
   }
-};
-
-const handleAddComment = () => {
-    if (newComment.trim() === "") return;
-    const newC = { username: "You", text: newComment };
-    setComments([...comments, newC]);
-    setNewComment("");
 };
 
   const imageStyle = { borderRadius: '50%', width: '20px', height: '20px', marginRight: '8px' };
@@ -209,7 +199,7 @@ const handleAddComment = () => {
                     style={{ textDecoration: "none", color: "inherit" }}
                 >
                     <img src="../images/comment.svg" alt="comment" />
-                    <span className="post-comment-amount">{comments.length}</span>
+                    <span className="post-comment-amount">{initialComments}</span>
                 </Link>
             </div>
         </div>

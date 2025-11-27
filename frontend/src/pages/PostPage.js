@@ -13,7 +13,9 @@ function PostPage() {
   // ✅ Define fetchPost OUTSIDE useEffect using useCallback (so it's reusable)
   const fetchPost = useCallback(async () => {
     try {
-      const res = await fetch(`http://localhost:5001/api/posts/${postId}`);
+      const res = await fetch(`http://localhost:5001/api/posts/${postId}`, {
+        credentials: "include"
+      });
       if (!res.ok) throw new Error("Post not found");
       const data = await res.json();
       setPost(data.post);

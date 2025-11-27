@@ -104,7 +104,7 @@ function Community() {
                     avatar={p.author?.avatarUrl || "../images/avatar.png"}
                     initialVotes={p.score}
                     initialVote={p.userVote}
-                    initialComments={p.comments || []}
+                    initialComments={p.commentCount}
                     community={community.name}
                     isAllFeed={false}         
                     isCommunityPage={true} 
