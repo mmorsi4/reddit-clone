@@ -3,11 +3,22 @@ import CustomFeed from '../models/CustomFeed.js';
 
 export async function createCustomFeed(req, res) {
   try {
-    const { name, description, isPrivate, showOnProfile, image } = req.body;
+    // ✅ Destructure initialCommunityId from the request body
+    const { 
+      name, 
+      description, 
+      isPrivate, 
+      showOnProfile, 
+      image, 
+      initialCommunityId 
+    } = req.body;
 
     if (!name || !image) {
       return res.status(400).json({ message: "Name and image path are required." });
     }
+    
+    // ✅ Check if initialCommunityId is provided and use it, otherwise use an empty array
+    const communitiesList = initialCommunityId ? [initialCommunityId] : [];
 
     const feed = await CustomFeed.create({
       name,
@@ -16,7 +27,8 @@ export async function createCustomFeed(req, res) {
       showOnProfile,
       image,
       author: req.userId,
-      communities: [],
+      // ✅ Use the dynamically created list
+      communities: communitiesList, 
     });
 
     res.status(201).json(feed);

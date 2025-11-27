@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import AddToCustom from "./AddToCustom";
 
 function CommunityHeader({ banner, avatar, name, communityId }) {
   const [joined, setJoined] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const [favorite, setFavorite] = useState(false);
+  const [showCustomFeedPopup, setShowCustomFeedPopup] = useState(false);
 
   // ✅ Check membership from backend on mount
   useEffect(() => {
@@ -102,12 +104,6 @@ function CommunityHeader({ banner, avatar, name, communityId }) {
     }
   };
 
-  // ✅ Placeholder for custom feed (you'll need to implement this)
-  const handleCustomFeed = () => {
-    // Implement custom feed logic here
-    console.log("Custom feed clicked");
-    setShowMenu(false);
-  };
 
   // ✅ Close menu on outside click
   useEffect(() => {
@@ -119,6 +115,18 @@ function CommunityHeader({ banner, avatar, name, communityId }) {
     document.addEventListener("click", handleClickOutside);
     return () => document.removeEventListener("click", handleClickOutside);
   }, []);
+
+
+  const handleCustomFeed = () => {
+    setShowMenu(false); // Close the 'more' menu
+    setShowCustomFeedPopup(true); // Open the popup
+  };
+
+  // ✅ Close the custom feed popup
+  const handleCloseCustomFeedPopup = () => {
+    setShowCustomFeedPopup(false);
+  };
+  
 
   return (
     <div className="main-head">
@@ -156,8 +164,8 @@ function CommunityHeader({ banner, avatar, name, communityId }) {
           </button>
 
           <ul className={`more-menu ${showMenu ? "visible" : ""}`}>
+            {/* Updated onClick handler */}
             <li className="more-menu-item" onClick={handleCustomFeed}>
-              {/* {1 ? "Remove from custom feed" : "Add to custom feed"} */}
               Add to custom feed
             </li>
             <li className="more-menu-item" onClick={toggleFavorite}>
@@ -168,6 +176,13 @@ function CommunityHeader({ banner, avatar, name, communityId }) {
         
         </div>
       </div>
+      {showCustomFeedPopup && (
+        <AddToCustom
+          communityId={communityId}
+          communityName={name}
+          onClose={handleCloseCustomFeedPopup}
+        />
+      )}
     </div>
   );
 }

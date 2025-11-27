@@ -154,7 +154,6 @@ const ToggleSwitch = ({ checked, onChange, label, description }) => {
         </div>
 
         <form onSubmit={handleSubmit}>
-          {/* ... (Input fields and ToggleSwitches remain the same, using state: name, description, isPrivate, showOnProfile) ... */}
           <div style={styles.inputArea}>
             <input
               type="text"
