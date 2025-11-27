@@ -249,7 +249,7 @@ function Home() {
                       avatar={p.author?.avatarUrl || "../images/avatar.png"}
                       initialVotes={p.score}
                       initialVote={p.userVote}
-                      initialComments={p.comments || []}
+                      initialComments={p.commentCount}
                       community={communityName}
                       isAllFeed={isAllFeed}
                       communityAvatarUrl={p.community?.avatar || "../images/default-community.svg"}
