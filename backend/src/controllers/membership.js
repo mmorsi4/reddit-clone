@@ -69,7 +69,10 @@ export const checkMembership = async (req, res) => {
     }
 
     const membership = await Membership.findOne({ userId, communityId });
-    res.status(200).json({ isMember: !!membership });
+    res.status(200).json({
+      isMember: !!membership,
+      isFavorite: membership ? membership.favorite : false 
+    });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Server error" });
