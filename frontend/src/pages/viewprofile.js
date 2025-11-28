@@ -13,7 +13,6 @@ function ViewProfile() {
   const { username } = useParams(); // get username from url
 
   useEffect(() => {
-    // 🧠 Get current user data
     const fetchProfile = async () => {
       const res = await fetch(`/api/users/${username}`, {
         method: "GET",
@@ -69,8 +68,6 @@ function ViewProfile() {
   const fetchUserPosts = async () => {
     setLoading(true);
     try {
-      console.log("🔍 Starting to fetch user posts...");
-      
       const res = await fetch("http://localhost:5001/api/posts/my/posts", {
         method: "GET",
         headers: {
@@ -78,21 +75,14 @@ function ViewProfile() {
         },
         credentials: "include"
       });
-
-      console.log("📥 Posts response status:", res.status);
-      console.log("📥 Posts response ok:", res.ok);
-
       if (res.ok) {
         const posts = await res.json();
         setUserPosts(posts);
-        console.log("✅ User posts fetched:", posts);
       } else {
         const errorText = await res.text();
-        console.error("❌ Failed to fetch posts. Status:", res.status, "Error:", errorText);
       }
     } catch (error) {
-      console.error("💥 Error fetching posts:", error);
-      console.error("💥 Error details:", error.message);
+      console.error("Error details:", error.message);
     } finally {
       setLoading(false);
     }

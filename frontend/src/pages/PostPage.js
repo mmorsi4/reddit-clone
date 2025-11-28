@@ -304,11 +304,20 @@ function PostPage() {
             {/* Post Title */}
             <h1 className="post-title">{post.title}</h1>
 
-            {/* Post Content */}
+            {/* Post Content - SIMPLIFIED: NO LOADING STATE */}
             <div className="post-content">
               {post.mediaUrl ? (
                 <div className="post-media">
-                  <img src={post.mediaUrl} alt="post content" className="post-image" />
+                  {/* SIMPLE IMAGE - NO COMPLEX LOAD HANDLING */}
+                  <img 
+                    src={post.mediaUrl} 
+                    alt="post content" 
+                    className="post-image"
+                    onError={(e) => {
+                      console.error("Failed to load image:", post.mediaUrl);
+                      e.target.style.display = 'none';
+                    }}
+                  />
                 </div>
               ) : (
                 <div className="post-text">

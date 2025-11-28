@@ -52,7 +52,7 @@ export async function getPosts(req, res) {
   }
 }
 
-// Get a single post with comments
+// Get a single post with comments (with proper nesting for replies)
 export async function getPost(req, res) {
   try {
     const post = await Post.findById(req.params.id)
@@ -62,25 +62,40 @@ export async function getPost(req, res) {
 
     if (!post) return res.status(404).json({ message: 'Post not found' });
 
+    // Fetch all comments for this post
     const comments = await Comment.find({ post: post._id })
-      .populate('author', 'username displayName')
+      .populate('author', 'username displayName avatarUrl')
       .lean();
 
-    // Add vote information to each comment
-    const commentsWithVotes = comments.map(comment => {
-     
-      const userVote = comment.votes?.find(v => v.user && v.user.toString() === req.userId);
-      const score = comment.votes?.reduce((sum, v) => sum + (v.value || 0), 0) || 0;
-      
-      return {
-        ...comment,
-        userVote: userVote ? userVote.value : 0,
-        upvotes: score,
-        score: score
-      };
-    });
+    // Build nested comment structure
+    const buildCommentTree = (comments, parentId = null) => {
+      return comments
+        .filter(comment => {
+          // Handle both null and undefined parent values
+          const commentParent = comment.parent;
+          if (parentId === null) {
+            return commentParent === null || commentParent === undefined;
+          }
+          return commentParent && commentParent.toString() === parentId.toString();
+        })
+        .map(comment => {
+          // Add vote information to each comment
+          const userVote = comment.votes?.find(v => v.user && v.user.toString() === req.userId);
+          const score = comment.votes?.reduce((sum, v) => sum + (v.value || 0), 0) || 0;
+          
+          return {
+            ...comment,
+            userVote: userVote ? userVote.value : 0,
+            upvotes: score,
+            score: score,
+            replies: buildCommentTree(comments, comment._id) // Recursively build replies
+          };
+        });
+    };
 
-    res.json({ post, comments: commentsWithVotes });
+    const nestedComments = buildCommentTree(comments);
+
+    res.json({ post, comments: nestedComments });
   } catch (err) {
     console.error("Error fetching post:", err);
     res.status(500).json({ message: "Internal server error" });

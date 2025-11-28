@@ -1,73 +1,133 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 // Markdown to HTML conversion function
 const markdownToHtml = (text) => {
   if (!text) return '';
   
   return text
-    // Convert **bold** to <strong>bold</strong>
     .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-    // Convert *italic* to <em>italic</em>  
-    .replace(/\*(.*?)\*/g, '<em>$1</em>')
-    // Convert ~~strikethrough~~ to <s>strikethrough</s>
+    .replace(/\*(.*?)\*/g, '<em>$1</em>')  
     .replace(/~~(.*?)~~/g, '<s>$1</s>')
-    // Convert `code` to <code>code</code>
     .replace(/`(.*?)`/g, '<code>$1</code>')
-    // Convert line breaks to <br>
     .replace(/\n/g, '<br>');
 };
 
-function CommentWithVotes({ comment, username, text, replies = [], onReplyAdded }) {
-    // Use the comment object if provided, otherwise fall back to individual props
-    const author = comment?.author || { username: username || "Anonymous", avatar: "/default-avatar.png" };
-    const body = comment?.body || text || "";
-    const createdAt = comment?.createdAt;
-    const initialUpvotes = comment?.upvotes || 0;
-    
-    const [vote, setVote] = useState(0);
-    const [voteCount, setVoteCount] = useState(initialUpvotes);
+function CommentWithVotes({ comment, onReplyAdded, depth = 0 }) {
+    const [vote, setVote] = useState(comment?.userVote || 0);
+    const [voteCount, setVoteCount] = useState(comment?.score || 0);
     const [showReplyInput, setShowReplyInput] = useState(false);
     const [replyText, setReplyText] = useState("");
-    const [replyList, setReplyList] = useState(comment?.replies || replies || []);
     const [expanded, setExpanded] = useState(true);
+    const [currentUser, setCurrentUser] = useState(null);
+    const [replies, setReplies] = useState(comment?.replies || []);
 
-    const handleUpvote = () => {
-        if (vote === 1) {
-            setVote(0);
-            setVoteCount((v) => v - 1);
-        } else {
-            const change = vote === -1 ? 2 : 1;
-            setVote(1);
-            setVoteCount((v) => v + change);
-        }
-    };
+    // Maximum depth for nesting (like Reddit)
+    const maxDepth = 8;
+    const shouldIndent = depth > 0 && depth < maxDepth;
 
-    const handleDownvote = () => {
-        if (vote === -1) {
-            setVote(0);
-            setVoteCount((v) => v + 1);
-        } else {
-            const change = vote === 1 ? -2 : -1;
-            setVote(-1);
-            setVoteCount((v) => v + change);
-        }
-    };
-
-    const handleAddReply = () => {
-        if (replyText.trim() === "") return;
-        const newReply = { 
-            author: { username: "You", avatar: "/default-avatar.png" },
-            body: replyText,
-            createdAt: new Date().toISOString(),
-            upvotes: 0,
-            replies: []
+    // Fetch current user info
+    useEffect(() => {
+        const fetchCurrentUser = async () => {
+            try {
+                const res = await fetch('http://localhost:5001/api/auth/me', {
+                    credentials: "include"
+                });
+                if (res.ok) {
+                    const userData = await res.json();
+                    setCurrentUser(userData);
+                }
+            } catch (error) {
+                console.error("Failed to fetch user:", error);
+            }
         };
-        setReplyList([...replyList, newReply]);
-        setReplyText("");
-        setShowReplyInput(false);
+        fetchCurrentUser();
+    }, []);
+
+    const handleUpvote = async () => {
+        try {
+            const newVote = vote === 1 ? 0 : 1;
+            const res = await fetch(`http://localhost:5001/api/comments/${comment._id}/vote`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                credentials: "include",
+                body: JSON.stringify({ value: newVote })
+            });
+
+            if (res.ok) {
+                const data = await res.json();
+                setVote(newVote);
+                setVoteCount(data.score);
+            }
+        } catch (error) {
+            console.error("Vote error:", error);
+        }
+    };
+
+    const handleDownvote = async () => {
+        try {
+            const newVote = vote === -1 ? 0 : -1;
+            const res = await fetch(`http://localhost:5001/api/comments/${comment._id}/vote`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                credentials: "include",
+                body: JSON.stringify({ value: newVote })
+            });
+
+            if (res.ok) {
+                const data = await res.json();
+                setVote(newVote);
+                setVoteCount(data.score);
+            }
+        } catch (error) {
+            console.error("Vote error:", error);
+        }
+    };
+
+    const handleAddReply = async () => {
+        if (replyText.trim() === "") return;
         
-        // Notify parent if needed
-        if (onReplyAdded) onReplyAdded();
+        try {
+            // Save reply to database
+            const res = await fetch("http://localhost:5001/api/comments", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                credentials: "include",
+                body: JSON.stringify({
+                    post: comment.post, // Same post as parent comment
+                    body: replyText,
+                    parent: comment._id, // This makes it a reply!
+                }),
+            });
+
+            if (!res.ok) throw new Error("Failed to save reply");
+
+            const savedReply = await res.json();
+            
+            // Add the new reply to our local state
+            const replyToAdd = {
+                ...savedReply,
+                author: {
+                    username: currentUser?.username || "You",
+                    displayName: currentUser?.displayName,
+                    avatarUrl: currentUser?.avatarUrl
+                },
+                userVote: 0,
+                score: 0,
+                replies: []
+            };
+            
+            setReplies(prevReplies => [...prevReplies, replyToAdd]);
+            setReplyText("");
+            setShowReplyInput(false);
+            setExpanded(true); // Auto-expand when new reply is added
+            
+            // Notify parent to refresh comments if needed
+            if (onReplyAdded) onReplyAdded();
+            
+        } catch (error) {
+            console.error("Error saving reply:", error);
+            alert("Failed to post reply");
+        }
     };
 
     // Calculate time difference for display
@@ -85,101 +145,125 @@ function CommentWithVotes({ comment, username, text, replies = [], onReplyAdded 
     };
 
     return (
-        <div className="comment-item">
-            {/* Comment Header with Avatar and Username */}
-            <div className="comment-header">
-                <div className="comment-author">
-                    <img 
-                        src={author?.avatar || "/default-avatar.png"} 
-                        alt="avatar" 
-                        className="comment-avatar"
-                    />
-                    <strong className="comment-username">u/{author?.username || "Anonymous"}</strong>
-                    <span className="comment-time">• {getTimeAgo(createdAt)}</span>
-                </div>
-            </div>
-
-            {/* Comment Text - NOW WITH HTML RENDERING */}
-            <div 
-                className="comment-text" 
-                dangerouslySetInnerHTML={{ __html: markdownToHtml(body) }}
-            />
-
-            {/* Actions below comment */}
-            <div className="comment-actions">
-                <div className="comment-votes-below">
-                    <img
-                        src={
-                            vote === 1
-                                ? "../images/upvote-active.svg"
-                                : "../images/upvote.svg"
-                        }
-                        alt="upvote"
-                        onClick={handleUpvote}
-                    />
-                    <span className="comment-vote-score">{voteCount}</span>
-                    <img
-                        src={
-                            vote === -1
-                                ? "../images/downvote-active.svg"
-                                : "../images/downvote.svg"
-                        }
-                        alt="downvote"
-                        onClick={handleDownvote}
-                    />
-
-                    {/* Reply Icon */}
-                    <img
-                        src="../images/comment.svg"
-                        alt="reply"
-                        className="comment-reply-icon"
-                        onClick={() => setShowReplyInput((v) => !v)}
-                    />
-
-                    {/* Expand / Collapse Replies */}
-                    {replyList.length > 0 && (
-                        <div className="expand-toggle-container">
-                            <span
-                                className="expand-toggle"
-                                onClick={() => setExpanded(!expanded)}
-                            >
-                                {expanded ? "–" : "+"}
-                            </span>
-                        </div>
-                    )}
-                </div>
-            </div>
-
-            {/* Reply Input */}
-            {showReplyInput && (
-                <div className="reply-input-area">
-                    <input
-                        type="text"
-                        className="reply-input"
-                        placeholder="Write a reply..."
-                        value={replyText}
-                        onChange={(e) => setReplyText(e.target.value)}
-                    />
-                    <button onClick={handleAddReply} className="reply-submit-btn">
-                        Reply
-                    </button>
-                </div>
-            )}
-
-            {/* Nested Replies */}
-            {replyList.length > 0 && (
-                <div
-                    className={`comment-replies ${expanded ? 'visible' : 'hidden'}`}
+        <div className={`comment-item ${shouldIndent ? 'comment-indented' : ''}`}>
+            {/* LEFT SIDE: Expand/Collapse button and vertical line - REDDIT STYLE */}
+            <div className="comment-line-container">
+                <button 
+                    className="expand-collapse-btn"
+                    onClick={() => setExpanded(!expanded)}
+                    title={expanded ? "Collapse thread" : "Expand thread"}
                 >
-                    {replyList.map((reply, i) => (
-                        <CommentWithVotes
-                            key={i}
-                            comment={reply}
-                            onReplyAdded={onReplyAdded}
+                    {expanded ? "−" : "+"}
+                </button>
+                {replies.length > 0 && expanded && (
+                    <div className="comment-vertical-line"></div>
+                )}
+            </div>
+
+            {/* RIGHT SIDE: Comment content */}
+            <div className="comment-content">
+                {/* Comment Header with Avatar and Username */}
+                <div className="comment-header">
+                    <div className="comment-author">
+                        <img 
+                            src={comment.author?.avatarUrl || "/default-avatar.png"} 
+                            alt="avatar" 
+                            className="comment-avatar"
                         />
-                    ))}
+                        <strong className="comment-username">u/{comment.author?.username || "Anonymous"}</strong>
+                        <span className="comment-time">• {getTimeAgo(comment.createdAt)}</span>
+                    </div>
                 </div>
-            )}
+
+                {/* Comment Text */}
+                <div 
+                    className="comment-text" 
+                    dangerouslySetInnerHTML={{ __html: markdownToHtml(comment.body) }}
+                />
+
+                {/* Actions below comment */}
+                <div className="comment-actions">
+                    <div className="comment-votes-below">
+                        <img
+                            src={
+                                vote === 1
+                                    ? "../images/upvote-active.svg"
+                                    : "../images/upvote.svg"
+                            }
+                            alt="upvote"
+                            onClick={handleUpvote}
+                        />
+                        <span className="comment-vote-score">{voteCount}</span>
+                        <img
+                            src={
+                                vote === -1
+                                    ? "../images/downvote-active.svg"
+                                    : "../images/downvote.svg"
+                            }
+                            alt="downvote"
+                            onClick={handleDownvote}
+                        />
+
+                        {/* Reply Icon */}
+                        <img
+                            src="../images/comment.svg"
+                            alt="reply"
+                            className="comment-reply-icon"
+                            onClick={() => setShowReplyInput((v) => !v)}
+                            title="Reply"
+                        />
+
+                        {/* Reply count text */}
+                        {replies.length > 0 && (
+                            <span className="reply-count">
+                                {replies.length} {replies.length === 1 ? 'reply' : 'replies'}
+                            </span>
+                        )}
+                    </div>
+                </div>
+
+                {/* Reply Input */}
+                {showReplyInput && (
+                    <div className="reply-input-area">
+                        <textarea
+                            className="reply-textarea"
+                            placeholder="What are your thoughts?"
+                            value={replyText}
+                            onChange={(e) => setReplyText(e.target.value)}
+                            rows="3"
+                        />
+                        <div className="reply-actions">
+                            <button 
+                                className="reply-cancel-btn"
+                                onClick={() => setShowReplyInput(false)}
+                            >
+                                Cancel
+                            </button>
+                            <button 
+                                onClick={handleAddReply} 
+                                className="reply-submit-btn"
+                                disabled={!replyText.trim()}
+                            >
+                                Reply
+                            </button>
+                        </div>
+                    </div>
+                )}
+
+                {/* Nested Replies */}
+                {replies.length > 0 && expanded && (
+                    <div className="comment-replies">
+                        {replies.map((reply) => (
+                            <CommentWithVotes
+                                key={reply._id}
+                                comment={reply}
+                                onReplyAdded={onReplyAdded}
+                                depth={depth + 1}
+                            />
+                        ))}
+                    </div>
+                )}
+            </div>
         </div>
     );
 }
