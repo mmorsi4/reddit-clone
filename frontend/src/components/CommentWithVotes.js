@@ -1,11 +1,34 @@
 import React, { useState } from "react";
 
-function CommentWithVotes({ username, text, replies = [] }) {
+// Markdown to HTML conversion function
+const markdownToHtml = (text) => {
+  if (!text) return '';
+  
+  return text
+    // Convert **bold** to <strong>bold</strong>
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    // Convert *italic* to <em>italic</em>  
+    .replace(/\*(.*?)\*/g, '<em>$1</em>')
+    // Convert ~~strikethrough~~ to <s>strikethrough</s>
+    .replace(/~~(.*?)~~/g, '<s>$1</s>')
+    // Convert `code` to <code>code</code>
+    .replace(/`(.*?)`/g, '<code>$1</code>')
+    // Convert line breaks to <br>
+    .replace(/\n/g, '<br>');
+};
+
+function CommentWithVotes({ comment, username, text, replies = [], onReplyAdded }) {
+    // Use the comment object if provided, otherwise fall back to individual props
+    const author = comment?.author || { username: username || "Anonymous", avatar: "/default-avatar.png" };
+    const body = comment?.body || text || "";
+    const createdAt = comment?.createdAt;
+    const initialUpvotes = comment?.upvotes || 0;
+    
     const [vote, setVote] = useState(0);
-    const [voteCount, setVoteCount] = useState(0);
+    const [voteCount, setVoteCount] = useState(initialUpvotes);
     const [showReplyInput, setShowReplyInput] = useState(false);
     const [replyText, setReplyText] = useState("");
-    const [replyList, setReplyList] = useState(replies);
+    const [replyList, setReplyList] = useState(comment?.replies || replies || []);
     const [expanded, setExpanded] = useState(true);
 
     const handleUpvote = () => {
@@ -32,21 +55,55 @@ function CommentWithVotes({ username, text, replies = [] }) {
 
     const handleAddReply = () => {
         if (replyText.trim() === "") return;
-        const newReply = { username: "You", text: replyText, replies: [] };
+        const newReply = { 
+            author: { username: "You", avatar: "/default-avatar.png" },
+            body: replyText,
+            createdAt: new Date().toISOString(),
+            upvotes: 0,
+            replies: []
+        };
         setReplyList([...replyList, newReply]);
         setReplyText("");
         setShowReplyInput(false);
+        
+        // Notify parent if needed
+        if (onReplyAdded) onReplyAdded();
+    };
+
+    // Calculate time difference for display
+    const getTimeAgo = (timestamp) => {
+        if (!timestamp) return "just now";
+        
+        const now = new Date();
+        const commentTime = new Date(timestamp);
+        const diffInSeconds = Math.floor((now - commentTime) / 1000);
+        
+        if (diffInSeconds < 60) return "just now";
+        if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
+        if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
+        return `${Math.floor(diffInSeconds / 86400)}d ago`;
     };
 
     return (
         <div className="comment-item">
-            {/*  Username */}
+            {/* Comment Header with Avatar and Username */}
             <div className="comment-header">
-                <strong className="comment-username">u/{username}</strong>
+                <div className="comment-author">
+                    <img 
+                        src={author?.avatar || "/default-avatar.png"} 
+                        alt="avatar" 
+                        className="comment-avatar"
+                    />
+                    <strong className="comment-username">u/{author?.username || "Anonymous"}</strong>
+                    <span className="comment-time">• {getTimeAgo(createdAt)}</span>
+                </div>
             </div>
 
-            {/*  Comment text */}
-            <div className="comment-text">{text}</div>
+            {/* Comment Text - NOW WITH HTML RENDERING */}
+            <div 
+                className="comment-text" 
+                dangerouslySetInnerHTML={{ __html: markdownToHtml(body) }}
+            />
 
             {/* Actions below comment */}
             <div className="comment-actions">
@@ -71,7 +128,7 @@ function CommentWithVotes({ username, text, replies = [] }) {
                         onClick={handleDownvote}
                     />
 
-                    {/*  Reply Icon */}
+                    {/* Reply Icon */}
                     <img
                         src="../images/comment.svg"
                         alt="reply"
@@ -90,7 +147,6 @@ function CommentWithVotes({ username, text, replies = [] }) {
                             </span>
                         </div>
                     )}
-
                 </div>
             </div>
 
@@ -110,22 +166,20 @@ function CommentWithVotes({ username, text, replies = [] }) {
                 </div>
             )}
 
+            {/* Nested Replies */}
             {replyList.length > 0 && (
                 <div
-                    className="comment-replies"
-                    style={{ display: expanded ? "block" : "none" }}
+                    className={`comment-replies ${expanded ? 'visible' : 'hidden'}`}
                 >
                     {replyList.map((reply, i) => (
                         <CommentWithVotes
                             key={i}
-                            username={reply.username}
-                            text={reply.text}
-                            replies={reply.replies}
+                            comment={reply}
+                            onReplyAdded={onReplyAdded}
                         />
                     ))}
                 </div>
             )}
-
         </div>
     );
 }

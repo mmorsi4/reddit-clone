@@ -56,3 +56,41 @@ export async function getMyComments(req, res) {
     res.status(500).json({ message: 'Failed to fetch comments' });
   }
 }
+
+export async function voteComment(req, res) {
+  try {
+    const { value } = req.body;
+    if (![1, -1, 0].includes(value)) {
+      return res.status(400).json({ message: 'Invalid vote' });
+    }
+
+    const comment = await Comment.findById(req.params.id);
+    if (!comment) {
+      return res.status(404).json({ message: 'Comment not found' });
+    }
+    // Initialize votes array if it doesn't exist
+    comment.votes = comment.votes || [];
+    
+    // Remove existing vote from this user
+    comment.votes = comment.votes.filter(v => v.user.toString() !== req.userId);
+    
+    // Add new vote if value is not 0
+    if (value !== 0) {
+      comment.votes.push({ user: req.userId, value });
+    }
+    await comment.save();
+    
+    // Verify the save worked
+    const updatedComment = await Comment.findById(req.params.id);
+    // Calculate total score
+    const score = updatedComment.votes.reduce((total, vote) => total + vote.value, 0);
+    res.json({ 
+      score,
+      userVote: value 
+    });
+    
+  } catch (err) {
+    console.error("Error voting on comment:", err);
+    res.status(500).json({ message: "Internal server error" });
+  }
+}

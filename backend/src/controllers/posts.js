@@ -62,14 +62,25 @@ export async function getPost(req, res) {
 
     if (!post) return res.status(404).json({ message: 'Post not found' });
 
-    const userVote = post.votes?.find(v => v.user.toString() === req.userId);
-    const score = post.votes?.reduce((sum, v) => sum + v.value, 0) || 0;
-    const normalizedPost = { ...post, userVote: userVote ? userVote.value : 0, score };
-
     const comments = await Comment.find({ post: post._id })
-      .populate('author', 'username displayName');
+      .populate('author', 'username displayName')
+      .lean();
 
-    res.json({ post: normalizedPost, comments });
+    // Add vote information to each comment
+    const commentsWithVotes = comments.map(comment => {
+     
+      const userVote = comment.votes?.find(v => v.user && v.user.toString() === req.userId);
+      const score = comment.votes?.reduce((sum, v) => sum + (v.value || 0), 0) || 0;
+      
+      return {
+        ...comment,
+        userVote: userVote ? userVote.value : 0,
+        upvotes: score,
+        score: score
+      };
+    });
+
+    res.json({ post, comments: commentsWithVotes });
   } catch (err) {
     console.error("Error fetching post:", err);
     res.status(500).json({ message: "Internal server error" });
