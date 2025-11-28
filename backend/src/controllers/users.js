@@ -97,3 +97,26 @@ export async function getUsers(req, res) {
     res.status(500).json({ message: 'Server error while fetching users' });
   }
 }
+export async function updateAvatar(req, res) {
+  try {
+    const userId = req.userId;
+    const { avatarData } = req.body; // We'll send the base64 image data
+    
+    if (!avatarData) {
+      return res.status(400).json({ message: 'No avatar data provided' });
+    }
+
+    // Just save the base64 data directly to the database
+    await User.findByIdAndUpdate(userId, { 
+      avatarUrl: avatarData 
+    });
+
+    res.json({ 
+      message: 'Avatar updated successfully',
+      avatarUrl: avatarData 
+    });
+  } catch (error) {
+    console.error('Error updating avatar:', error);
+    res.status(500).json({ message: 'Failed to update avatar' });
+  }
+}

@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Sidebar from "../components/sidebar";
 import SearchBar from "../components/searchbar";
 import Header from "../components/header"
@@ -9,6 +9,7 @@ const AvatarCustomizer = ({ headerAvatarRef }) => {
     const [layers, setLayers] = useState({});
     const avatarGridRef = useRef(null);
     const layerContainerRef = useRef(null);
+    const navigate = useNavigate();
 
     const avatarSets = {
         Outfits: ["../images/outfit1.png", "../images/outfit2.png", "../images/outfit3.png", "../images/outfit4.png"],
@@ -38,24 +39,39 @@ const AvatarCustomizer = ({ headerAvatarRef }) => {
         Hats: 10,
     };
 
-    // 🟠 Load saved avatar on mount
+    // 🟠 Load saved avatar AND layers on mount
     useEffect(() => {
+        // Load saved avatar image
         const savedAvatar = localStorage.getItem("userAvatar");
         if (savedAvatar && headerAvatarRef?.current) {
             headerAvatarRef.current.src = savedAvatar;
+        }
+
+        // 🆕 Load saved layers so avatar remembers outfits
+        const savedLayers = localStorage.getItem("avatarLayers");
+        if (savedLayers) {
+            try {
+                setLayers(JSON.parse(savedLayers));
+            } catch (error) {
+                console.error('Error loading saved layers:', error);
+            }
         }
     }, [headerAvatarRef]);
 
     // 🧱 Add or replace a layer
     const addOrReplaceLayer = (category, src) => {
-        setLayers(prev => ({
-            ...prev,
+        const newLayers = {
+            ...layers,
             [category]: { src, zIndex: layerOrder[category] || 1 },
-        }));
+        };
+        setLayers(newLayers);
+        
+        // 🆕 Immediately save layers to localStorage
+        localStorage.setItem("avatarLayers", JSON.stringify(newLayers));
     };
 
-    // 💾 Save the final avatar (including default layer)
-    const handleSave = () => {
+    // 💾 Save the final avatar to localStorage AND database
+    const handleSave = async () => {
         const canvas = document.createElement("canvas");
         const ctx = canvas.getContext("2d");
         const size = 128;
@@ -75,78 +91,161 @@ const AvatarCustomizer = ({ headerAvatarRef }) => {
 
         const zoomOutFactor = 1.3;
 
-        // Load default avatar first, then other layers
-        const drawDefaultAvatar = new Promise(resolve => {
-            const baseImg = new Image();
-            baseImg.src = defaultAvatarSrc;
-            baseImg.onload = () => {
-                const imgAspect = baseImg.naturalWidth / baseImg.naturalHeight;
-                let drawWidth, drawHeight;
+        try {
+            // Load default avatar first, then other layers
+            await new Promise(resolve => {
+                const baseImg = new Image();
+                baseImg.src = defaultAvatarSrc;
+                baseImg.onload = () => {
+                    const imgAspect = baseImg.naturalWidth / baseImg.naturalHeight;
+                    let drawWidth, drawHeight;
 
-                if (imgAspect > 1) {
-                    drawHeight = size / zoomOutFactor;
-                    drawWidth = drawHeight * imgAspect;
-                } else {
-                    drawWidth = size / zoomOutFactor;
-                    drawHeight = drawWidth / imgAspect;
+                    if (imgAspect > 1) {
+                        drawHeight = size / zoomOutFactor;
+                        drawWidth = drawHeight * imgAspect;
+                    } else {
+                        drawWidth = size / zoomOutFactor;
+                        drawHeight = drawWidth / imgAspect;
+                    }
+
+                    const offsetX = (size - drawWidth) / 2;
+                    const offsetY = -drawHeight * 0.001;
+
+                    ctx.drawImage(baseImg, offsetX, offsetY, drawWidth, drawHeight);
+                    resolve();
+                };
+            });
+
+            // Draw all the custom layers
+            for (const data of sortedLayers) {
+                await new Promise(resolve => {
+                    const img = new Image();
+                    img.src = data.src;
+                    img.onload = () => {
+                        const imgAspect = img.naturalWidth / img.naturalHeight;
+                        let drawWidth, drawHeight;
+
+                        if (imgAspect > 1) {
+                            drawHeight = size / zoomOutFactor;
+                            drawWidth = drawHeight * imgAspect;
+                        } else {
+                            drawWidth = size / zoomOutFactor;
+                            drawHeight = drawWidth / imgAspect;
+                        }
+
+                        const offsetX = (size - drawWidth) / 2;
+                        const offsetY = -drawHeight * 0.001;
+
+                        ctx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
+                        resolve();
+                    };
+                });
+            }
+
+            const finalAvatar = canvas.toDataURL("image/png");
+            
+            // 1. Save to localStorage (for immediate UI updates)
+            localStorage.setItem("userAvatar", finalAvatar);
+            
+            // 🆕 Also save layers to localStorage (so avatar remembers outfits)
+            localStorage.setItem("avatarLayers", JSON.stringify(layers));
+            
+            // 2. Save to database (for profile page and comments)
+            const saveToDatabase = async (avatarDataUrl) => {
+                try {
+                    const updateRes = await fetch('http://localhost:5001/api/users/update-avatar', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        credentials: 'include',
+                        body: JSON.stringify({
+                            avatarData: avatarDataUrl
+                        })
+                    });
+
+                    if (updateRes.ok) {
+                        console.log('✅ Avatar saved to database successfully!');
+                        return true;
+                    } else {
+                        console.error('❌ Failed to save avatar to database');
+                        return false;
+                    }
+                } catch (error) {
+                    console.error('💥 Error saving avatar to database:', error);
+                    return false;
                 }
-
-                const offsetX = (size - drawWidth) / 2;
-                const offsetY = -drawHeight * 0.001;
-
-                ctx.drawImage(baseImg, offsetX, offsetY, drawWidth, drawHeight);
-                resolve();
             };
-        });
 
-        drawDefaultAvatar
-            .then(() =>
-                Promise.all(
-                    sortedLayers.map(
-                        data =>
-                            new Promise(resolve => {
-                                const img = new Image();
-                                img.src = data.src;
-                                img.onload = () => {
-                                    const imgAspect = img.naturalWidth / img.naturalHeight;
-                                    let drawWidth, drawHeight;
+            // Save to database
+            const dbSuccess = await saveToDatabase(finalAvatar);
+            
+            // Update UI - including the header avatar!
+            if (headerAvatarRef?.current) {
+                headerAvatarRef.current.src = finalAvatar;
+            }
 
-                                    if (imgAspect > 1) {
-                                        drawHeight = size / zoomOutFactor;
-                                        drawWidth = drawHeight * imgAspect;
-                                    } else {
-                                        drawWidth = size / zoomOutFactor;
-                                        drawHeight = drawWidth / imgAspect;
-                                    }
+            // 🆕 Update ALL avatar images on the page
+            updateAllAvatarImages(finalAvatar);
 
-                                    const offsetX = (size - drawWidth) / 2;
-                                    const offsetY = -drawHeight * 0.001;
-
-                                    ctx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
-                                    resolve();
-                                };
-                            })
-                    )
-                )
-            )
-            .then(() => {
-                const finalAvatar = canvas.toDataURL("image/png");
-                if (headerAvatarRef?.current) headerAvatarRef.current.src = finalAvatar;
-                localStorage.setItem("userAvatar", finalAvatar);
-
-                const saveBtn = document.querySelector(".save-btn");
-                if (saveBtn) {
+            const saveBtn = document.querySelector(".save-btn");
+            if (saveBtn) {
+                if (dbSuccess) {
                     saveBtn.textContent = "Saved!";
                     saveBtn.style.backgroundColor = "#4CAF50";
+                    
+                    setTimeout(() => {
+                        fetch('http://localhost:5001/api/users/me', {
+                            credentials: 'include'
+                        })
+                        .then(res => res.json())
+                        .then(userData => {
+                            navigate(`/profile/${userData.username}`);
+                        })
+                        .catch(err => {
+                            console.error('Error fetching user data:', err);
+                        });
+                    }, 1200);
+                } else {
+                    saveBtn.textContent = "Save Failed!";
+                    saveBtn.style.backgroundColor = "#ff4444";
                     setTimeout(() => {
                         saveBtn.textContent = "Save";
                         saveBtn.style.backgroundColor = "#ff4500";
-                    }, 1200);
+                    }, 2000);
                 }
-            });
+            }
+
+        } catch (error) {
+            console.error('Error generating avatar:', error);
+            const saveBtn = document.querySelector(".save-btn");
+            if (saveBtn) {
+                saveBtn.textContent = "Error!";
+                saveBtn.style.backgroundColor = "#ff4444";
+                setTimeout(() => {
+                    saveBtn.textContent = "Save";
+                    saveBtn.style.backgroundColor = "#ff4500";
+                }, 2000);
+            }
+        }
     };
 
-
+    // 🆕 Function to update ALL avatar images on the page
+    const updateAllAvatarImages = (avatarSrc) => {
+        // Update header avatar
+        if (headerAvatarRef?.current) {
+            headerAvatarRef.current.src = avatarSrc;
+        }
+        
+        // Update any other avatar images on the page
+        const allAvatars = document.querySelectorAll('img[class*="avatar"], img[alt*="avatar"], .profile-avatar, .comment-avatar');
+        allAvatars.forEach(avatar => {
+            avatar.src = avatarSrc;
+        });
+        
+        // 🆕 Also update localStorage so other pages can use it
+        localStorage.setItem("userAvatar", avatarSrc);
+    };
 
     return (
         <>
@@ -216,7 +315,6 @@ const AvatarCustomizer = ({ headerAvatarRef }) => {
                     </div>
                 </div>
             </div>
-
         </>
     );
 }

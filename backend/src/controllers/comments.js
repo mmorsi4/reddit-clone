@@ -94,3 +94,32 @@ export async function voteComment(req, res) {
     res.status(500).json({ message: "Internal server error" });
   }
 }
+// Get replies for a specific comment
+export async function getCommentReplies(req, res) {
+  try {
+    const commentId = req.params.id;
+    
+    const replies = await Comment.find({ parent: commentId })
+      .populate('author', 'username displayName avatarUrl')
+      .sort({ createdAt: 1 })
+      .lean();
+
+    // Add vote information to each reply
+    const repliesWithVotes = replies.map(reply => {
+      const userVote = reply.votes?.find(v => v.user && v.user.toString() === req.userId);
+      const score = reply.votes?.reduce((sum, v) => sum + (v.value || 0), 0) || 0;
+      
+      return {
+        ...reply,
+        userVote: userVote ? userVote.value : 0,
+        upvotes: score,
+        score: score
+      };
+    });
+
+    res.json(repliesWithVotes);
+  } catch (err) {
+    console.error("Error fetching comment replies:", err);
+    res.status(500).json({ message: "Internal server error" });
+  }
+}
