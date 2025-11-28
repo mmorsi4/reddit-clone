@@ -11,11 +11,13 @@ function PostPage() {
   const [post, setPost] = useState(location.state?.post || null);
   const [comments, setComments] = useState([]);
   const [sortedComments, setSortedComments] = useState([]);
+  const [filteredComments, setFilteredComments] = useState([]);
   const [newComment, setNewComment] = useState("");
   const [isLoading, setIsLoading] = useState(!location.state?.post);
   const [currentUser, setCurrentUser] = useState(null);
   const [sortOption, setSortOption] = useState("best");
   const [showFormattingToolbar, setShowFormattingToolbar] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   // Fetch current user info
   useEffect(() => {
@@ -46,6 +48,7 @@ function PostPage() {
       setPost(data.post);
       setComments(data.comments || []);
       setSortedComments(data.comments || []);
+      setFilteredComments(data.comments || []);
     } catch (err) {
       console.error(err);
       setPost(null);
@@ -95,8 +98,29 @@ function PostPage() {
     sortComments();
   }, [comments, sortOption]);
 
+  // Filter comments when search query changes
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      setFilteredComments(sortedComments);
+    } else {
+      const filtered = sortedComments.filter(comment => 
+        comment.body?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        comment.author?.username?.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+      setFilteredComments(filtered);
+    }
+  }, [searchQuery, sortedComments]);
+
   const handleSortChange = (event) => {
     setSortOption(event.target.value);
+  };
+
+  const handleSearchChange = (event) => {
+    setSearchQuery(event.target.value);
+  };
+
+  const handleClearSearch = () => {
+    setSearchQuery("");
   };
 
   const handleVote = async (type) => {
@@ -415,33 +439,68 @@ function PostPage() {
             <div className="comments-list">
               <div className="comments-header">
                 <div className="comments-header-left">
-                  <h3>{post.commentCount || comments.length} Comments</h3>
-                  <div className="sort-options">
-                    <span className="sort-by-text">Sort by:</span>
-                    <div className="sort-container">
-                      <select 
-                        className="sort-select" 
-                        value={sortOption}
-                        onChange={handleSortChange}
-                      >
-                        <option value="best">🏆 Best</option>
-                        <option value="top">⬆️ Top</option>
-                        <option value="new">🆕 New</option>
-                        <option value="old">📜 Old</option>
-                        <option value="controversial">🔥 Controversial</option>
-                      </select>
+                  <h3>
+                    {searchQuery ? 
+                      `${filteredComments.length} of ${sortedComments.length} comments` : 
+                      `${post.commentCount || comments.length} Comments`
+                    }
+                  </h3>
+                  <div className="comments-controls">
+                    <div className="sort-options">
+                      <span className="sort-by-text">Sort by:</span>
+                      <div className="sort-container">
+                        <select 
+                          className="sort-select" 
+                          value={sortOption}
+                          onChange={handleSortChange}
+                        >
+                          <option value="best">🏆 Best</option>
+                          <option value="top">⬆️ Top</option>
+                          <option value="new">🆕 New</option>
+                          <option value="old">📜 Old</option>
+                          <option value="controversial">🔥 Controversial</option>
+                        </select>
+                      </div>
+                    </div>
+                    
+                    <div className="search-container">
+                      <div className="search-input-wrapper">
+                        <svg className="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+                        </svg>
+                        <input
+                          type="text"
+                          className="search-input"
+                          placeholder="Search comments..."
+                          value={searchQuery}
+                          onChange={handleSearchChange}
+                        />
+                        {searchQuery && (
+                          <button 
+                            className="clear-search-btn"
+                            onClick={handleClearSearch}
+                            title="Clear search"
+                          >
+                            ×
+                          </button>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
 
-              {sortedComments.length === 0 ? (
+              {filteredComments.length === 0 ? (
                 <div className="no-comments">
-                  <p>No comments yet. Be the first to share your thoughts!</p>
+                  {searchQuery ? (
+                    <p>No comments found for "{searchQuery}"</p>
+                  ) : (
+                    <p>No comments yet. Be the first to share your thoughts!</p>
+                  )}
                 </div>
               ) : (
                 <div className="comments-container">
-                  {sortedComments.map((comment, index) => (
+                  {filteredComments.map((comment, index) => (
                     <CommentWithVotes 
                       key={comment._id || index} 
                       comment={comment}
