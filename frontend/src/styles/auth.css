@@ -1,3 +1,22 @@
+*{
+  box-sizing: border-box;
+}
+
+.head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 16px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+    height: 56px;
+    background-color: #181c1f;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 10;
+}
+
 body {
   font-family: 'Inter', sans-serif;
 }
@@ -9,19 +28,40 @@ body {
   align-items: center;
   width: 100%;
   padding: 20px;
-  background: linear-gradient(135deg, #ff7b00, #ff4500);
+  background: linear-gradient(135deg, #2a09bd, #920dc7);
   height: 100vh;
 }
 
 .login-box {
-  background: #fff;
+  background: #181c1f;
   border-radius: 16px;
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
   width: 100%;
-  max-width: 400px;
+  max-width: 500px;
+  height: 100%;
+  max-height: 500px;
   padding: 30px;
+  padding-bottom: 0px;
+  padding-top:40px;
   text-align: center;
   transition: 0.3s ease;
+  margin-top: 50px;
+}
+
+.signup-box {
+  background: #181c1f;
+  border-radius: 16px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+  width: 100%;
+  max-width: 500px;
+  height: 100%;
+  max-height: 500px;
+  padding: 30px;
+  padding-bottom: 0px;
+  padding-top:20px;
+  text-align: center;
+  transition: 0.3s ease;
+  margin-top: 50px;
 }
 
 /* ---------- Tabs ---------- */
@@ -49,46 +89,133 @@ body {
   border-bottom: 3px solid #ff4500;
 }
 
-/* ---------- Forms ---------- */
+/* ---------- Form ---------- */
+
 .login-form {
-  display: none;
+  display: flex;
   flex-direction: column;
+  align-items: center;
 }
+
 
 .login-form.login-active {
   display: flex;
+  padding-left:11%;
+  padding-right:11%;
+}
+
+.login-form .inputbox{
+  position:relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  margin-bottom: 2px;
+  gap: 5px;
 }
 
 .login-form h2 {
-  margin-bottom: 20px;
-  color: #333;
+  margin-bottom: 0px;
+  color: #eef1f3;
+}
+
+.login-form p {
+  margin-bottom: 10px;
+  color: #b7cad4;
+  font-size: smaller;
+}
+
+.login-form span{
+  color:#577ad6;
+}
+
+.login-form span:hover{
+  color:#577ad6;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.login-form a {
+  color: #577ad6;
+  cursor: pointer;
+  font-weight: 10;
+  text-decoration: none;
+}
+
+.login-form a:hover {
+  text-decoration: underline;
 }
 
 .login-form input {
   padding: 12px;
-  margin: 8px 0;
-  border-radius: 8px;
-  border: 1px solid #ccc;
+  border: 2px solid transparent;
+  border-radius: 20px;
   font-size: 15px;
+  color:white;
+  height: 55px;
+  width: 100%;
+  background-color: #2a3236;
+  outline: none;
+  transition: 0.05s;
 }
 
 .login-form input:focus {
-  border-color: #ff7b00;
+  border: 2px solid white;
   outline: none;
+  transition: 0.05s;
 }
+
+.login-form input.warning {
+  border: 3px solid #ff4f40;
+  transition: 0.05s;
+}
+
+.login-form .warn{
+  color:#ff4f40;
+  font-size: 12px;
+  font-weight: 50;
+  align-self: flex-start;
+  margin-top: 0px;
+  margin-bottom: 0px;
+  margin-left: 14px;
+  visibility: hidden;
+}
+
+.login-form .warn.show {
+  visibility: visible;
+  opacity: 1;
+}
+
+
+/* ------- Button case1------- */
+.login-form .login-button{
+  background-color: #23272a;
+  color: #575a5c;
+  border: none;
+  border-radius: 30px;
+  padding: 12px;
+  margin-top: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  transition: 0.3s;
+  height: 100%;
+  max-height: 80px;
+  width: 100%;
+}
+
 
 /* ---------- Button ---------- */
 .login-btn {
   background-color: #ff4500;
   color: white;
   border: none;
-  border-radius: 8px;
+  border-radius: 30px;
   padding: 12px;
   margin-top: 10px;
   font-size: 16px;
   font-weight: 600;
   cursor: pointer;
   transition: 0.3s;
+  width: 100%;
 }
 
 .login-btn:hover {
@@ -100,17 +227,20 @@ body {
 .login-switch-text {
   margin-top: 10px;
   font-size: 14px;
-  color: #555;
+  color: #9fafb8;
+  align-self: flex-start;
+  margin-top: 10px;
 }
 
 .login-switch-text span {
-  color: #ff4500;
+  color: #618af3;
   cursor: pointer;
-  font-weight: 600;
+  font-weight: 10;
 }
 
-.login-switch-text span:hover {
-  text-decoration: underline;
+.login-switch-text span:hover{
+  text-decoration: none;
+  color: #6d96ff;
 }
 
 /* ---------- Password Field ---------- */
@@ -118,11 +248,20 @@ body {
   position: relative;
   display: flex;
   align-items: center;
+  border-radius: 20px;
+  width: 100%;
+  margin-bottom: 10px;
+  background-color: #2a3236;
+  height: 100%;
 }
 
 .login-password-field input {
   width: 100%;
+  height: 100%;
   padding-right: 40px;
+  padding: 12px;
+  border:none;
+  background-color: #2a3236;
 }
 
 .login-toggle-password {
@@ -137,4 +276,31 @@ body {
 
 .login-toggle-password:hover {
   opacity: 1;
+}
+
+.icon-warn {
+  position: absolute;
+  right: 15px;
+  top: 18px;
+  pointer-events: none;
+}
+
+.icon-success {
+  position: absolute;
+  right: 15px;
+  top: 18px;
+  pointer-events: none;
+  stroke: #28a745;
+}
+
+/* This simply stops some unexpected styling from browser autofill feature */
+input:-webkit-autofill,
+input:-webkit-autofill:hover, 
+input:-webkit-autofill:focus, 
+input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 30px #2a3236 inset !important;
+    
+    -webkit-text-fill-color: white !important;
+    
+    border-radius: 20px !important;
 }
