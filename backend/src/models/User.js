@@ -9,7 +9,8 @@ const UserSchema = new Schema({
   bio: String,
   avatarUrl: String,
   karma: { type: Number, default: 0 },
-  createdAt: { type: Date, default: Date.now }
+  createdAt: { type: Date, default: Date.now },
+  recentCommunityIds: [{ type: Schema.Types.ObjectId, ref: 'Community' }]
 });
 
 export default model('User', UserSchema);

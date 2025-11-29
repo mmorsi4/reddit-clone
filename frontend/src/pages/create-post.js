@@ -12,12 +12,13 @@ function CreatePost({ showToast }) {
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [errors, setErrors] = useState({});
   const [communities, setCommunities] = useState([]);
+  const [joinedCommunities, setJoinedCommunities] = useState([]);
   const navigate = useNavigate();
 
   useEffect(() => {
   const loadCommunities = async () => {
     try {
-      const res = await fetch("/api/communities/", {
+      const res = await fetch("/api/communities", {
         credentials: "include",
       });
       if (!res.ok) throw new Error("Failed to load communities");
@@ -28,6 +29,22 @@ function CreatePost({ showToast }) {
     }
   };
   loadCommunities();
+}, []);
+
+useEffect(() => {
+  const loadJoinedCommunities = async () => {
+    try {
+      const res = await fetch("/api/communities/joined", {
+        credentials: "include",
+      });
+      if (!res.ok) throw new Error("Failed to load joined communities");
+      const data = await res.json();
+      setJoinedCommunities(data);
+    } catch {
+      alert("Network error while loading joined communities");
+    }
+  };
+  loadJoinedCommunities();
 }, []);
 
   const location = useLocation();
@@ -55,7 +72,25 @@ function CreatePost({ showToast }) {
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
-    if (file) setSelectedFiles([file]); // store as single-item array
+    if (!file) return;
+
+    const allowedTypes = [
+      "video/mp4",
+      "video/webm",
+      "image/jpeg",
+      "image/png",
+      "image/gif",
+      "image/webp",
+      "image/bmp",
+      "image/svg+xml"
+    ];
+
+    if (!allowedTypes.includes(file.type)) {
+      alert("Only images or .mp4/.webm videos are allowed.");
+      return;
+    }
+
+    setSelectedFiles([file]);
   };
 
 
@@ -112,7 +147,7 @@ function CreatePost({ showToast }) {
     return false;
   };
 
-  return (
+   return (
     <>
       <Header />
       <Sidebar />
@@ -130,11 +165,12 @@ function CreatePost({ showToast }) {
               {selectedCommunity ? `r/${selectedCommunity.name}` : "Choose a community"}
             </span>
           </div>
+          
           {errors.community && <p className="error-msg">{errors.community}</p>}
 
           {isDropdownOpen && (
             <ul className="community-dropdown">
-              {communities.map((c, i) => (
+              {joinedCommunities.map((c, i) => (
                 <li
                   key={i}
                   className="community-item"
@@ -144,6 +180,11 @@ function CreatePost({ showToast }) {
                   <span>r/{c.name}</span>
                 </li>
               ))}
+              {joinedCommunities.length === 0 && (
+                <li className="community-item disabled">
+                  <span>No joined communities</span>
+                </li>
+              )}
             </ul>
           )}
         </div>
@@ -208,7 +249,7 @@ function CreatePost({ showToast }) {
                   <p>{selectedFiles.length === 0 ? "Drag & drop an image or video here, or click to upload" : "Replace file"}</p>
                   <input
                     type="file"
-                    accept="image/*,video/*"
+                    accept="image/*,video/mp4,video/webm"
                     onChange={handleFileChange}
                     hidden
                   />

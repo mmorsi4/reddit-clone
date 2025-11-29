@@ -1,0 +1,200 @@
+.posts-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  border-bottom: 1px solid #e6e7eb;
+  padding-bottom: 6px;
+  margin-bottom: 12px;
+}
+
+.mini-sort, .mini-view {
+  position: relative;
+  border-radius: 6px;
+  background-color: transparent; /* or white if you prefer */
+}
+
+/* Hover effect for the whole div */
+.mini-sort:hover,
+.mini-view:hover {
+  background-color: #e9e8e8; /* gray on hover */
+}
+
+/* Button inside dropdown */
+.mini-sort-btn,
+.mini-view-btn {
+  background: none;
+  border: none;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  cursor: pointer;
+}
+
+.down-icon {
+  width: 12px;
+  opacity: 0.7;
+}
+
+/* SORT MENU */
+.mini-sort-menu, 
+.mini-view-menu {
+  position: absolute;
+  top: 26px;
+  left: 0;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  list-style: none;
+  padding: 6px 0;
+  display: none;
+  width: 120px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  font-size: 13px;
+  z-index: 50;
+}
+
+/* Menu items */
+.mini-sort-menu li,
+.mini-view-menu li {
+  display: flex; /* keep flex if you have icon + text */
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  cursor: pointer;
+
+  /* Add this to make hover span full width */
+  width: 100%;
+  box-sizing: border-box;
+
+  border-radius: 6px;
+  transition: background-color 0.2s ease;
+}
+
+/* Hover effect */
+.mini-sort-menu li:hover,
+.mini-view-menu li:hover {
+  background-color: #dbdbdc;
+transition: background-color 0.2s ease;
+
+}
+
+.mini-sort-menu li img,
+.mini-view-menu li img {
+  vertical-align: middle;
+  margin-right: 6px; /* spacing for icons */
+}
+
+
+
+
+.mini-sort-menu,
+.mini-view-menu {
+  z-index: 1000; /* was 50, increase to be safe */
+}
+
+
+.mini-sort-menu.open,
+.mini-view-menu.open {
+  display: block; /* show when open */
+}
+
+
+.view-icon {
+  font-size: 14px;
+  opacity: 0.7;
+}
+
+
+.home-layout-wrapper {
+    max-width: 1000px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-start;
+    gap: 24px;
+    padding-top: 8px;
+}
+
+/* Posts Column Styling */
+.main-posts-column {
+    flex-shrink: 0;
+    width: 100%;
+    max-width: 640px;
+}
+
+/* Right Sidebar Column Styling (Sticky for scroll effect) */
+.right-sidebar-column {
+    flex-shrink: 0;
+    width: 310px;
+    position: sticky;
+    top: 73px;
+    border-radius: 50px;
+    padding-top: 0;
+    display: none;
+}
+
+@media (min-width: 1024px) {
+    .right-sidebar-column {
+        display: block;
+    }
+}
+
+/* Existing post list container */
+.post-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.right-sidebar-card {
+    background-color: #f3f3f3;
+    border-radius: 8px;
+    padding: 12px;
+
+}
+
+.card-title {
+    font-size: 10px;
+    font-weight: 700;
+    color: #555;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 4px;
+}
+
+/* Target the new unique class name */
+.right-sidebar-post-link {
+    display: block;
+    padding: 8px 0;
+    /* This style now only applies to the right sidebar */
+    text-decoration: none;
+    color: #333;
+    border-bottom: 1px solid #f0f0f0;
+    transition: background-color 0.2s;
+}
+
+.right-sidebar-post-link:hover {
+    background-color: #fafafa;
+}
+
+.sidebar-community {
+    font-size: 12px;
+    color: #0079d3;
+    font-weight: 500;
+    margin-bottom: 2px;
+}
+
+.sidebar-post-title {
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.3;
+    margin-bottom: 2px;
+}
+
+.sidebar-details {
+    font-size: 11px;
+    color: #777;
+}

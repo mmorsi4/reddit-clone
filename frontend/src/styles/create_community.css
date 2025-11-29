@@ -64,7 +64,6 @@ textarea {
   color: black;
 }
 
-/* === Step 1: Topics Page Styles === */
 .topic-step-title {
   font-size: 20px;
   margin-bottom: 6px;
@@ -223,4 +222,3 @@ textarea {
 .no-underline {
   text-decoration: none;
 }
-

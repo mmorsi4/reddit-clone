@@ -6,7 +6,12 @@ const CommentSchema = new Schema({
   parent: { type: Schema.Types.ObjectId, ref: 'Comment', default: null },
   author: { type: Schema.Types.ObjectId, ref: 'User', required: true },
   body: { type: String, required: true },
-  createdAt: { type: Date, default: Date.now }
+  createdAt: { type: Date, default: Date.now },
+
+  votes: [{
+    user: { type: Schema.Types.ObjectId, ref: 'User' },
+    value: Number
+  }]
 });
 
 export default model('Comment', CommentSchema);

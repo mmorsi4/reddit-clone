@@ -1,4 +1,3 @@
-
 .main-head-banner {
   width: 100%;         
   max-width: 1200px;    
@@ -8,6 +7,11 @@
   object-fit: cover;
   object-position: center;
   display: block;
+  margin: 0 auto;
+}
+
+.banner-container {
+    width: 100%;
 }
 
 .main-head-info {
@@ -17,6 +21,8 @@
     top: -36px;
     align-items: flex-end;
     padding: 0 16px;
+    max-width: 1200px;
+    margin: 0 auto;
 }
 
 .main-head-community {

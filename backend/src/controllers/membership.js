@@ -69,8 +69,10 @@ export const checkMembership = async (req, res) => {
     }
 
     const membership = await Membership.findOne({ userId, communityId });
-
-    res.json({ isMember: !!membership });
+    res.status(200).json({
+      isMember: !!membership,
+      isFavorite: membership ? membership.favorite : false 
+    });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Server error" });
@@ -103,3 +105,31 @@ export async function toggleFavorite(req, res) {
     res.status(500).json({ message: "Server error" });
   }
 }
+
+// get joined communities
+export const getJoinedCommunities = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const memberships = await Membership.find({ userId })
+      .populate('communityId')
+      .exec();
+
+    const joinedCommunities = memberships.map(membership => ({
+      _id: membership.communityId._id,
+      name: membership.communityId.name,
+      description: membership.communityId.description,
+      avatar: membership.communityId.avatar,
+      banner: membership.communityId.banner,
+      membersCount: membership.communityId.membersCount,
+      createdAt: membership.communityId.createdAt,
+      favorite: membership.favorite,
+      role: membership.role,
+      joinedAt: membership.joinedAt
+    }));
+
+    res.status(200).json(joinedCommunities);
+  } catch (err) {
+    console.error("Error fetching joined communities:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+};

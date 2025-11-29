@@ -11,131 +11,197 @@ function Post({
   textPreview,
   avatar,
   initialVotes,
+  initialVote,
   initialComments,
   community,
+  isAllFeed,           
+  communityAvatarUrl,  
+  isJoined,            
+  onToggleJoin,
+  viewType, 
+  isCommunityPage,
 }) {
   const [voteCount, setVoteCount] = useState(initialVotes || 0);
-  const [vote, setVote] = useState(0); // 0 = no vote, 1 = upvote, -1 = downvote
-  const [comments, setComments] = useState(initialComments || []);
-  const [showComments, setShowComments] = useState(false);
-  const [newComment, setNewComment] = useState("");
+  const [vote, setVote] = useState(initialVote || 0); 
 
-  const handleUpvote = () => {
-    if (vote === 1) {
-      // If already upvoted, remove the upvote
-      setVote(0);
-      setVoteCount((prev) => prev - 1);
-    } else if (vote === -1) {
-      // If downvoted, switch to upvote (remove downvote and add upvote)
-      setVote(1);
-      setVoteCount((prev) => prev + 2); // +1 to remove downvote, +1 to add upvote
-    } else {
-      // If no vote, add upvote
-      setVote(1);
-      setVoteCount((prev) => prev + 1);
-    }
-  };
+const handleUpvote = async () => {
+  let newVoteValue;
 
-  const handleDownvote = () => {
-    if (vote === -1) {
-      // If already downvoted, remove the downvote
-      setVote(0);
-      setVoteCount((prev) => prev + 1);
-    } else if (vote === 1) {
-      // If upvoted, switch to downvote (remove upvote and add downvote)
-      setVote(-1);
-      setVoteCount((prev) => prev - 2); // -1 to remove upvote, -1 to add downvote
-    } else {
-      // If no vote, add downvote
-      setVote(-1);
-      setVoteCount((prev) => prev - 1);
-    }
-  };
+  if (vote === 1) newVoteValue = 0;      // Remove upvote
+  else newVoteValue = 1;                 // Add upvote (or switch from downvote)
 
-  const handleAddComment = () => {
-    if (newComment.trim() === "") return;
-    const newC = { username: "You", text: newComment };
-    setComments([...comments, newC]);
-    setNewComment("");
-  };
+  updateVote(newVoteValue);
+};
+
+const handleDownvote = async () => {
+  let newVoteValue;
+
+  if (vote === -1) newVoteValue = 0;    // Remove downvote
+  else newVoteValue = -1;                // Add downvote (or switch from upvote)
+
+  updateVote(newVoteValue);
+};
+
+const updateVote = async (newVoteValue) => {
+  try {
+    const res = await fetch(`/api/posts/${postId}/vote`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ value: newVoteValue }),
+    });
+
+    if (!res.ok) throw new Error("Vote failed");
+
+    const data = await res.json();
+
+    // update state only after backend confirms
+    setVote(newVoteValue);
+    setVoteCount(data.score);
+
+  } catch (err) {
+    console.error(err);
+  }
+};
+
+  const imageStyle = { borderRadius: '50%', width: '20px', height: '20px', marginRight: '8px' };
+  const showCommunityMeta = isAllFeed || (!isCommunityPage && community);
 
   return (
-    <div className="post-fullwidth">
+    <div className={`post-fullwidth ${viewType === 'compact' ? 'compact-view' : ''}`}>
       <div className="post">
 
-        {/* MAIN CLICKABLE AREA */}
-          <div className="post-meta">
-
-            <Link
-            to={username ? `/profile/${username}` : "#"}
-            style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}
-            >
-              <div className="post-user-info">
-                <img src={avatar} alt="avatar" />
-                <span className="post-user-name">u/{username}</span>
-              </div>
-            </Link>
-
-            <div className="post-created-at">
-              • {
-                (() => {
-                  const parsedTime = new Date(time);
-                  return !time || isNaN(parsedTime)
-                    ? 'Unknown time'
-                    : formatDistanceToNow(parsedTime, { addSuffix: true }).replace(/^about /, '');
-                })()
-              }
-            </div>
-
-          </div>
-
+        {/* POST HEADER/META SECTION */}
+        <div className="post-meta">
           <Link
+            to={isCommunityPage ? (username ? `/profile/${username}` : "#") : `/community/${community}`}
+            style={{ textDecoration: 'none', color: 'inherit', display: 'flex', alignItems: 'center' }}
+          >
+            <div className="post-user-info">
+              
+              {/* 1. Community Feed / All Feed Logic */}
+              {showCommunityMeta ? ( 
+                <>
+                  <img src={communityAvatarUrl || "../images/default-community.svg"} alt="Community Avatar" style={imageStyle} />
+                  <span className="post-community-name">r/{community}</span>
+                  {/* Show author and time */}
+                  <span className="post-separator-meta post-separator">
+                    • Posted by u/{username}
+                  </span>
+                  <div className="post-created-at post-separator-meta"> 
+                    • {
+                      (() => {
+                        const parsedTime = new Date(time);
+                        return !time || isNaN(parsedTime)
+                          ? 'Unknown time'
+                          : formatDistanceToNow(parsedTime, { addSuffix: true }).replace(/^about /, '');
+                      })()
+                    }
+                  </div>
+                </>
+              ) : (
+                /* 2. Community Page / Profile View Logic */
+                <>
+                  <img src={avatar} alt="User Avatar" style={imageStyle} />
+                  <span className="post-user-name">u/{username}</span>
+                  <div className="post-created-at post-separator-meta">
+                    • {
+                      (() => {
+                        const parsedTime = new Date(time);
+                        return !time || isNaN(parsedTime)
+                          ? 'Unknown time'
+                          : formatDistanceToNow(parsedTime, { addSuffix: true }).replace(/^about /, '');
+                      })()
+                    }
+                  </div>
+                </>
+              )}
+            </div>
+          </Link>
+          
+         {isAllFeed && ( 
+            <div className="post-meta-actions">
+              <button 
+                className={`post-join-button ${isJoined ? 'joined' : 'not-joined'}`}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation(); 
+                  if(onToggleJoin) onToggleJoin(community); 
+                }}
+              >
+                {isJoined ? 'Joined' : 'Join'}
+              </button>
+              <img src="../images/three-dots.svg" alt="More options" className="post-meta-dots" />
+            </div>
+          )}
+          
+          {(!isAllFeed && !isCommunityPage) && ( // Show only dots on Home Feed
+            <div className="post-meta-actions">
+              <img src="../images/three-dots.svg" alt="More options" className="post-meta-dots" />
+            </div>
+          )}
+
+          {isCommunityPage && ( // Show only dots on Community Page
+            <div className="post-meta-actions">
+              <img src="../images/three-dots.svg" alt="More options" className="post-meta-dots" />
+            </div>
+          )}
+          
+        </div>
+
+        <Link
           to={postId ? `/post/${postId}` : "#"}
           className="post-link"
           style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}
-          >
-
+        >
           <h2 className="post-header">{title}</h2>
-
-          {preview ? (
-            <div className="post-preview">
-              <img src={preview} alt="preview" />
-            </div>
-          ) : (
-            <div className="post-preview">
-              <p>{textPreview}</p>
-            </div>
+          
+          {/* POST PREVIEW / MEDIA (conditionally render based on viewType) */}
+          {viewType !== 'compact' && ( // <-- HIDE MEDIA IN COMPACT VIEW
+              preview ? (
+                <div className="post-preview">
+                  {/* ... media content ... */}
+                  {preview.endsWith(".mp4") || preview.endsWith(".webm") ? (
+                    <video src={preview} controls className="post-media" />
+                  ) : (
+                    <img src={preview} alt="preview" className="post-media" />
+                  )}
+                </div>
+              ) : (
+                <div className="post-preview">
+                  <p>{textPreview}</p>
+                </div>
+              )
           )}
         </Link>
 
-        {/* ACTIVITY SECTION */}
-        <div className="post-activity">
-          {/* VOTE SECTION */}
-          <div className="post-vote post-activity-container">
-            <div className="post-activity-button" onClick={handleUpvote}>
-              <img
-                src={vote === 1 ? "../images/upvote-active.svg" : "../images/upvote.svg"}
-                alt="upvote"
-              />
-            </div>
-            <span className="post-vote-score">{voteCount}</span>
-            <div className="post-activity-button" onClick={handleDownvote}>
-              <img
-                src={vote === -1 ? "../images/downvote-active.svg" : "../images/downvote.svg"}
-                alt="downvote"
-              />
-            </div>
-          </div>
+        <div className="post-activity-wrapper">
+            <div className="post-activity">
+                <div className="post-vote post-activity-container">
+                    <div className="post-activity-button" onClick={handleUpvote}>
+                        <img
+                            src={vote === 1 ? "../images/upvote-active.svg" : "../images/upvote.svg"}
+                            alt="upvote"
+                        />
+                    </div>
+                    <span className="post-vote-score">{voteCount}</span>
+                    <div className="post-activity-button" onClick={handleDownvote}>
+                        <img
+                            src={vote === -1 ? "../images/downvote-active.svg" : "../images/downvote.svg"}
+                            alt="downvote"
+                        />
+                    </div>
+                </div>
 
-          {/* COMMENTS BUTTON */}
-          <Link
-            to={postId ? `/post/${postId}` : "#"}
-            className="post-comment post-activity-button post-activity-container"
-            style={{ textDecoration: "none", color: "inherit" }}
-          >
-            <img src="../images/comment.svg" alt="comment" />
-            <span className="post-comment-amount">{comments.length}</span>
-          </Link>
+                <Link
+                    to={postId ? `/post/${postId}` : "#"}
+                    className="post-comment post-activity-button post-activity-container"
+                    style={{ textDecoration: "none", color: "inherit" }}
+                >
+                    <img src="../images/comment.svg" alt="comment" />
+                    <span className="post-comment-amount">{initialComments}</span>
+                </Link>
+            </div>
         </div>
 
       </div>

@@ -2,9 +2,12 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import SearchBar from "../components/searchbar";
+import Chat from "../components/Chat";
 
 function Header() {
   const [currentUser, setCurrentUser] = useState(null);
+  const [isChatOpen, setIsChatOpen] = useState(false);
+  const [customAvatar, setCustomAvatar] = useState(null);
 
   useEffect(() => {
     const fetchCurrentUser = async () => {
@@ -15,7 +18,18 @@ function Header() {
         });
         if (res.ok) {
           const data = await res.json();
-          setCurrentUser(data); // { username, avatarUrl, ... }
+          setCurrentUser(data);
+          
+          // 🆕 Check for custom avatar in database first, then localStorage
+          if (data.avatarUrl && data.avatarUrl.startsWith('data:image')) {
+            setCustomAvatar(data.avatarUrl);
+          } else {
+            // Fallback to localStorage
+            const savedAvatar = localStorage.getItem("userAvatar");
+            if (savedAvatar) {
+              setCustomAvatar(savedAvatar);
+            }
+          }
         }
       } catch (err) {
         console.error("Failed to fetch current user", err);
@@ -23,7 +37,41 @@ function Header() {
     };
 
     fetchCurrentUser();
+
+    // 🆕 Listen for avatar updates from other components
+    const handleAvatarUpdate = () => {
+      const savedAvatar = localStorage.getItem("userAvatar");
+      if (savedAvatar) {
+        setCustomAvatar(savedAvatar);
+      }
+    };
+
+    // 🆕 Custom event listener for avatar updates
+    window.addEventListener('avatarUpdated', handleAvatarUpdate);
+    
+    // 🆕 Also check localStorage periodically (in case of multiple tabs)
+    const interval = setInterval(() => {
+      const savedAvatar = localStorage.getItem("userAvatar");
+      if (savedAvatar && savedAvatar !== customAvatar) {
+        setCustomAvatar(savedAvatar);
+      }
+    }, 1000);
+
+    return () => {
+      window.removeEventListener('avatarUpdated', handleAvatarUpdate);
+      clearInterval(interval);
+    };
   }, []);
+
+  const toggleChat = (event) => {
+    event.preventDefault();
+    setIsChatOpen(prev => !prev);
+  };
+
+  // 🆕 Function to get the correct avatar URL
+  const getAvatarUrl = () => {
+    return customAvatar || "../images/avatar.png";
+  };
 
   const profileLink = currentUser ? `/profile/${currentUser.username}` : "#";
   
@@ -40,18 +88,18 @@ function Header() {
         <ul className="header-actions">
 
           <li className="header-action">
-            <button>
-              <a href="./chats.html" className="header-action-link">
+            <button onClick={toggleChat}>
+              <div className="header-action-link"> 
                 <img src="../images/chat.svg" />
                 <div className="message-counter">1</div>
                 <div className="header-action-tooltip">Open chat</div>
-              </a>
+              </div>
             </button>
           </li>
 
           <li className="header-action">
-            <Link to="/create_post" className="header-action-link rect">
-              <img src="../images/create-post.svg" /> Create
+            <Link to="/create_post" className="header-action-link">
+              <img src="../images/create-post.svg" />Create
               <div className="header-action-tooltip">Create post</div>
             </Link>
           </li>
@@ -59,7 +107,16 @@ function Header() {
           <li className="header-action">
             <button className="profile-menu-button">
               <label htmlFor="profile-menu-visibility-checkbox">
-                <img src="../images/avatar.png" className="header-action-avatar" />
+                {/* 🆕 UPDATED: Use custom avatar */}
+                <img 
+                  src={getAvatarUrl()} 
+                  className="header-action-avatar" 
+                  alt="User avatar"
+                  onError={(e) => {
+                    // Fallback if custom avatar fails to load
+                    e.target.src = "../images/avatar.png";
+                  }}
+                />
               </label>
               <div className="online-indicator"></div>
               <div className="header-action-tooltip">Open profile menu</div>
@@ -70,10 +127,14 @@ function Header() {
               <li className="profile-menu-item">
               <Link to={profileLink} className="profile-menu-link">
                 <div className="profile-menu-item-icon">
+                  {/* 🆕 UPDATED: Use custom avatar in profile menu too */}
                   <img
-                    src="../images/avatar.png"
+                    src={getAvatarUrl()}
                     className="profile-menu-item-icon-avatar"
                     alt="Profile avatar"
+                    onError={(e) => {
+                      e.target.src = "../images/avatar.png";
+                    }}
                   />
                   <div className="online-indicator online-indicator-profile-menu"></div>
                 </div>
@@ -124,7 +185,8 @@ function Header() {
           </li>
         </ul>
       </div>
-      </>
+      {isChatOpen && <Chat onClose={() => setIsChatOpen(false)} />} 
+    </>
 )};
 
 export default Header;
