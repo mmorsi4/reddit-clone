@@ -12,24 +12,6 @@ function Community() {
   const [posts, setPosts] = useState([]);
   const [loadingCommunity, setLoadingCommunity] = useState(true);
   const [loadingPosts, setLoadingPosts] = useState(true);
-  const [isMember, setIsMember] = useState(false);
-
-  // Check if user is already a member
-  useEffect(() => {
-    const checkMembership = async () => {
-      if (!community) return;
-      try {
-        const res = await fetch(`/api/memberships/check?communityId=${community._id}`, {
-          credentials: "include",
-        });
-        const data = await res.json();
-        setIsMember(data.isMember);
-      } catch (err) {
-        console.error(err);
-      }
-    };
-    checkMembership();
-  }, [community]);
 
   useEffect(() => {
     const fetchCommunity = async () => {
@@ -118,11 +100,16 @@ function Community() {
                     time={new Date(p.createdAt).toLocaleString()}
                     title={p.title}
                     textPreview={p.body || ""}
-                    preview={p.url || ""}
+                    preview={p.mediaUrl || ""}
                     avatar={p.author?.avatarUrl || "../images/avatar.png"}
-                    initialVotes={p.votes?.reduce((s, v) => s + v.value, 0) || 0}
-                    initialComments={p.comments || []}
+                    initialVotes={p.score}
+                    initialVote={p.userVote}
+                    initialComments={p.commentCount}
                     community={community.name}
+                    isAllFeed={false}         
+                    isCommunityPage={true} 
+                    communityAvatarUrl={null} 
+                    viewType={"card"}
                   />
                 ))
               )}

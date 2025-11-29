@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 
 function SearchBar() {
   const [communities, setCommunities] = useState([]);
+  const [users, setUsers] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredResults, setFilteredResults] = useState([]);
   const [showResults, setShowResults] = useState(false);
@@ -10,11 +11,16 @@ function SearchBar() {
   const searchRef = useRef(null);
   const navigate = useNavigate(); // hook to navigate programmatically
 
+    useEffect(() => {
+    console.log("showResults:", showResults);
+    console.log("filteredResults length:", filteredResults.length);
+  }, [showResults, filteredResults]);
+
   // Fetch communities
   useEffect(() => {
     const loadCommunities = async () => {
       try {
-        const res = await fetch("http://localhost:5001/api/communities");
+        const res = await fetch("api/communities");
         if (!res.ok) throw new Error("Failed to load communities");
         const data = await res.json();
         setCommunities(data);
@@ -25,13 +31,44 @@ function SearchBar() {
     loadCommunities();
   }, []);
 
-  // Filter communities
+  // Fetch users
   useEffect(() => {
-    const filtered = communities.filter(
-      (c) => c.name && c.name.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-    setFilteredResults(filtered);
-  }, [searchTerm, communities]);
+    const loadUsers = async () => {
+      try {
+        const res = await fetch("api/users");
+        if (!res.ok) throw new Error("Failed to load users");
+        const data = await res.json();
+        setUsers(data);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    loadUsers();
+  }, []);
+
+  useEffect(() => {
+    if (!searchTerm.trim()) {
+      const allCommunities = communities.map(item => ({ ...item, type: 'community' }));
+      const allUsers = users.map(item => ({ ...item, type: 'user' }));
+      const combinedResults = [...allCommunities, ...allUsers].slice(0, 5); // Limit to 20 total
+      setFilteredResults(combinedResults);
+    }
+    else{
+      const lowercasedTerm = searchTerm.toLowerCase();
+      
+      const filteredCommunities = communities
+        .filter(c => c.name && c.name.toLowerCase().includes(lowercasedTerm))
+        .map(item => ({ ...item, type: 'community' }));
+
+      const filteredUsers = users
+        .filter(u => u.username && u.username.toLowerCase().includes(lowercasedTerm))
+        .map(item => ({ ...item, type: 'user' }));
+
+      // Combine and limit results
+      const combinedResults = [...filteredCommunities, ...filteredUsers].slice(0, 5);
+      setFilteredResults(combinedResults);
+    }
+  }, [searchTerm, communities, users]);
 
   // Hide dropdown when clicking outside
   useEffect(() => {
@@ -50,7 +87,21 @@ function SearchBar() {
     navigate(`/community/${community.name}`);
   };
 
-  return (
+  const handleUserClick = (user) => {
+    setShowResults(false);
+    setSearchTerm("");
+    navigate(`/profile/${user.username}`);
+  };
+
+  const handleItemClick = (item) => {
+    if (item.type === 'community') {
+      handleCommunityClick(item);
+    } else {
+      handleUserClick(item);
+    }
+  };
+
+   return (
     <div className="search" ref={searchRef}>
       <img src="../images/search.svg" alt="search" />
       <input
@@ -66,16 +117,24 @@ function SearchBar() {
         <div className="search-results show">
           <div className="search-results-scrollable">
             <ul className="recent-searches">
-              {filteredResults.map((community, index) => (
-                <li key={index} onClick={() => handleCommunityClick(community)}>
+              {filteredResults.map((item, index) => (
+                <li key={`${item.type}-${index}`} onClick={() => handleItemClick(item)}>
                   <img
-                    src={community.avatar || "../images/default-community.svg"}
-                    alt={community.name || "Community"}
-                    className="community-image"
+                    src={
+                      item.type === 'community' 
+                        ? (item.avatar || "../images/community-avatar-placeholder.png")
+                        : (item.avatar || "../images/avatar.png")
+                    } 
+                    alt={item.type === 'community' ? item.name : item.username}
+                    className={`community-image`}
                   />
-                  <span className="recent-search-value">{community.name || "Unnamed"}</span>
-                  {community.joined && (
-                    <span style={{ marginLeft: "8px", color: "#888" }}>Joined</span>
+                  <div className="search-item-info">
+                    <span className="search-item-name">
+                      {item.type === 'community' ? `r/${item.name}` : `u/${item.username}`}
+                    </span>
+                  </div>
+                  {item.type === 'community' && item.joined && (
+                    <span className="joined-badge">Joined</span>
                   )}
                 </li>
               ))}

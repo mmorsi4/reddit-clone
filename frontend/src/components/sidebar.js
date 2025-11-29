@@ -1,4 +1,4 @@
-import React, { useState, useEffect , useCallback } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Link, useLocation } from "react-router-dom";
 import CreateCommunityPopup from "./create-community";
 import CustomFeedPopup from "../pages/CustomFeedPopup";
@@ -6,15 +6,28 @@ import CustomFeedPopup from "../pages/CustomFeedPopup";
 function Sidebar() {
   const [recent, setRecent] = useState([]);
   const [communities, setCommunities] = useState([]);
+  const [joinedCommunities, setJoinedCommunities] = useState([]);
   const [favorites, setFavorites] = useState([]);
   const [showPopup, setShowPopup] = useState(false);
   const [customFeeds, setCustomFeeds] = useState([]);
   const location = useLocation();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
   const getLinkClass = (path) => {
-    if (path === "/home" && location.pathname === "/home") return "sidebar-link active";
-    if (location.pathname.startsWith(path)) return "sidebar-link active";
+    const currentURL = location.pathname + location.search;
+
+    if (path === "/home") {
+      return currentURL === "/home" ? "sidebar-link active" : "sidebar-link";
+    }
+
+    if (path === "/home?feed=all") {
+      return currentURL === "/home?feed=all" ? "sidebar-link active" : "sidebar-link";
+    }
+    if (location.pathname.startsWith(path)) {
+      return "sidebar-link active";
+    }
+
     return "sidebar-link";
   };
 
@@ -23,15 +36,11 @@ function Sidebar() {
     setIsModalOpen(true);
   };
   const handleCloseModal = () => setIsModalOpen(false);
-  const handleFeedSubmission = (feedData) => {
-    console.log("New Feed Data Submitted:", feedData);
-    handleCloseModal();
-  };
 
- // ✅ Fetch all communities
+  // ✅ Fetch all communities
   const fetchCommunities = useCallback(async () => {
     try {
-      const res = await fetch("/api/communities/with-favorites");
+      const res = await fetch("/api/communities/");
       if (!res.ok) throw new Error("Failed to fetch communities");
       const data = await res.json();
       setCommunities(data);
@@ -45,35 +54,61 @@ function Sidebar() {
     fetchCommunities();
   }, [fetchCommunities]);
 
-  // Load recent
-  useEffect(() => {
-    const recentData = JSON.parse(localStorage.getItem("recentCommunities")) || [];
-    setRecent(recentData);
+  // fetch joined comms only to show under community section
+  const fetchJoinedCommunities = useCallback(async () => {
+    try {
+      const res = await fetch("/api/memberships/joined");
+      if (!res.ok) throw new Error("Failed to fetch joined communities");
+      const data = await res.json();
+      console.log(data)
+      setJoinedCommunities(data);
+    } catch (err) {
+      console.error("Error fetching joined communities:", err);
+    }
   }, []);
 
-  // Update recent when navigating
+  // intial load joined communities
   useEffect(() => {
-    if (location.pathname.startsWith("/community/")) {
-      const communityName = location.pathname.split("/")[2];
-      const matched = communities.find((c) => c.name === communityName);
-      if (matched) {
-        setRecent((prev) => {
-          let updated = [matched, ...prev.filter((c) => c.name !== matched.name)];
-          if (updated.length > 5) updated = updated.slice(0, 5);
-          localStorage.setItem("recentCommunities", JSON.stringify(updated));
-          return updated;
-        });
-      }
+    fetchJoinedCommunities();
+  }, [fetchJoinedCommunities]);
+
+  // // Load recent
+  // useEffect(() => {
+  //     const recentData = JSON.parse(localStorage.getItem("recentCommunities")) || [];
+  //     setRecent(recentData);
+  //   }, []);
+
+  // get recent communities
+  const fetchRecentCommunities = useCallback(async () => {
+    try {
+      const res = await fetch('/api/users/recent-communities', {
+        credentials: "include"
+      });
+
+      const data = await res.json();
+      setRecent(data);
+
+    } catch (err) {
+      console.error("Error fetching recent communities:", err);
     }
-  }, [location.pathname, communities]);
+  }, []);
+
+  // initial load
+  useEffect(() => {
+    fetchRecentCommunities();
+  }, [fetchRecentCommunities]);
 
   // ✅ Toggle favorite and immediately re-fetch
   const toggleFavorite = async (communityId) => {
     try {
+      setJoinedCommunities(prev => prev.map(community =>
+        community._id === communityId
+          ? { ...community, favorite: !community.favorite }
+          : community
+      ));
+
       const res = await fetch(`/api/memberships/favorite/${communityId}`, { method: "POST" });
       if (!res.ok) throw new Error("Failed to toggle favorite");
-      await res.json();
-      await fetchCommunities(); // refresh live
     } catch (err) {
       console.error(err);
     }
@@ -85,9 +120,71 @@ function Sidebar() {
     await fetchCommunities();
   };
 
+  const fetchCustomFeeds = useCallback(async () => {
+    try {
+      const res = await fetch("/api/customfeeds", { credentials: "include" });
+      if (!res.ok) throw new Error("Failed to fetch custom feeds");
+      const data = await res.json();
+      setCustomFeeds(data);
+    } catch (err) {
+      console.error("Error fetching custom feeds:", err);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchCustomFeeds();
+  }, [fetchCustomFeeds]);
+
+  const handleFeedSubmission = async (feedData) => {
+
+    const randomIndex = Math.floor(Math.random() * 11) + 1;
+    const imageUrl = `../images/custom_feed_default_${randomIndex}.png`;
+
+    try {
+      const res = await fetch("/api/customfeeds", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          name: feedData.name,
+          description: feedData.description,
+          isPrivate: feedData.isPrivate,
+          showOnProfile: feedData.showOnProfile,
+          image: imageUrl,
+        }),
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.message || "Failed to create custom feed.");
+      }
+
+      handleCloseModal();
+      await fetchCustomFeeds();
+
+    } catch (err) {
+      console.error("Error creating custom feed:", err);
+      alert(err.message || "An unknown error occurred during feed creation.");
+    }
+  };
+
+   const toggleCollapse = () => {
+    setIsCollapsed(prev => !prev);
+  };
+
 
   return (
-    <div className="sidebar-container">
+  <div className={`sidebar-container ${isCollapsed ? 'collapsed' : ''}`}>
+    <button 
+      className="sidebar-collapse-toggle"
+      onClick={toggleCollapse} 
+    >
+      <img 
+        src="../images/collapse.svg" 
+        alt="Collapse Sidebar" 
+      />
+    </button>
+
       <ul className="sidebar">
         {/* HOME / POPULAR / ALL */}
         <li>
@@ -105,10 +202,29 @@ function Sidebar() {
               </Link>
             </li>
             <li>
-              <Link to="/all" className={getLinkClass("/all")}>
+              <Link to="/explore" className={getLinkClass("/explore")}>
+                <img src="../images/explore.svg" alt="Explore" />
+                <div className="sidebar-section-item-details">Explore</div>
+              </Link>
+            </li>
+            <li>
+              <Link to="/home?feed=all" className={getLinkClass("/home?feed=all")}>
                 <img src="../images/all.svg" alt="All" />
                 <div className="sidebar-section-item-details">All</div>
               </Link>
+            </li>
+            
+            {/* Create Community button */}
+            <li>
+              <button
+                onClick={() => setShowPopup(true)}
+                className="sidebar-link create-btn"
+              >
+                <img src="../images/plus.svg" alt="Create" />
+                <div className="sidebar-section-item-details">
+                  Start a community
+                </div>
+              </button>
             </li>
           </ul>
         </li>
@@ -127,6 +243,7 @@ function Sidebar() {
             Custom Feeds <img src="../images/down.svg" alt="Expand" />
           </label>
           <ul className="sidebar-section">
+            {/* Create Custom Feed button (always remains at the bottom) */}
             <li onClick={handleOpenModal}>
               <a className="sidebar-link" href="#">
                 <img src="../images/plus.svg" alt="Create Feed" />
@@ -135,6 +252,24 @@ function Sidebar() {
                 </div>
               </a>
             </li>
+            {/* Render dynamically created Custom Feeds */}
+            {customFeeds.map((feed) => (
+              <li key={feed._id}>
+                <Link to={`/f/${feed._id}`} className={getLinkClass(`/f/${feed._id}`)}>
+                  <img
+                    src={feed.image}
+                    className="sidebar-link-icon-round" // Use existing style for community image
+                    alt={feed.name}
+                  />
+                  <div className="sidebar-section-item-details">
+                    {feed.name}
+                    {feed.isPrivate && <img src="../images/lock.svg" alt="Private" style={{ width: '12px', marginLeft: '5px' }} />}
+                  </div>
+                </Link>
+              </li>
+            ))}
+
+            
           </ul>
         </li>
 
@@ -166,7 +301,7 @@ function Sidebar() {
                     className="sidebar-link"
                   >
                     <img
-                      src={community.avatar}
+                      src={community.image}
                       className="sidebar-link-icon-round"
                       alt={community.name}
                     />
@@ -194,18 +329,6 @@ function Sidebar() {
             Communities <img src="../images/down.svg" alt="Expand" />
           </label>
           <ul className="sidebar-section">
-            {/* Create Community button */}
-            <li>
-              <button
-                onClick={() => setShowPopup(true)}
-                className="sidebar-link create-btn"
-              >
-                <img src="../images/plus.svg" alt="Create" />
-                <div className="sidebar-section-item-details">
-                  Create Community
-                </div>
-              </button>
-            </li>
             <li>
               <Link to="/manage_community" className="sidebar-link">
                 <img src="../images/settings.svg" alt="Manage Community" />
@@ -216,12 +339,12 @@ function Sidebar() {
             </li>
 
             {/* Render communities from DB */}
-            {(communities || []).length === 0 ? (
+            {(joinedCommunities || []).length === 0 ? (
               <li className="sidebar-link">
                 <div className="sidebar-section-item-details">Loading communities...</div>
               </li>
             ) : (
-              [...communities]
+              [...joinedCommunities]
                 .sort((a, b) => {
                   if (a.favorite && !b.favorite) return -1;
                   if (!a.favorite && b.favorite) return 1;
@@ -245,7 +368,7 @@ function Sidebar() {
                           }}
                         >
                           <img
-                            src={community.favorite ? "/images/star-yellow.svg" : "/images/star.svg"}
+                            src={community.favorite ? "/images/star-black.svg" : "/images/star.svg"}
                             alt="favorite"
                           />
                         </button>
@@ -255,10 +378,13 @@ function Sidebar() {
                 ))
             )}
           </ul>
+          <a href="#" className="copyright-link">
+            Reddit, Inc. &copy;2025. All rights reserved.
+          </a>
         </li>
 
         {/* RESOURCES */}
-        <li>
+        {/* <li>
           <input
             type="checkbox"
             className="sidebar-collapse-checkbox"
@@ -288,10 +414,7 @@ function Sidebar() {
               </Link>
             </li>
           </ul>
-          <a href="#" className="copyright-link">
-            Reddit, Inc. &copy;2025. All rights reserved.
-          </a>
-        </li>
+        </li>*/}
       </ul>
 
       {/* Popup */}

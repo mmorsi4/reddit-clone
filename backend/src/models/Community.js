@@ -9,6 +9,13 @@ const CommunitySchema = new Schema({
   banner: { type: String, default: "" }, 
   url: { type: String },
   createdAt: { type: Date, default: Date.now },
+  createdBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  },
+  topics: [{
+    type: String
+  }],
 });
 
 CommunitySchema.pre('save', function(next) {

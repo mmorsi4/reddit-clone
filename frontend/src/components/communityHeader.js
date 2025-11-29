@@ -1,8 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import AddToCustom from "./AddToCustom";
 
 function CommunityHeader({ banner, avatar, name, communityId }) {
   const [joined, setJoined] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
+  const [favorite, setFavorite] = useState(false);
+  const [showCustomFeedPopup, setShowCustomFeedPopup] = useState(false);
 
   // ✅ Check membership from backend on mount
   useEffect(() => {
@@ -13,7 +17,9 @@ function CommunityHeader({ banner, avatar, name, communityId }) {
           credentials: "include",
         });
         const data = await res.json();
+        console.log(data.isMember, data.isFavorite);
         setJoined(data.isMember);
+        setFavorite(data.isFavorite);
       } catch (err) {
         console.error("Failed to fetch membership status:", err);
       }
@@ -40,6 +46,10 @@ function CommunityHeader({ banner, avatar, name, communityId }) {
       throw new Error(errText);
     }
 
+    if (joined && favorite) {
+        setFavorite(false);
+    }
+
     setJoined(prev => !prev); // toggle state correctly
   } catch (err) {
     console.error("Error joining/unjoining community:", err);
@@ -47,13 +57,76 @@ function CommunityHeader({ banner, avatar, name, communityId }) {
   }
 };
 
-  // ✅ Add to RECENT communities
+  // // add to recent communities
+  // useEffect(() => {
+  //   const recent = JSON.parse(localStorage.getItem("recentCommunities")) || [];
+  //   const newCommunity = { name, image: avatar, link: `/community/${name}` };
+  //   const updated = [newCommunity, ...recent.filter(c => c.name !== name)].slice(0, 5);
+  //   localStorage.setItem("recentCommunities", JSON.stringify(updated));
+  // }, [name, avatar]);
+
   useEffect(() => {
-    const recent = JSON.parse(localStorage.getItem("recentCommunities")) || [];
-    const newCommunity = { name, image: avatar, link: `/community/${name}` };
-    const updated = [newCommunity, ...recent.filter(c => c.name !== name)].slice(0, 5);
-    localStorage.setItem("recentCommunities", JSON.stringify(updated));
-  }, [name, avatar]);
+  const updateRecentCommunity = async () => {
+    try {
+      await fetch('/api/users/recent-communities', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: "include",
+        body: JSON.stringify({ communityId }), // based on the community id
+      });
+    } catch (err) {
+      console.error('Failed to update recent communities:', err);
+    }
+  };
+
+  updateRecentCommunity();
+  }, [communityId]);
+
+  const toggleFavorite = async () => {
+    try {
+      if(!joined){
+        await handleJoin();  
+      }
+
+      setShowMenu(false);
+      setFavorite(prev => !prev);
+      
+      const res = await fetch(`/api/memberships/favorite/${communityId}`, { 
+        method: "POST",
+        credentials: "include"
+      });
+      
+      if (!res.ok) throw new Error("Failed to toggle favorite");
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+
+  // ✅ Close menu on outside click
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (!e.target.closest(".community-action-more-container")) {
+        setShowMenu(false);
+      }
+    };
+    document.addEventListener("click", handleClickOutside);
+    return () => document.removeEventListener("click", handleClickOutside);
+  }, []);
+
+
+  const handleCustomFeed = () => {
+    setShowMenu(false); // Close the 'more' menu
+    setShowCustomFeedPopup(true); // Open the popup
+  };
+
+  // ✅ Close the custom feed popup
+  const handleCloseCustomFeedPopup = () => {
+    setShowCustomFeedPopup(false);
+  };
+  
 
   return (
     <div className="main-head">
@@ -81,8 +154,35 @@ function CommunityHeader({ banner, avatar, name, communityId }) {
           >
             {joined ? "Joined" : "Join"}
           </button>
+
+          <div className="community-action-more-container">
+          <button
+            className="community-action-more"
+            onClick={e => { e.stopPropagation(); setShowMenu(prev => !prev); }}
+          >
+            <img src="../images/three-dots.svg" alt="More options" />
+          </button>
+
+          <ul className={`more-menu ${showMenu ? "visible" : ""}`}>
+            {/* Updated onClick handler */}
+            <li className="more-menu-item" onClick={handleCustomFeed}>
+              Add to custom feed
+            </li>
+            <li className="more-menu-item" onClick={toggleFavorite}>
+              { favorite ? "Remove from favorites" : "Add to favorites"}
+            </li>
+          </ul>
+        </div>
+        
         </div>
       </div>
+      {showCustomFeedPopup && (
+        <AddToCustom
+          communityId={communityId}
+          communityName={name}
+          onClose={handleCloseCustomFeedPopup}
+        />
+      )}
     </div>
   );
 }
