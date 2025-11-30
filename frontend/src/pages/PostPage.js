@@ -22,11 +22,10 @@ function PostPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [showDropdown, setShowDropdown] = useState(false);
   
-  // ADD THESE STATES - like sidebar
   const [allCommunities, setAllCommunities] = useState([]);
   const [currentCommunity, setCurrentCommunity] = useState(null);
 
-  // ✅ Fetch ALL communities like sidebar does
+  // Fetch ALL communities like sidebar does
   useEffect(() => {
     const fetchAllCommunities = async () => {
       try {
@@ -34,7 +33,6 @@ function PostPage() {
         if (!res.ok) throw new Error("Failed to fetch communities");
         const data = await res.json();
         setAllCommunities(data);
-        console.log("📚 ALL COMMUNITIES LOADED:", data);
       } catch (err) {
         console.error("Error fetching communities:", err);
       }
@@ -42,41 +40,30 @@ function PostPage() {
     fetchAllCommunities();
   }, []);
 
-  // ✅ Find the current community when post loads
+  // Find the current community when post loads
   useEffect(() => {
     if (post?.community?.name && allCommunities.length > 0) {
       const foundCommunity = allCommunities.find(c => 
         c?.name?.toLowerCase() === post.community.name.toLowerCase()
       );
-      
-      console.log("🎯 FOUND CURRENT COMMUNITY:", {
-        postCommunityName: post.community.name,
-        foundCommunity: foundCommunity,
-        foundAvatar: foundCommunity?.avatar
-      });
-      
       setCurrentCommunity(foundCommunity);
     }
   }, [post?.community?.name, allCommunities]);
 
-  // Rest of your code remains the same...
-  
-  // Add this useEffect to debug
-useEffect(() => {
-  if (post && post.community) {
-    console.log("🔍 COMMUNITY DEBUG:", {
-      communityName: post.community.name,
-      avatarPath: post.community.avatar,
-      fullTestUrl: `http://localhost:3000${post.community.avatar}`
-    });
-    
-    // Test if the image actually loads
-    const img = new Image();
-    img.onload = () => console.log("✅ Image should work:", post.community.avatar);
-    img.onerror = () => console.log("❌ Image won't load:", post.community.avatar);
-    img.src = post.community.avatar;
-  }
-}, [post]);
+  // Debug community data
+  useEffect(() => {
+    if (post && post.community) {
+      console.log("🔍 COMMUNITY DEBUG:", {
+        communityName: post.community.name,
+        avatarPath: post.community.avatar
+      });
+      
+      const img = new Image();
+      img.onload = () => console.log("✅ Image should work:", post.community.avatar);
+      img.onerror = () => console.log("❌ Image won't load:", post.community.avatar);
+      img.src = post.community.avatar;
+    }
+  }, [post]);
 
   // Fetch current user info
   useEffect(() => {
@@ -307,7 +294,6 @@ useEffect(() => {
     const newText = newComment.substring(0, start) + formattedText + newComment.substring(end);
     setNewComment(newText);
     
-    // Set cursor position
     setTimeout(() => {
       textarea.focus();
       if (selectedText) {
@@ -317,6 +303,52 @@ useEffect(() => {
       }
     }, 0);
   };
+
+  // Comments Header Component
+  const CommentsHeader = () => (
+    <div className="comments-header">
+      <div className="comments-header-left">
+        <h3>{filteredComments.length} Comments</h3>
+        <div className="comments-controls">
+          <div className="sort-options">
+            <span className="sort-by-text">Sort by:</span>
+            <div className="sort-container">
+              <select 
+                className="sort-select" 
+                value={sortOption} 
+                onChange={handleSortChange}
+              >
+                <option value="best">Best</option>
+                <option value="top">Top</option>
+                <option value="new">New</option>
+                <option value="old">Old</option>
+                <option value="controversial">Controversial</option>
+              </select>
+            </div>
+          </div>
+          <div className="search-container">
+            <div className="search-input-wrapper">
+              <svg className="search-icon" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+              </svg>
+              <input
+                type="text"
+                className="search-input"
+                placeholder="Search comments..."
+                value={searchQuery}
+                onChange={handleSearchChange}
+              />
+              {searchQuery && (
+                <button className="clear-search-btn" onClick={handleClearSearch}>
+                  ×
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 
   if (isLoading) {
     return (
@@ -360,30 +392,31 @@ useEffect(() => {
                 </svg>
               </button>
               
-              <div className="community-header-info">
+              {/* UPDATED: Using unique post-page class names */}
+              <div className="post-page-community-info">
                 <img 
                   src={currentCommunity?.avatar?.replace('/images/', '../images/')} 
                   alt="Community avatar" 
-                  className="community-avatar"
+                  className="post-page-community-avatar"
                   onError={(e) => {
                     console.log("❌ Community avatar failed:", currentCommunity?.avatar);
+                    e.target.src = "../images/default-community.png";
                   }}
-                  onLoad={() => console.log("✅ Community avatar loaded!")}
                 />
-                <div className="community-meta-main">
-                  <div className="community-line">
-                    <span className="community-name">r/{post.community?.name}</span>
-                    <span className="post-time-inline">
+                <div className="post-page-community-meta">
+                  <div className="post-page-community-line">
+                    <span className="post-page-community-name">r/{post.community?.name}</span>
+                    <span className="post-page-time-inline">
                       • {formatDistanceToNow(new Date(post.createdAt), { addSuffix: true })}
                     </span>
                   </div>
-                  <div className="username-below">
+                  <div className="post-page-username-below">
                     u/{post.author?.username}
                   </div>
                 </div>
               </div>
 
-              {/* Options Button with Dropdown - FIXED POSITION */}
+              {/* Options Button with Dropdown */}
               <div className="post-options-container">
                 <button 
                   className="post-options-button"
@@ -396,7 +429,6 @@ useEffect(() => {
                   </svg>
                 </button>
                 
-                {/* Dropdown Menu - Now properly positioned */}
                 {showDropdown && (
                   <div className="post-options-dropdown">
                     <button className="dropdown-item">Save</button>
@@ -471,7 +503,7 @@ useEffect(() => {
 
             {/* Comment Section */}
             <div className="comments-section">
-              {/* Add Comment - Without "Comment as username" */}
+              {/* Add Comment */}
               <div className="add-comment-card">
                 <div className={`formatting-toolbar ${showFormattingToolbar ? 'visible' : ''}`}>
                   <button 
@@ -544,7 +576,23 @@ useEffect(() => {
 
               {/* Comments List */}
               <div className="comments-list">
-                {/* ... rest of comments section remains the same ... */}
+                <CommentsHeader />
+                <div className="comments-container">
+                  {filteredComments.length === 0 ? (
+                    <div className="no-comments">
+                      {searchQuery ? "No comments match your search." : "No comments yet."}
+                    </div>
+                  ) : (
+                    filteredComments.map(comment => (
+                      <CommentWithVotes
+                        key={comment._id}
+                        comment={comment}
+                        currentUser={currentUser}
+                        onCommentUpdate={fetchPost}
+                      />
+                    ))
+                  )}
+                </div>
               </div>
             </div>
           </div>
@@ -556,6 +604,7 @@ useEffect(() => {
                 communityId={post.community?._id} 
                 post={post}
                 currentUser={currentUser}
+                isCommunityPage={false}
               />
             </div>
           </div>

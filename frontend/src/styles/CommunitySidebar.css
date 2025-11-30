@@ -1,28 +1,30 @@
-/* CommunitySidebar.css - ALL SIDEBAR STYLING */
-
-/* Community Sidebar Container */
+/* Community Sidebar Container - SIMPLIFIED */
 .community-sidebar-container {
   width: 312px;
-  background: #f8f9fa;
-  margin-top: -20px;
-  padding-top: 20px;
-  margin-bottom: -20px;
-  padding-bottom: 20px;
-  margin-right: -24px;
-  padding-right: 24px;
   position: sticky;
-  top: 0;
   align-self: flex-start;
-  height: 100vh;
   overflow-y: auto;
+}
+
+/* For POST page */
+.community-sidebar-container.post-page {
+  background: #f8f9fa;
+  top: 60px;
+  max-height: calc(100vh - 80px);
+}
+
+/* For COMMUNITY page */
+.community-sidebar-container.community-page {
+  background: transparent;
+  top: 180px; /* Much lower to account for community header */
+  max-height: calc(100vh - 200px);
 }
 
 /* Community Sidebar Content */
 .community-sidebar {
   background: #f8f9fa;
-  border-radius: 0;
-  border: none;
-  margin-bottom: 0;
+  border-radius: 4px;
+  border: 1px solid #edeff1;
   overflow: hidden;
   width: 100%;
 }
@@ -88,16 +90,32 @@
 .sidebar-section {
   padding: 12px;
   border-bottom: 1px solid #edeff1;
+  background: white;
 }
 
 .sidebar-section:last-child {
   border-bottom: none;
 }
 
+/* Community Description Section */
+.community-description-section {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  background: white;
+}
+
+.community-description-text {
+  font-size: 12px;
+  color: #1c1c1c;
+  line-height: 1.4;
+  margin: 0;
+}
+
 /* Stats Section */
 .stats-section {
   padding-top: 8px;
   padding-bottom: 8px;
+  background: white;
 }
 
 .stats-grid {
@@ -156,6 +174,7 @@
 .user-flair-section {
   padding-top: 8px;
   padding-bottom: 8px;
+  background: white;
 }
 
 .user-flair-preview {
@@ -213,6 +232,7 @@
 .bookmark-section {
   padding-top: 8px;
   padding-bottom: 8px;
+  background: white;
 }
 
 .community-bookmark-btn {
@@ -237,6 +257,7 @@
 .rules-section {
   padding-top: 8px;
   padding-bottom: 8px;
+  background: white;
 }
 
 .rules-list {
@@ -285,6 +306,7 @@
 .about-section {
   padding-top: 8px;
   padding-bottom: 8px;
+  background: white;
 }
 
 .about-content {
@@ -319,6 +341,7 @@
 .repost-section {
   padding-top: 8px;
   padding-bottom: 8px;
+  background: white;
 }
 
 .repost-content {
@@ -355,6 +378,7 @@
 .message-mods-section {
   padding-top: 8px;
   padding-bottom: 8px;
+  background: white;
 }
 
 .message-mods-main-btn {
@@ -379,6 +403,7 @@
 .moderators-section {
   padding-top: 8px;
   padding-bottom: 8px;
+  background: white;
 }
 
 .moderators-header {
@@ -430,6 +455,7 @@
 .community-sidebar.error {
   padding: 20px;
   text-align: center;
+  background: white;
 }
 
 .loading-spinner-small {
@@ -445,17 +471,4 @@
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
-}
-
-.community-description-section {
-  padding-top: 8px;
-  padding-bottom: 8px;
-  border-bottom: 1px solid #edeff1; /* Optional: add divider below description */
-}
-
-.community-description-text {
-  font-size: 12px;
-  color: #1c1c1c;
-  line-height: 1.4;
-  margin: 0;
 }
