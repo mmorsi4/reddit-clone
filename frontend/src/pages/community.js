@@ -5,6 +5,7 @@ import MainSidebar from "../components/main-sidebar";
 import Header from "../components/header";
 import CommunityHeader from "../components/communityHeader";
 import Post from "../components/post";
+import CommunitySidebar from "../components/CommunitySidebar"; // ADD THIS IMPORT
 
 function Community() {
   const { name } = useParams();
@@ -12,6 +13,26 @@ function Community() {
   const [posts, setPosts] = useState([]);
   const [loadingCommunity, setLoadingCommunity] = useState(true);
   const [loadingPosts, setLoadingPosts] = useState(true);
+  const [currentUser, setCurrentUser] = useState(null); // ADD THIS STATE
+
+  // ADD THIS: Fetch current user
+  useEffect(() => {
+    const fetchCurrentUser = async () => {
+      try {
+        const res = await fetch("/api/users/me", {
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+        });
+        if (res.ok) {
+          const userData = await res.json();
+          setCurrentUser(userData);
+        }
+      } catch (error) {
+        console.error("Failed to fetch user:", error);
+      }
+    };
+    fetchCurrentUser();
+  }, []);
 
   useEffect(() => {
     const fetchCommunity = async () => {
@@ -115,7 +136,19 @@ function Community() {
               )}
             </div>
           </div>
-          <MainSidebar community={community} />
+          
+          {/* REPLACE MainSidebar with CommunitySidebar */}
+          <div className="community-sidebar-column">
+            <div className="community-sidebar-container">
+              <CommunitySidebar 
+                communityId={community._id}
+                post={null} // No specific post on community page
+                currentUser={currentUser}
+                showJoinButton={false}
+                isCommunityPage={true} 
+              />
+            </div>
+          </div>
         </div>
       </div>
     </>
