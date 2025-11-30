@@ -1,9 +1,48 @@
-/* PostPage.css */
+/* PostPage.css - CLEAN VERSION */
+
+/* Main container with two-column layout */
 .post-page-container {
-  max-width: 800px;
-  margin: 0 auto;
+  max-width: 1200px;
+  margin: 80px auto 20px auto;
   padding: 20px;
   margin-left: 240px;
+}
+
+.post-page-content {
+  display: flex;
+  gap: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.post-main-column {
+  flex: 1;
+  min-width: 0;
+}
+
+.post-sidebar-column {
+  width: 312px;
+  flex-shrink: 0;
+}
+
+/* Responsive design for two-column layout */
+@media (max-width: 960px) {
+  .post-sidebar-column {
+    display: none;
+  }
+  
+  .post-main-column {
+    width: 100%;
+  }
+  
+  .post-page-content {
+    flex-direction: column;
+  }
+  
+  .post-page-container {
+    margin-left: 0;
+    margin-top: 80px;
+  }
 }
 
 .post-page-loading,
@@ -59,7 +98,7 @@
   font-weight: 500;
 }
 
-/* Post Content Card - UPDATED FOR FLEXIBLE CONTENT */
+/* Post Content Card */
 .post-content-card {
   background: white;
   border: 1px solid #ccc;
@@ -67,7 +106,6 @@
   margin-bottom: 16px;
   overflow: hidden;
   padding: 16px;
-  /* Let it adjust naturally to content */
 }
 
 .post-header {
@@ -96,40 +134,35 @@
   line-height: 1.4;
 }
 
-/* POST CONTENT - UPDATED FOR FLEXIBLE SIZING */
+/* Post Content */
 .post-content {
   margin-bottom: 12px;
   width: 100%;
 }
 
-/* POST MEDIA - UPDATED TO NOT SHRINK IMAGES */
 .post-media {
   text-align: center;
   max-width: 100%;
   margin: 0 auto;
 }
 
-/* POST IMAGE - FIXED: REMOVED MAX-HEIGHT CONSTRAINT */
 .post-image {
   max-width: 100%;
-  height: auto; /* Maintain aspect ratio */
+  height: auto;
   border-radius: 4px;
   display: block;
   margin: 0 auto;
-  /* Optional: Add a reasonable max-height for very large images */
-  max-height: 80vh; /* 80% of viewport height - adjusts to screen size */
-  object-fit: contain; /* Prevents cropping */
+  max-height: 80vh;
+  object-fit: contain;
 }
 
-/* POST TEXT - NATURAL SIZING */
 .post-text {
   font-size: 14px;
   line-height: 1.6;
   color: #1c1c1c;
   width: 100%;
-  white-space: pre-wrap; /* Preserve line breaks */
+  white-space: pre-wrap;
   word-wrap: break-word;
-  /* Let it expand naturally with content */
 }
 
 /* Post Actions */
@@ -622,7 +655,7 @@
   min-width: 0;
 }
 
-/* Expand/Collapse Button - REDDIT STYLE ON LEFT */
+/* Expand/Collapse Button */
 .expand-collapse-btn {
   background: none;
   border: none;
@@ -669,13 +702,6 @@
 
 .comment-vertical-line:hover {
   background: #0079d3;
-}
-
-/* Nested comment styling - REDDIT STYLE */
-.comment-item.comment-indented {
-  margin-left: 0;
-  padding-left: 0;
-  border-left: none;
 }
 
 /* Container for nested comments */
@@ -893,11 +919,41 @@
   margin-left: 0;
 }
 
+/* Image loading state */
+.image-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  color: #787c7e;
+}
+
+.loading-spinner-small {
+  width: 24px;
+  height: 24px;
+  border: 2px solid #f3f3f3;
+  border-top: 2px solid #0079d3;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 8px;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .post-page-container {
     margin-left: 0;
     padding: 8px;
+  }
+  
+  .post-page-content {
+    flex-direction: column;
+    gap: 16px;
+  }
+  
+  .post-sidebar-column {
+    width: 100%;
+    order: -1;
   }
   
   .post-actions {
@@ -935,7 +991,6 @@
     width: 100%;
   }
   
-  /* Adjust for mobile */
   .comment-item {
     padding: 10px 12px 10px 6px;
   }
@@ -1019,23 +1074,4 @@
   .comment-votes-below {
     gap: 6px;
   }
-}
-/* Image loading state */
-.image-loading {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 40px;
-  color: #787c7e;
-}
-
-.loading-spinner-small {
-  width: 24px;
-  height: 24px;
-  border: 2px solid #f3f3f3;
-  border-top: 2px solid #0079d3;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-  margin-bottom: 8px;
 }
