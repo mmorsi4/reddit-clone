@@ -385,6 +385,7 @@ function PostPage() {
           {/* Main Content Column */}
           <div className="post-main-column">
             {/* Combined Back Button and Community Info */}
+            {/* Combined Back Button and Community Info */}
             <div className="post-header-navigation">
               <button className="back-button" onClick={() => window.history.back()}>
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
@@ -416,27 +417,29 @@ function PostPage() {
                 </div>
               </div>
 
-              {/* Options Button with Dropdown */}
-              <div className="post-options-container">
-                <button 
-                  className="post-options-button"
-                  onClick={() => setShowDropdown(!showDropdown)}
-                >
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                    <circle cx="12" cy="5" r="1.5"/>
-                    <circle cx="12" cy="12" r="1.5"/>
-                    <circle cx="12" cy="19" r="1.5"/>
-                  </svg>
-                </button>
-                
-                {showDropdown && (
-                  <div className="post-options-dropdown">
-                    <button className="dropdown-item">Save</button>
-                    <button className="dropdown-item">Hide</button>
-                    <button className="dropdown-item">Report</button>
-                    <button className="dropdown-item">Crosspost</button>
-                  </div>
-                )}
+              {/* Options Button with Dropdown - MOVED OUTSIDE community-info div */}
+              <div className="post-options-wrapper">
+                <div className="post-options-container">
+                  <button 
+                    className="post-options-button"
+                    onClick={() => setShowDropdown(!showDropdown)}
+                  >
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                      <circle cx="5" cy="12" r="1.5"/>
+                      <circle cx="12" cy="12" r="1.5"/>
+                      <circle cx="19" cy="12" r="1.5"/>
+                    </svg>
+                  </button>
+                  
+                  {showDropdown && (
+                    <div className="post-options-dropdown">
+                      <button className="dropdown-item">Save</button>
+                      <button className="dropdown-item">Hide</button>
+                      <button className="dropdown-item">Report</button>
+                      <button className="dropdown-item">Crosspost</button>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
 
