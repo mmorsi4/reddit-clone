@@ -1,3 +1,9 @@
+/* src/index.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Reddit Dark Theme */
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
@@ -5,9 +11,196 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background-color: #1A1A1B; /* Reddit dark background */
+  color: #D7DADC; /* Reddit text color */
 }
 
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
+}
+
+/* Custom utility classes */
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.line-clamp-6 {
+  display: -webkit-box;
+  -webkit-line-clamp: 6;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Reddit Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #1A1A1B;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #343536;
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #454648;
+}
+
+/* Toast Notification */
+.toast {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #FF4500; /* Reddit orange */
+  color: white;
+  padding: 12px 24px;
+  border-radius: 8px;
+  z-index: 1000;
+  animation: fadeInOut 3s ease-in-out;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  font-weight: 500;
+}
+
+/* Links */
+a {
+  color: #4FBCFF; /* Reddit link blue */
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* Input Fields */
+input, textarea {
+  background-color: #272729;
+  border: 1px solid #343536;
+  color: #D7DADC;
+  border-radius: 4px;
+  padding: 8px 12px;
+}
+
+input:focus, textarea:focus {
+  outline: none;
+  border-color: #4FBCFF;
+  box-shadow: 0 0 0 2px rgba(79, 188, 255, 0.2);
+}
+
+/* Buttons */
+button {
+  transition: all 0.2s ease;
+}
+
+button:active {
+  transform: scale(0.98);
+}
+
+/* Custom Reddit Classes */
+.reddit-vote-btn {
+  @apply p-1 rounded hover:bg-opacity-20 transition-colors;
+}
+
+.reddit-post-hover {
+  @apply hover:border-reddit-text-lighter transition-colors duration-200;
+}
+
+.reddit-card {
+  @apply bg-reddit-card border border-reddit-line rounded-md;
+}
+
+.reddit-nav-item {
+  @apply flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-reddit-hover transition-colors;
+}
+
+/* Animations */
+@keyframes fadeInOut {
+  0%, 100% { 
+    opacity: 0;
+    transform: translateX(-50%) translateY(10px);
+  }
+  10%, 90% { 
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+@keyframes votePulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+.vote-pulse {
+  animation: votePulse 0.3s ease;
+}
+
+/* Loading Spinner */
+.loading-spinner {
+  @apply animate-spin rounded-full border-2 border-reddit-orange border-t-transparent;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .hide-on-mobile {
+    display: none;
+  }
+  
+  .mobile-full-width {
+    width: 100%;
+    margin-left: 0;
+    margin-right: 0;
+  }
+}
+
+/* Reddit Specific Styles */
+.upvote-active {
+  color: #FF4500 !important;
+}
+
+.downvote-active {
+  color: #7193FF !important;
+}
+
+.community-avatar {
+  @apply w-8 h-8 rounded-full border border-reddit-line;
+}
+
+.post-flair {
+  @apply inline-block px-2 py-0.5 text-xs font-semibold rounded-full mr-2;
+}
+
+/* Reddit Award Colors */
+.award-gold { background: linear-gradient(45deg, #FFD700, #FFC400); color: #000; }
+.award-platinum { background: linear-gradient(45deg, #E5E4E2, #B5B5B5); color: #000; }
+.award-silver { background: linear-gradient(45deg, #C0C0C0, #A0A0A0); color: #000; }
+
+/* NSFW Overlay */
+.nsfw-overlay {
+  @apply absolute inset-0 bg-black bg-opacity-80 flex items-center justify-center rounded;
+}
+
+.nsfw-overlay span {
+  @apply text-white font-bold text-lg bg-red-600 px-4 py-2 rounded;
+}
+
+/* Spoiler Text */
+.spoiler-text {
+  @apply bg-black text-black cursor-pointer hover:text-white transition-colors;
+}
+
+.spoiler-text:hover {
+  @apply bg-gray-800;
+}
+
+/* Custom Selection */
+::selection {
+  background-color: #FF4500;
+  color: white;
 }
