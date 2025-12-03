@@ -8,6 +8,7 @@ import rateLimit from 'express-rate-limit';
 import connectDB from './src/config/db.js';
 import authRoutes from './src/routes/auth.js';
 import postsRoutes from './src/routes/posts.js';
+import popularRoutes from "./src/routes/popular.js";
 import commentsRoutes from './src/routes/comments.js';
 import communitiesRoutes from './src/routes/communities.js';
 import membershipsRouter from "./src/routes/membershipRoute.js"
@@ -44,6 +45,7 @@ app.use(limiter);
 // routes
 app.use('/api/auth', authRoutes);
 app.use('/api/posts', postsRoutes);
+app.use("/api/popular", popularRoutes);
 app.use('/api/comments', commentsRoutes);
 app.use('/api/communities', communitiesRoutes);
 app.use("/api/memberships", membershipsRouter);
