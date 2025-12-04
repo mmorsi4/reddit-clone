@@ -8,6 +8,21 @@ function Header() {
   const [currentUser, setCurrentUser] = useState(null);
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [customAvatar, setCustomAvatar] = useState(null);
+  const [users, setUsers] = useState([]);
+
+  useEffect(() => {
+      const loadUsers = async () => {
+        try {
+          const res = await fetch("api/users");
+          if (!res.ok) throw new Error("Failed to load users");
+          const data = await res.json();
+          setUsers(data);
+        } catch (err) {
+          console.error(err);
+        }
+      };
+      loadUsers();
+    }, []);
 
   useEffect(() => {
     const fetchCurrentUser = async () => {
@@ -84,7 +99,7 @@ function Header() {
           <img src="../images/reddit-logo.png" className="reddit-logo" />
         </a>
 
-        <SearchBar />
+        <SearchBar users={users}/>
 
         <ul className="header-actions">
 

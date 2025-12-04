@@ -1,9 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 
-function SearchBar() {
+function SearchBar({ users }) {
   const [communities, setCommunities] = useState([]);
-  const [users, setUsers] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredResults, setFilteredResults] = useState([]);
   const [showResults, setShowResults] = useState(false);
@@ -31,20 +30,20 @@ function SearchBar() {
     loadCommunities();
   }, []);
 
-  // Fetch users
-  useEffect(() => {
-    const loadUsers = async () => {
-      try {
-        const res = await fetch("api/users");
-        if (!res.ok) throw new Error("Failed to load users");
-        const data = await res.json();
-        setUsers(data);
-      } catch (err) {
-        console.error(err);
-      }
-    };
-    loadUsers();
-  }, []);
+  // // Fetch users
+  // useEffect(() => {
+  //   const loadUsers = async () => {
+  //     try {
+  //       const res = await fetch("api/users");
+  //       if (!res.ok) throw new Error("Failed to load users");
+  //       const data = await res.json();
+  //       setUsers(data);
+  //     } catch (err) {
+  //       console.error(err);
+  //     }
+  //   };
+  //   loadUsers();
+  // }, []);
 
   useEffect(() => {
     if (!searchTerm.trim()) {
