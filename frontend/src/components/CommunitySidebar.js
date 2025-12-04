@@ -108,7 +108,7 @@ const CommunitySidebar = ({
         <div className="sidebar-header">
           <div className="community-header-main">
             <div className="community-title-section">
-              <h2 className="community-name">r/{community.name}</h2>
+              <h2 className="side-card-community-name">r/{community.name}</h2>
             </div>
           </div>
           {showJoinButton && (

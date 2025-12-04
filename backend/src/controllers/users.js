@@ -120,3 +120,51 @@ export async function updateAvatar(req, res) {
     res.status(500).json({ message: 'Failed to update avatar' });
   }
 }
+
+export async function getSelectedChats(req, res) {
+  try {
+    const userId = req.userId;
+
+    const user = await User.findById(userId)
+      .populate("selectedChatUsers", "_id username avatarUrl")
+      .lean();
+
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    res.status(200).json(user.selectedChatUsers || []);
+  } catch (err) {
+    console.error("Error fetching selected chats:", err);
+    res.status(500).json({ message: "Server error while fetching chats" });
+  }
+}
+
+export async function addSelectedChat(req, res) {
+  try {
+    const userId = req.userId;
+    const { chatUserId } = req.body;
+
+    if (!chatUserId) {
+      return res.status(400).json({ message: "chatUserId is required" });
+    }
+
+    const user = await User.findById(userId);
+
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    // prevent dupes
+    const alreadyExists = user.selectedChatUsers.some(
+      uid => uid.toString() === chatUserId
+    );
+
+    if (!alreadyExists) {
+      user.selectedChatUsers.push(chatUserId);
+      await user.save();
+    }
+
+    res.json({ success: true, message: "Chat user added" });
+
+  } catch (err) {
+    console.error("Error adding selected chat:", err);
+    res.status(500).json({ message: "Server error while saving chat" });
+  }
+}

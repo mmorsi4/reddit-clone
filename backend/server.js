@@ -14,6 +14,7 @@ import communitiesRoutes from './src/routes/communities.js';
 import membershipsRouter from "./src/routes/membershipRoute.js"
 import usersRoutes from './src/routes/users.js';
 import customFeedRoutes from './src/routes/customFeed.js';
+import messagesRoutes from './src/routes/messages.js';
 import { errorHandler } from './src/middleware/errorHandler.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -35,27 +36,32 @@ app.use(express.json({limit: '5mb'}));
 app.use(express.urlencoded({extended:true}));
 app.use(cookieParser());
 app.use(cors({
-  origin: 'http://localhost:3000',
+  origin: '*',
   credentials: true,
 }));
 
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:3000",
+    origin: "*",
     methods: ["GET","POST"]
   }
 });
 
-// this object has all concurrent users
-const userSocketMap = {};
+// multiple tabs -> multiple sockets for the same user
+const userSocketMap = {}; // userId -> [socketId1, socketId2, ...]
 
 // this is ALWAYS listening
 io.on("connection", socket => {
   // client sends userId after connection, we register their socket.id in userSocketMap
   socket.on("register", userId => {
-    userSocketMap[userId] = socket.id;
-    console.log("User registered:", userId, "Socket:", socket.id);
+    if (!userSocketMap[userId]) {
+      userSocketMap[userId] = [];
+    }
+    if (!userSocketMap[userId].includes(socket.id)) {
+      userSocketMap[userId].push(socket.id);
+      console.log("User registered:", userId, "Socket:", socket.id);
+    }
   });
 
   // handle message sending (this is an http message not an endpoint)
@@ -70,24 +76,29 @@ io.on("connection", socket => {
       text
     });
 
-    // find receivers socket
-    const receiverSocketId = userSocketMap[receiver];
+    const populated = await Message.findById(saved._id)
+    .populate("sender", "_id username avatar")
+    .populate("receiver", "_id username avatar");
 
-    // do not broadcoast, only send the message to that user
-    if (receiverSocketId) {
-      io.to(receiverSocketId).emit("receive_message", saved);
-    }
+    // send to all receiver sockets
+    const receiverSockets = userSocketMap[receiver] || [];
+    receiverSockets.forEach(sockId => {
+      io.to(sockId).emit("receive_message", populated);
+    });
 
-    // now send the same message to the sender to display in UI
-    socket.emit("receive_message", saved);
+    // send to all sender sockets too
+    const senderSockets = userSocketMap[sender] || [];
+    senderSockets.forEach(sockId => {
+      io.to(sockId).emit("receive_message", populated);
+    });
   });
 
-  // remove user on disconnect from concurrent users (remove their socket.id)
+  // remove user on disconnect (remove the disconnected socket.id)
   socket.on("disconnect", () => {
     for (const uid in userSocketMap) {
-      if (userSocketMap[uid] === socket.id) {
-        delete userSocketMap[uid];
-        break;
+      userSocketMap[uid] = userSocketMap[uid].filter(sid => sid !== socket.id);
+      if (userSocketMap[uid].length === 0) {
+        delete userSocketMap[uid]; // remove if no more sockets
       }
     }
   });
@@ -109,6 +120,7 @@ app.use('/api/communities', communitiesRoutes);
 app.use("/api/memberships", membershipsRouter);
 app.use('/api/users', usersRoutes);
 app.use('/api/customfeeds', customFeedRoutes);
+app.use('/api/messages', messagesRoutes);
 
 // media
 const __filename = fileURLToPath(import.meta.url);

@@ -10,16 +10,11 @@ function SearchBar({ users }) {
   const searchRef = useRef(null);
   const navigate = useNavigate(); // hook to navigate programmatically
 
-    useEffect(() => {
-    console.log("showResults:", showResults);
-    console.log("filteredResults length:", filteredResults.length);
-  }, [showResults, filteredResults]);
-
   // Fetch communities
   useEffect(() => {
     const loadCommunities = async () => {
       try {
-        const res = await fetch("api/communities");
+        const res = await fetch("/api/communities");
         if (!res.ok) throw new Error("Failed to load communities");
         const data = await res.json();
         setCommunities(data);

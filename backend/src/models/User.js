@@ -10,7 +10,8 @@ const UserSchema = new Schema({
   avatarUrl: String,
   karma: { type: Number, default: 0 },
   createdAt: { type: Date, default: Date.now },
-  recentCommunityIds: [{ type: Schema.Types.ObjectId, ref: 'Community' }]
+  recentCommunityIds: [{ type: Schema.Types.ObjectId, ref: 'Community' }],
+  selectedChatUsers: [{ type: Schema.Types.ObjectId, ref: 'User' }]
 });
 
 export default model('User', UserSchema);
