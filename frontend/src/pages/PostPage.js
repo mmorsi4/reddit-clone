@@ -23,7 +23,7 @@ function PostPage() {
   useEffect(() => {
     const fetchCurrentUser = async () => {
       try {
-        const res = await fetch('http://localhost:5001/api/auth/me', {
+        const res = await fetch('api/auth/me', {
           credentials: "include"
         });
         if (res.ok) {

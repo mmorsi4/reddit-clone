@@ -19,6 +19,7 @@ function Header() {
         if (res.ok) {
           const data = await res.json();
           setCurrentUser(data);
+          console.log(data)
           
           // 🆕 Check for custom avatar in database first, then localStorage
           if (data.avatarUrl && data.avatarUrl.startsWith('data:image')) {
@@ -143,7 +144,6 @@ function Header() {
                 </div>
               </Link>
             </li>
-
             <li className="profile-menu-item">
               <Link to="/edit-avatar" className="profile-menu-link">
                 <div className="profile-menu-item-icon">
@@ -185,7 +185,7 @@ function Header() {
           </li>
         </ul>
       </div>
-      {isChatOpen && <Chat onClose={() => setIsChatOpen(false)} />} 
+      {isChatOpen && <Chat currentUserId={currentUser._id} onClose={() => setIsChatOpen(false)} />} 
     </>
 )};
 
