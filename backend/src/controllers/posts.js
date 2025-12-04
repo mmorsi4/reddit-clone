@@ -4,7 +4,6 @@ import Community from '../models/Community.js';
 import Membership from '../models/Membership.js';
 import mongoose from 'mongoose';
 
-
 export async function createPost(req,res){
   const { title, body, url, community } = req.body;
   const file = req.file;

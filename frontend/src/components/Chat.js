@@ -32,7 +32,7 @@ const NewChatForm = ({ onBack }) => {
 };
 
 // --- Main Chat Pop-up Component ---
-const Chat = ({ onClose }) => {
+const Chat = ({ currentUserId, onClose }) => {
   const [currentView, setCurrentView] = useState('default'); 
   const [isMinimized, setIsMinimized] = useState(false);
 

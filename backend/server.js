@@ -16,6 +16,9 @@ import customFeedRoutes from './src/routes/customFeed.js';
 import { errorHandler } from './src/middleware/errorHandler.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { Server } from 'socket.io'
+import http from 'http'
+import Message from './src/models/Message.js';
 
 dotenv.config();
 const PORT = process.env.PORT || 5001;
@@ -34,6 +37,61 @@ app.use(cors({
   origin: 'http://localhost:3000',
   credentials: true,
 }));
+
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: "http://localhost:3000",
+    methods: ["GET","POST"]
+  }
+});
+
+// this object has all concurrent users
+const userSocketMap = {};
+
+// this is ALWAYS listening
+io.on("connection", socket => {
+  // client sends userId after connection, we register their socket.id in userSocketMap
+  socket.on("register", userId => {
+    userSocketMap[userId] = socket.id;
+    console.log("User registered:", userId, "Socket:", socket.id);
+  });
+
+  // handle message sending (this is an http message not an endpoint)
+  // the "socket" here is the socket of the sender
+  socket.on("send_message", async data => {
+    const { sender, receiver, text } = data;
+
+    // create in db
+    const saved = await Message.create({
+      sender,
+      receiver,
+      text
+    });
+
+    // find receivers socket
+    const receiverSocketId = userSocketMap[receiver];
+
+    // do not broadcoast, only send the message to that user
+    if (receiverSocketId) {
+      io.to(receiverSocketId).emit("receive_message", saved);
+    }
+
+    // now send the same message to the sender to display in UI
+    socket.emit("receive_message", saved);
+  });
+
+  // remove user on disconnect from concurrent users (remove their socket.id)
+  socket.on("disconnect", () => {
+    for (const uid in userSocketMap) {
+      if (userSocketMap[uid] === socket.id) {
+        delete userSocketMap[uid];
+        break;
+      }
+    }
+  });
+
+});
 
 const limiter = rateLimit({
   windowMs: 1000*60,
@@ -61,4 +119,4 @@ app.get('/', (req,res)=> res.send({ok:true, now: new Date().toISOString()}));
 
 app.use(errorHandler);
 
-app.listen(PORT, ()=> console.log(`Server running on port ${PORT}`));
+server.listen(PORT, ()=> console.log(`Server running on port ${PORT}`));
