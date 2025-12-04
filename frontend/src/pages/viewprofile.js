@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import { Link } from "react-router-dom";
 import Sidebar from "../components/sidebar";
 import Header from "../components/header";
+import Post from "../components/post"
 
 function ViewProfile() {
   const [activeTab, setActiveTab] = useState("overview");
@@ -144,26 +145,108 @@ function ViewProfile() {
       }
 
       return (
-        <div className="posts-list">
+        <div>
           {userPosts.map((post) => (
-            <div key={post._id} className="post-item">
-              <Link to={`/post/${post._id}`} className="post-link">
-                <h4 className="post-title">{post.title}</h4>
-              </Link>
-              <p className="post-body">{post.body || "No content"}</p>
-              <p className="post-meta">
-                In r/{post.community?.name || "unknown"} • 
-                {new Date(post.createdAt).toLocaleDateString()} • 
-                {post.commentCount || 0} comments
-              </p>
+            <Post
+              key={post._id}
+              postId={post._id}
+              username={post.author?.username || user.username}
+              time={post.createdAt}
+              title={post.title}
+              preview={post.mediaUrl}
+              textPreview={post.body}
+              avatar={user.avatarUrl || "../images/avatar.png"}
+              initialVotes={post.score || 0}
+              initialVote={post.userVote || 0}
+              initialComments={post.commentCount || 0}
+              community={post.community?.name || "unknown"}
+              isAllFeed={true}
+              communityAvatarUrl={
+                post.community?.avatar 
+                  ? post.community.avatar.startsWith('/') 
+                    ? `..${post.community.avatar}` // Add .. if it starts with /
+                    : post.community.avatar
+                  : "../images/default-community.svg"
+              }
+              isJoined={false}
+              onToggleJoin={null}
+              viewType="normal"
+              isCommunityPage={false}
+            />
+          ))}
+        </div>
+      );
+    }
+
+    // For "overview" tab - show both posts and comments
+    if (activeTab === "overview") {
+      if (loading) {
+        return (
+          <div className="empty-state">
+            <p className="empty-text">Loading...</p>
+          </div>
+        );
+      }
+
+      const hasPosts = userPosts.length > 0;
+      const hasComments = userComments.length > 0;
+
+      if (!hasPosts && !hasComments) {
+        return (
+          <div className="empty-state">
+            <p className="empty-text">
+              {user ? `u/${user.username} hasn't posted or commented yet` : "User hasn't posted or commented yet"}
+            </p>
+          </div>
+        );
+      }
+
+      return (
+        <div className="profile-overview-content">
+          {/* Show posts */}
+          {hasPosts && userPosts.map((post) => (
+            <Post
+              key={`post-${post._id}`}
+              postId={post._id}
+              username={post.author?.username || user.username}
+              time={post.createdAt}
+              title={post.title}
+              preview={post.mediaUrl}
+              textPreview={post.body}
+              avatar={user.avatarUrl || "../images/avatar.png"}
+              initialVotes={post.score || 0}
+              initialVote={post.userVote || 0}
+              initialComments={post.commentCount || 0}
+              community={post.community?.name || "unknown"}
+              isAllFeed={false}
+              communityAvatarUrl={post.community?.avatar || "../images/default-community.svg"}
+              isJoined={false}
+              onToggleJoin={null}
+              viewType="normal"
+              isCommunityPage={false}
+            />
+          ))}
+          
+          {/* Show comments as simple cards */}
+          {hasComments && userComments.map((comment) => (
+            <div key={`comment-${comment._id}`} className="profile-comment-card">
+              <div className="profile-comment-header">
+                <span className="profile-comment-meta">
+                  Commented on "{comment.post?.title || "a post"}"
+                </span>
+                <span className="profile-comment-time">
+                  {new Date(comment.createdAt).toLocaleDateString()}
+                </span>
+              </div>
+              <p className="profile-comment-body">{comment.body || comment.text}</p>
             </div>
           ))}
         </div>
       );
     }
 
+    // For other tabs (hidden, upvoted, downvoted)
     const messages = {
-      overview: "hasn't posted yet",
       hidden: "has no hidden content",
       upvoted: "hasn't upvoted anything yet",
       downvoted: "hasn't downvoted anything yet"
@@ -172,12 +255,11 @@ function ViewProfile() {
     return (
       <div className="empty-state">
         <p className="empty-text" id="empty-text">
-          {user ? `u/${user.username} ${messages[activeTab]}` : "User hasn't posted yet"}
+          {user ? `u/${user.username} ${messages[activeTab] || "has no content"}` : "User has no content"}
         </p>
       </div>
     );
   };
-
   const handleTabClick = (tabName) => {
     setActiveTab(tabName);
     if (tabName === "comments") {

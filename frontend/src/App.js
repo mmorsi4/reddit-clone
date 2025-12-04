@@ -12,6 +12,7 @@ import PostPage from "./pages/PostPage";
 import CustomFeedPopup from "./pages/CustomFeedPopup";
 import CustomFeedPage from './pages/customFeedPage';
 import Explore from "./pages/Explore";
+import Popular from "./pages/Popular"; // Added import
 
 function App() {
 
@@ -34,6 +35,7 @@ function App() {
         <Route path="/community/:name" element={<Community />} />
         <Route path="/home" element={<Home />} />
         <Route path="/explore" element={<Explore />} />
+        <Route path="/popular" element={<Popular />} /> {/* Added route */}
         <Route path="/manage_community" element={<ManageCommunity/>} />
         <Route path="/create_post"element={<CreatePost showToast={showToastMessage} />}/>
         <Route path="/profile/:username"element={<ViewProfile/>}/>
@@ -51,7 +53,5 @@ function App() {
     </>
   );
 }
-
-
 
 export default App;

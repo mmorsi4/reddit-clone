@@ -3,6 +3,8 @@ import { useParams, Link, useLocation } from "react-router-dom";
 import Sidebar from "../components/sidebar";
 import Header from "../components/header";
 import CommentWithVotes from "../components/CommentWithVotes";
+import CommunitySidebar from "../components/CommunitySidebar";
+import { formatDistanceToNow } from 'date-fns';
 
 function PostPage() {
   const { postId } = useParams();
@@ -18,20 +20,78 @@ function PostPage() {
   const [sortOption, setSortOption] = useState("best");
   const [showFormattingToolbar, setShowFormattingToolbar] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [showDropdown, setShowDropdown] = useState(false);
+  
+  const [allCommunities, setAllCommunities] = useState([]);
+  const [currentCommunity, setCurrentCommunity] = useState(null);
+
+  // Fetch ALL communities like sidebar does
+  useEffect(() => {
+    const fetchAllCommunities = async () => {
+      try {
+        const res = await fetch("/api/communities/");
+        if (!res.ok) throw new Error("Failed to fetch communities");
+        const data = await res.json();
+        setAllCommunities(data);
+      } catch (err) {
+        console.error("Error fetching communities:", err);
+      }
+    };
+    fetchAllCommunities();
+  }, []);
+
+  // Find the current community when post loads
+  useEffect(() => {
+    if (post?.community?.name && allCommunities.length > 0) {
+      const foundCommunity = allCommunities.find(c => 
+        c?.name?.toLowerCase() === post.community.name.toLowerCase()
+      );
+      setCurrentCommunity(foundCommunity);
+    }
+  }, [post?.community?.name, allCommunities]);
+
+  // Debug community data
+  useEffect(() => {
+    if (post && post.community) {
+      console.log("🔍 COMMUNITY DEBUG:", {
+        communityName: post.community.name,
+        avatarPath: post.community.avatar
+      });
+      
+      const img = new Image();
+      img.onload = () => console.log("✅ Image should work:", post.community.avatar);
+      img.onerror = () => console.log("❌ Image won't load:", post.community.avatar);
+      img.src = post.community.avatar;
+    }
+  }, [post]);
 
   // Fetch current user info
   useEffect(() => {
     const fetchCurrentUser = async () => {
       try {
-        const res = await fetch('api/auth/me', {
-          credentials: "include"
+        const res = await fetch("/api/users/me", {
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
         });
+        
         if (res.ok) {
           const userData = await res.json();
           setCurrentUser(userData);
+        } else {
+          const savedUsername = localStorage.getItem("username") || "your_username";
+          const savedAvatar = localStorage.getItem("userAvatar") || "../images/avatar.png";
+          
+          setCurrentUser({
+            username: savedUsername,
+            avatarUrl: savedAvatar
+          });
         }
       } catch (error) {
-        console.error("Failed to fetch user:", error);
+        console.error("Failed to fetch current user:", error);
+        setCurrentUser({
+          username: "your_username", 
+          avatarUrl: "../images/avatar.png"
+        });
       }
     };
     fetchCurrentUser();
@@ -234,7 +294,6 @@ function PostPage() {
     const newText = newComment.substring(0, start) + formattedText + newComment.substring(end);
     setNewComment(newText);
     
-    // Set cursor position
     setTimeout(() => {
       textarea.focus();
       if (selectedText) {
@@ -244,6 +303,52 @@ function PostPage() {
       }
     }, 0);
   };
+
+  // Comments Header Component
+  const CommentsHeader = () => (
+    <div className="comments-header">
+      <div className="comments-header-left">
+        <h3>{filteredComments.length} Comments</h3>
+        <div className="comments-controls">
+          <div className="sort-options">
+            <span className="sort-by-text">Sort by:</span>
+            <div className="sort-container">
+              <select 
+                className="sort-select" 
+                value={sortOption} 
+                onChange={handleSortChange}
+              >
+                <option value="best">Best</option>
+                <option value="top">Top</option>
+                <option value="new">New</option>
+                <option value="old">Old</option>
+                <option value="controversial">Controversial</option>
+              </select>
+            </div>
+          </div>
+          <div className="search-container">
+            <div className="search-input-wrapper">
+              <svg className="search-icon" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+              </svg>
+              <input
+                type="text"
+                className="search-input"
+                placeholder="Search comments..."
+                value={searchQuery}
+                onChange={handleSearchChange}
+              />
+              {searchQuery && (
+                <button className="clear-search-btn" onClick={handleClearSearch}>
+                  ×
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 
   if (isLoading) {
     return (
@@ -276,248 +381,234 @@ function PostPage() {
       <Header />
       <Sidebar />
       <div className="post-page-container">
-        <div className="post-page">
-          {/* Breadcrumb Navigation */}
-          <div className="post-breadcrumb">
-            <Link to="/home" className="breadcrumb-link">Home</Link>
-            <span className="breadcrumb-separator">/</span>
-            <Link to={`/community/${post.community?.name}`} className="breadcrumb-link">
-              r/{post.community?.name || "community"}
-            </Link>
-            <span className="breadcrumb-separator">/</span>
-            <span className="breadcrumb-current">Post</span>
-          </div>
-
-          {/* Main Post Content */}
-          <div className="post-content-card">
-            {/* Post Header */}
-            <div className="post-header">
-              <div className="post-meta">
-                <span className="community-name">r/{post.community?.name}</span>
-                <span className="meta-separator">•</span>
-                <span className="post-author">Posted by u/{post.author?.username}</span>
-                <span className="meta-separator">•</span>
-                <span className="post-time">{new Date(post.createdAt).toLocaleDateString()}</span>
-              </div>
-            </div>
-
-            {/* Post Title */}
-            <h1 className="post-title">{post.title}</h1>
-
-            {/* Post Content - SIMPLIFIED: NO LOADING STATE */}
-            <div className="post-content">
-              {post.mediaUrl ? (
-                <div className="post-media">
-                  {/* SIMPLE IMAGE - NO COMPLEX LOAD HANDLING */}
-                  <img 
-                    src={post.mediaUrl} 
-                    alt="post content" 
-                    className="post-image"
-                    onError={(e) => {
-                      console.error("Failed to load image:", post.mediaUrl);
-                      e.target.style.display = 'none';
-                    }}
-                  />
-                </div>
-              ) : (
-                <div className="post-text">
-                  {post.body || "No content available."}
-                </div>
-              )}
-            </div>
-
-            {/* Post Actions & Voting */}
-            <div className="post-actions">
-              {/* Voting Section */}
-              <div className="post-voting-horizontal">
-                <button 
-                  className={`vote-btn upvote ${post.userVote === 1 ? 'active' : ''}`}
-                  onClick={() => handleVote('up')}
-                >
-                  <img 
-                    src={post.userVote === 1 ? "../images/upvote-active.svg" : "../images/upvote.svg"} 
-                    alt="upvote" 
-                  />
-                </button>
-                <span className="vote-count">{post.score || 0}</span>
-                <button 
-                  className={`vote-btn downvote ${post.userVote === -1 ? 'active' : ''}`}
-                  onClick={() => handleVote('down')}
-                >
-                  <img 
-                    src={post.userVote === -1 ? "../images/downvote-active.svg" : "../images/downvote.svg"} 
-                    alt="downvote" 
-                  />
-                </button>
-              </div>
-
-              {/* Other Actions */}
-              <button className="post-action-btn">
-                <span className="action-icon">💬</span>
-                <span>{post.commentCount || comments.length} Comments</span>
+        <div className="post-page-content">
+          {/* Main Content Column */}
+          <div className="post-main-column">
+            {/* Combined Back Button and Community Info */}
+            {/* Combined Back Button and Community Info */}
+            <div className="post-header-navigation">
+              <button className="back-button" onClick={() => window.history.back()}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
+                </svg>
               </button>
-              <button className="post-action-btn">
-                <span className="action-icon">🔄</span>
-                <span>Share</span>
-              </button>
-              <button className="post-action-btn">
-                <span className="action-icon">📌</span>
-                <span>Save</span>
-              </button>
-            </div>
-          </div>
-
-          {/* Comment Section */}
-          <div className="comments-section">
-            {/* Add Comment */}
-            <div className="add-comment-card">
-              <div className="comment-input-header">
-                <span>Comment as <strong>{currentUser?.username || "You"}</strong></span>
-              </div>
               
-              {/* Formatting Toolbar */}
-              <div className={`formatting-toolbar ${showFormattingToolbar ? 'visible' : ''}`}>
-                <button 
-                  className="format-btn" 
-                  onClick={() => handleFormatText('bold')}
-                  title="Bold"
-                >
-                  <strong>B</strong>
-                </button>
-                <button 
-                  className="format-btn" 
-                  onClick={() => handleFormatText('italic')}
-                  title="Italic"
-                >
-                  <em>I</em>
-                </button>
-                <button 
-                  className="format-btn" 
-                  onClick={() => handleFormatText('strikethrough')}
-                  title="Strikethrough"
-                >
-                  <s>S</s>
-                </button>
-                <button 
-                  className="format-btn" 
-                  onClick={() => handleFormatText('code')}
-                  title="Code"
-                >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"/>
-                  </svg>
-                </button>
-              </div>
-              
-              <textarea
-                className="comment-textarea"
-                value={newComment}
-                onChange={(e) => setNewComment(e.target.value)}
-                rows="4"
-              />
-              
-              <div className="comment-actions">
-                <div className="comment-actions-left">
-                  <button 
-                    className="format-toggle-btn"
-                    onClick={() => setShowFormattingToolbar(!showFormattingToolbar)}
-                    title="Formatting options"
-                  >
-                    Aa
-                  </button>
-                </div>
-                <div className="comment-actions-right">
-                  <button 
-                    className="comment-cancel-btn"
-                    onClick={handleCancelComment}
-                  >
-                    Cancel
-                  </button>
-                  <button 
-                    className="comment-submit-btn"
-                    onClick={handleAddComment}
-                    disabled={!newComment.trim()}
-                  >
-                    Comment
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {/* Comments List */}
-            <div className="comments-list">
-              <div className="comments-header">
-                <div className="comments-header-left">
-                  <h3>
-                    {searchQuery ? 
-                      `${filteredComments.length} of ${sortedComments.length} comments` : 
-                      `${post.commentCount || comments.length} Comments`
-                    }
-                  </h3>
-                  <div className="comments-controls">
-                    <div className="sort-options">
-                      <span className="sort-by-text">Sort by:</span>
-                      <div className="sort-container">
-                        <select 
-                          className="sort-select" 
-                          value={sortOption}
-                          onChange={handleSortChange}
-                        >
-                          <option value="best">🏆 Best</option>
-                          <option value="top">⬆️ Top</option>
-                          <option value="new">🆕 New</option>
-                          <option value="old">📜 Old</option>
-                          <option value="controversial">🔥 Controversial</option>
-                        </select>
-                      </div>
-                    </div>
-                    
-                    <div className="search-container">
-                      <div className="search-input-wrapper">
-                        <svg className="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                          <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
-                        </svg>
-                        <input
-                          type="text"
-                          className="search-input"
-                          placeholder="Search comments..."
-                          value={searchQuery}
-                          onChange={handleSearchChange}
-                        />
-                        {searchQuery && (
-                          <button 
-                            className="clear-search-btn"
-                            onClick={handleClearSearch}
-                            title="Clear search"
-                          >
-                            ×
-                          </button>
-                        )}
-                      </div>
-                    </div>
+              {/* UPDATED: Using unique post-page class names */}
+              <div className="post-page-community-info">
+                <img 
+                  src={currentCommunity?.avatar?.replace('/images/', '../images/')} 
+                  alt="Community avatar" 
+                  className="post-page-community-avatar"
+                  onError={(e) => {
+                    console.log("❌ Community avatar failed:", currentCommunity?.avatar);
+                    e.target.src = "../images/default-community.png";
+                  }}
+                />
+                <div className="post-page-community-meta">
+                  <div className="post-page-community-line">
+                    <span className="post-page-community-name">r/{post.community?.name}</span>
+                    <span className="post-page-time-inline">
+                      • {formatDistanceToNow(new Date(post.createdAt), { addSuffix: true })}
+                    </span>
+                  </div>
+                  <div className="post-page-username-below">
+                    u/{post.author?.username}
                   </div>
                 </div>
               </div>
 
-              {filteredComments.length === 0 ? (
-                <div className="no-comments">
-                  {searchQuery ? (
-                    <p>No comments found for "{searchQuery}"</p>
-                  ) : (
-                    <p>No comments yet. Be the first to share your thoughts!</p>
+              {/* Options Button with Dropdown - MOVED OUTSIDE community-info div */}
+              <div className="post-options-wrapper">
+                <div className="post-options-container">
+                  <button 
+                    className="post-options-button"
+                    onClick={() => setShowDropdown(!showDropdown)}
+                  >
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                      <circle cx="5" cy="12" r="1.5"/>
+                      <circle cx="12" cy="12" r="1.5"/>
+                      <circle cx="19" cy="12" r="1.5"/>
+                    </svg>
+                  </button>
+                  
+                  {showDropdown && (
+                    <div className="post-options-dropdown">
+                      <button className="dropdown-item">Save</button>
+                      <button className="dropdown-item">Hide</button>
+                      <button className="dropdown-item">Report</button>
+                      <button className="dropdown-item">Crosspost</button>
+                    </div>
                   )}
                 </div>
-              ) : (
-                <div className="comments-container">
-                  {filteredComments.map((comment, index) => (
-                    <CommentWithVotes 
-                      key={comment._id || index} 
-                      comment={comment}
-                      onReplyAdded={fetchPost}
+              </div>
+            </div>
+
+            {/* Main Post Content */}
+            <div className="post-content-card">
+              {/* Post Title */}
+              <h1 className="post-title-large">{post.title}</h1>
+
+              {/* Post Content */}
+              <div className="post-content">
+                {post.mediaUrl ? (
+                  <div className="post-media">
+                    <img 
+                      src={post.mediaUrl} 
+                      alt="post content" 
+                      className="post-image"
+                      onError={(e) => {
+                        console.error("Failed to load image:", post.mediaUrl);
+                        e.target.style.display = 'none';
+                      }}
                     />
-                  ))}
+                  </div>
+                ) : (
+                  <div className="post-text">
+                    {post.body || "No content available."}
+                  </div>
+                )}
+              </div>
+
+              {/* Post Actions & Voting */}
+              <div className="post-actions">
+                <div className="post-voting-horizontal">
+                  <button 
+                    className={`vote-btn upvote ${post.userVote === 1 ? 'active' : ''}`}
+                    onClick={() => handleVote('up')}
+                  >
+                    <img 
+                      src={post.userVote === 1 ? "../images/upvote-active.svg" : "../images/upvote.svg"} 
+                      alt="upvote" 
+                    />
+                  </button>
+                  <span className="vote-count">{post.score || 0}</span>
+                  <button 
+                    className={`vote-btn downvote ${post.userVote === -1 ? 'active' : ''}`}
+                    onClick={() => handleVote('down')}
+                  >
+                    <img 
+                      src={post.userVote === -1 ? "../images/downvote-active.svg" : "../images/downvote.svg"} 
+                      alt="downvote" 
+                    />
+                  </button>
                 </div>
-              )}
+
+                <button className="post-action-btn">
+                  <span className="action-icon">💬</span>
+                  <span>{post.commentCount || comments.length} Comments</span>
+                </button>
+                <button className="post-action-btn">
+                  <span className="action-icon">🔄</span>
+                  <span>Share</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Comment Section */}
+            <div className="comments-section">
+              {/* Add Comment */}
+              <div className="add-comment-card">
+                <div className={`formatting-toolbar ${showFormattingToolbar ? 'visible' : ''}`}>
+                  <button 
+                    className="format-btn" 
+                    onClick={() => handleFormatText('bold')}
+                    title="Bold"
+                  >
+                    <strong>B</strong>
+                  </button>
+                  <button 
+                    className="format-btn" 
+                    onClick={() => handleFormatText('italic')}
+                    title="Italic"
+                  >
+                    <em>I</em>
+                  </button>
+                  <button 
+                    className="format-btn" 
+                    onClick={() => handleFormatText('strikethrough')}
+                    title="Strikethrough"
+                  >
+                    <s>S</s>
+                  </button>
+                  <button 
+                    className="format-btn" 
+                    onClick={() => handleFormatText('code')}
+                    title="Code"
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"/>
+                    </svg>
+                  </button>
+                </div>
+                
+                <textarea
+                  className="comment-textarea"
+                  value={newComment}
+                  onChange={(e) => setNewComment(e.target.value)}
+                  rows="4"
+                  placeholder="What are your thoughts?"
+                />
+                
+                <div className="comment-actions">
+                  <div className="comment-actions-left">
+                    <button 
+                      className="format-toggle-btn"
+                      onClick={() => setShowFormattingToolbar(!showFormattingToolbar)}
+                      title="Formatting options"
+                    >
+                      Aa
+                    </button>
+                  </div>
+                  <div className="comment-actions-right">
+                    <button 
+                      className="comment-cancel-btn"
+                      onClick={handleCancelComment}
+                    >
+                      Cancel
+                    </button>
+                    <button 
+                      className="comment-submit-btn"
+                      onClick={handleAddComment}
+                      disabled={!newComment.trim()}
+                    >
+                      Comment
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Comments List */}
+              <div className="comments-list">
+                <CommentsHeader />
+                <div className="comments-container">
+                  {filteredComments.length === 0 ? (
+                    <div className="no-comments">
+                      {searchQuery ? "No comments match your search." : "No comments yet."}
+                    </div>
+                  ) : (
+                    filteredComments.map(comment => (
+                      <CommentWithVotes
+                        key={comment._id}
+                        comment={comment}
+                        currentUser={currentUser}
+                        onCommentUpdate={fetchPost}
+                      />
+                    ))
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Sidebar Column */}
+          <div className="post-sidebar-column">
+            <div className="community-sidebar-container">
+              <CommunitySidebar 
+                communityId={post.community?._id} 
+                post={post}
+                currentUser={currentUser}
+                isCommunityPage={false}
+              />
             </div>
           </div>
         </div>
