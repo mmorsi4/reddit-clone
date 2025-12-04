@@ -13,7 +13,7 @@ function Header() {
   useEffect(() => {
       const loadUsers = async () => {
         try {
-          const res = await fetch("api/users");
+          const res = await fetch("/api/users");
           if (!res.ok) throw new Error("Failed to load users");
           const data = await res.json();
           setUsers(data);
@@ -107,7 +107,7 @@ function Header() {
             <button onClick={toggleChat}>
               <div className="header-action-link"> 
                 <img src="../images/chat.svg" />
-                <div className="message-counter">1</div>
+                {/* <div className="message-counter">1</div> */}
                 <div className="header-action-tooltip">Open chat</div>
               </div>
             </button>
@@ -200,7 +200,7 @@ function Header() {
           </li>
         </ul>
       </div>
-      {isChatOpen && <Chat currentUserId={currentUser._id} onClose={() => setIsChatOpen(false)} />} 
+      {isChatOpen && <Chat currentUserId={currentUser._id} onClose={() => setIsChatOpen(false)} users={users} />} 
     </>
 )};
 

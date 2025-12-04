@@ -1,21 +1,64 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef, use } from 'react';
 import "../styles/chat.css";
+import { io } from 'socket.io-client';
+import socket from "../socket";
 
+const NewChatForm = ({ onBack, users, onStartChat, currentUserId }) => {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filteredUsers, setFilteredUsers] = useState([]);
+  const [showUserResults, setShowUserResults] = useState(false);
+  const searchRef = useRef(null);
 
-const NewChatForm = ({ onBack }) => {
+  useEffect(() => {
+    if (!searchTerm.trim()) {
+      setFilteredUsers([]);
+      return;
+    }
+
+    const lowerTerm = searchTerm.toLowerCase();
+    const results = users
+      .filter(u => u.username && u.username.toLowerCase().includes(lowerTerm) && u._id != currentUserId)
+      .slice(0, 5);
+    setFilteredUsers(results);
+  }, [searchTerm, users]);
+
   return (
     <div className="chat-main new-chat-view">
-        
       {/* Input Area */}
-      <div className="new-chat-input-area">
-        <input 
-          type="text" 
-          placeholder="Type username(s) *" 
-          className="new-chat-input"
-        />
+      <div className="new-chat-input-area" ref={searchRef}>
+        <div className="chat-search-bar">
+          <input
+            type="text"
+            placeholder="Type username(s) *"
+            className="new-chat-input"
+            value={searchTerm}
+            onChange={(e) => {
+              setSearchTerm(e.target.value);
+              setShowUserResults(true);
+            }}
+            onFocus={() => setShowUserResults(true)}
+          />
+        </div>
         <p className="new-chat-input-help">
           Search for people by username to chat with them.
         </p>
+
+        {showUserResults && filteredUsers.length > 0 && (
+          <div className="chat-search-results">
+            <ul>
+              {filteredUsers.map((user, idx) => (
+                <li key={idx} onClick={() => onStartChat(user)}>
+                  <img
+                    src={user.avatar || "../images/avatar.png"}
+                    alt={user.username}
+                    className="chat-user-avatar"
+                  />
+                  <span className="chat-user-name">{user.username}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </div>
 
       {/* Footer Controls */}
@@ -23,7 +66,11 @@ const NewChatForm = ({ onBack }) => {
         <button onClick={onBack} className="new-chat-button new-chat-button--cancel">
           Cancel
         </button>
-        <button className="new-chat-button new-chat-button--start">
+        <button
+          className="new-chat-button new-chat-button--start"
+          onClick={() => onStartChat(filteredUsers[0])}
+          disabled={filteredUsers.length === 0}
+        >
           Start Chat
         </button>
       </div>
@@ -31,14 +78,126 @@ const NewChatForm = ({ onBack }) => {
   );
 };
 
+// actual chat
+const ChatWindow = ({ user, messages, onSend }) => {
+  const [newMessage, setNewMessage] = useState('');
+  const messagesEndRef = useRef(null);
+
+  const handleSend = () => {
+    if (!newMessage.trim()) return;
+    onSend(newMessage);
+    setNewMessage('');
+  };
+
+  // auto-scroll effect
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
+  return (
+    <div className="chat-window-component">
+      <div className="chat-window-header">
+        <img src={"../images/avatar.png"} className="chat-message-avatar" />
+        <span className="chat-window-title">{user.username}</span>
+      </div>
+
+      <div className="chat-window-messages">
+        {messages.map((msg, idx) => (
+          <div key={idx} className="chat-message">
+            <img src={msg.sender.avatar || "../images/avatar.png"} className="chat-message-avatar" />
+            <div className="chat-message-content">
+              <div className="chat-message-header">
+                <span className="chat-message-username">{msg.sender.username}</span>
+                <span className="chat-message-time">{new Date(msg.time).toLocaleTimeString()}</span>
+              </div>
+              <div className="chat-message-text">{msg.text}</div>
+            </div>
+          </div>
+        ))}
+        <div ref={messagesEndRef}></div> {/* we autoscroll to this on messages change */}
+      </div>
+
+      <div className="chat-window-input">
+        <input
+          type="text" 
+          placeholder="Message" 
+          value={newMessage}
+          onChange={e => setNewMessage(e.target.value)}
+          onKeyDown={e => e.key === 'Enter' && handleSend()}
+        />
+        <button className="send-icon" onClick={handleSend}>
+          <svg fill="currentColor" height="16" width="16" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+            <path d="M18.1 9.1L4.54 1.6c-1.15-.63-2.48.44-2.1 1.7l1.44 4.77c.19.63.77 1.06 1.43 1.06H10v1.75H5.3c-.66 0-1.23.43-1.42 1.06l-1.45 4.77c-.38 1.25.95 2.33 2.1 1.7l13.57-7.48c.72-.4.72-1.43 0-1.83z"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+  );
+};
+
 // --- Main Chat Pop-up Component ---
-const Chat = ({ currentUserId, onClose }) => {
+const Chat = ({ currentUserId, onClose, users }) => {
   const [currentView, setCurrentView] = useState('default'); 
   const [isMinimized, setIsMinimized] = useState(false);
+  const [selectedUsers, setSelectedUsers] = useState([]);
+
+  const [activeChatUser, setActiveChatUser] = useState(null);
+  const [messages, setMessages] = useState({});
+
+  useEffect(() => {
+  if (!activeChatUser?._id) return;
+
+  const fetchMessages = async () => {
+      try {
+        const res = await fetch(`/api/messages?receiver=${activeChatUser._id}`, { credentials: 'include' });
+        if (!res.ok) throw new Error("Failed to fetch messages");
+        const data = await res.json();
+        setMessages(prev => ({
+          ...prev,
+          [activeChatUser._id]: data
+        }));
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    fetchMessages();
+  }, [activeChatUser]);
+
+  useEffect(() => {
+    if (!currentUserId) return;
+    socket.connect();
+
+    socket.emit("register", currentUserId);
+
+    const handleReceive = (msg) => {
+      const otherUserId = msg.sender._id === currentUserId ? msg.receiver._id : msg.sender._id;
+      setMessages(prev => ({
+        ...prev,
+        [otherUserId]: [...(prev[otherUserId] || []), msg]
+      }));
+    };
+
+    socket.on("receive_message", handleReceive);
+    return () => socket.off("receive_message", handleReceive);
+  }, [currentUserId]);
+
+  const handleSend = (text) => {
+    if (!activeChatUser || !text.trim()) return;
+
+    const messageData = {
+      sender: currentUserId,
+      receiver: activeChatUser._id,
+      text
+    };
+
+    socket.emit("send_message", messageData);
+  };
+
+  const activeMessages = activeChatUser ? messages[activeChatUser._id] || [] : [];
 
   const handleStartNewChat = () => {
     setCurrentView('new_chat');
-    console.log("Switched to new chat view.");
   };
 
   const handleBackToDefault = () => {
@@ -47,6 +206,34 @@ const Chat = ({ currentUserId, onClose }) => {
 
   const handleMinimizeToggle = () => {
     setIsMinimized(prev => !prev);
+  };
+
+  useEffect(() => {
+    const fetchSelectedChats = async () => {
+      const res = await fetch(`/api/users/selected-chats`, {
+        credentials: "include"
+      });
+      const data = await res.json();
+      setSelectedUsers(data);
+    };
+
+    fetchSelectedChats();
+  }, [currentUserId]);
+
+  const handleStartChatWithUser = async (user) => {
+    await fetch(`/api/users/selected-chats`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ chatUserId: user._id }),
+      credentials: "include"
+    });
+
+    if (!selectedUsers.some(u => u._id === user._id)) {
+      setSelectedUsers(prev => [...prev, user]); // add user to sidebar
+    }
+    
+    setActiveChatUser(user); // open chat window
+    setCurrentView('default');
   };
 
   // Content for the default welcome screen
@@ -62,7 +249,7 @@ const Chat = ({ currentUserId, onClose }) => {
         Start a direct or group chat with other redditors.
       </p>
       <button
-        onClick={handleStartNewChat} // Triggers view change
+        onClick={handleStartNewChat}
         className="chat-main__start-button"
       >
         <img src="../images/plus.svg" alt="Plus" className="chat-main__plus-icon" />
@@ -70,10 +257,28 @@ const Chat = ({ currentUserId, onClose }) => {
       </button>
     </div>
   );
-  
-  const MainAreaToRender = currentView === 'new_chat' 
-    ? <NewChatForm onBack={handleBackToDefault} /> 
-    : MainContent;
+
+  let MainAreaToRender;
+  if (activeChatUser) {
+    MainAreaToRender = (
+      <ChatWindow 
+        user={activeChatUser} 
+        messages={activeMessages}
+        onSend={handleSend}
+      />
+    );
+  } else if (currentView === 'new_chat') {
+    MainAreaToRender = (
+      <NewChatForm 
+        onBack={handleBackToDefault} 
+        users={users} 
+        onStartChat={handleStartChatWithUser} 
+        currentUserId={currentUserId}
+      />
+    );
+  } else {
+    MainAreaToRender = MainContent;
+  }
 
 
   return (
@@ -99,43 +304,34 @@ const Chat = ({ currentUserId, onClose }) => {
             <span className="chat-header__title">
               {currentView === 'new_chat' ? 'New Chat' : 'Chats'} 
             </span>
-              <div className="chat-header__action-icons">
-                <img src="../images/envelope.svg" alt="Messages" className="chat-header__icon" />
-                
-                <span className="chat-header__icon-wrapper" onClick={handleStartNewChat}>
-                  <img 
-                    src="../images/chat-1.svg" 
-                    alt="New Chat" 
-                    className="chat-header__icon" 
-                  />
+            <div className="chat-header__action-icons">
+              <img src="../images/envelope.svg" alt="Messages" className="chat-header__icon" />
+              <span className="chat-header__icon-wrapper" onClick={handleStartNewChat}>
+                <img src="../images/chat-1.svg" alt="New Chat" className="chat-header__icon" />
+              </span>
+              <span className="chat-header__menu-wrapper">
+                <span className="chat-header__icon-wrapper">
+                  <img src="../images/setting.svg" alt="Settings" className="chat-header__icon" />
                 </span>
-                
-                <span className="chat-header__menu-wrapper">
-                  <span className="chat-header__icon-wrapper">
-                    <img src="../images/setting.svg" alt="Settings" className="chat-header__icon" />
-                  </span>
-                  <span className="chat-header__icon-wrapper">
-                    <img src="../images/down.svg" alt="Menu" className="chat-header__icon chat-header__icon--rotated" />
-                  </span>
+                <span className="chat-header__icon-wrapper">
+                  <img src="../images/down.svg" alt="Menu" className="chat-header__icon chat-header__icon--rotated" />
                 </span>
-              </div>
+              </span>
+            </div>
           </div>
-          
           <div className="chat-header__controls">
             <img src="../images/expand.svg" alt="Expand" className="chat-header__control-icon" /> 
-            
             <img 
-                src="../images/down.svg" 
-                alt="Minimize" 
-                className="chat-header__control-icon"
-                onClick={handleMinimizeToggle} 
+              src="../images/down.svg" 
+              alt="Minimize" 
+              className="chat-header__control-icon"
+              onClick={handleMinimizeToggle} 
             />
-            
             <img 
-                src="../images/close.svg" 
-                alt="Close" 
-                className="chat-header__control-icon"
-                onClick={onClose} 
+              src="../images/close.svg" 
+              alt="Close" 
+              className="chat-header__control-icon"
+              onClick={onClose} 
             />
           </div>
         </div>
@@ -156,12 +352,26 @@ const Chat = ({ currentUserId, onClose }) => {
               <img src="../images/arrow-right.svg" alt="Forward" className="chat-sidebar__icon-forward" />
             </div>
             <div className="chat-sidebar__empty-text">
-              No recent chats.
+              {selectedUsers.length === 0 ? (
+                "No recent chats."
+              ) : (
+                <ul className="chat-sidebar__selected-users">
+                  {selectedUsers.map(u => (
+                    <li key={u._id} className="chat-sidebar__user" onClick={() => setActiveChatUser(u)}>
+                      <img src={u.avatar || "../images/avatar.png"} alt={u.username} />
+                      <div className="chat-user-info">
+                        <div className="chat-user-header">
+                          <span className="chat-username">{u.username}</span>
+                        </div>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
           </div>
           
           {MainAreaToRender}
-
         </div>
       </div>
     </div>
