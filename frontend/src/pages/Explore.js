@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { Link } from "react-router-dom";
 import Header from "../components/header";
 import Sidebar from "../components/sidebar";
-import '../styles/Explore.css'; 
+import '../styles/Explore.css';
 
 
-const API_BASE_URL = '/api/communities'; 
-const MEMBERSHIP_API_URL = '/api/memberships'; 
+const API_BASE_URL = '/api/communities';
+const MEMBERSHIP_API_URL = '/api/memberships';
 
 const TOPIC_TABS = [
   'All',
@@ -35,19 +36,19 @@ function Explore() {
     setError(null);
 
     // 1. Determine URL for ALL communities (filtered by topic)
-    const allCommunitiesUrl = topic === 'All' 
-        ? `${API_BASE_URL}` 
-        : `${API_BASE_URL}/filter?topic=${topic}`;
-    
+    const allCommunitiesUrl = topic === 'All'
+      ? `${API_BASE_URL}`
+      : `${API_BASE_URL}/filter?topic=${topic}`;
+
     // 2. URL for the CURRENT USER's joined communities
-    const joinedCommunitiesUrl = `${MEMBERSHIP_API_URL}/joined`; 
+    const joinedCommunitiesUrl = `${MEMBERSHIP_API_URL}/joined`;
 
     try {
       // Execute both fetches concurrently
       const [allResponse, joinedResponse] = await Promise.all([
         // Fetch All Communities (Does not require auth, but may need it depending on your backend)
         fetch(allCommunitiesUrl),
-        
+
         // Fetch Joined Communities (MUST INCLUDE CREDENTIALS)
         fetch(joinedCommunitiesUrl, { credentials: "include" }) // <--- CRITICAL FIX HERE
       ]);
@@ -55,21 +56,21 @@ function Explore() {
       if (!allResponse.ok) {
         throw new Error(`Failed to fetch all communities! Status: ${allResponse.status}`);
       }
-      
+
       // Joined communities fetch might return 401/403 if auth fails, but 
       // if it fails, we treat the user as having no joined communities for now.
       const joinedData = joinedResponse.ok ? await joinedResponse.json() : [];
       const allData = await allResponse.json();
-      
+
       // Create a Set for fast lookup of joined community IDs
       // Use the _id field from the joined communities data
       const joinedIds = new Set(joinedData.map(c => c._id));
-      
+
       // Merge the status into the main list
       const mergedCommunities = allData.map(community => ({
         ...community,
         // Check if the community's ID exists in the joinedIds Set
-        isMember: joinedIds.has(community._id) 
+        isMember: joinedIds.has(community._id)
       }));
 
       setCommunities(mergedCommunities);
@@ -85,7 +86,7 @@ function Explore() {
 
   useEffect(() => {
     fetchCommunities(activeTopic);
-  }, [activeTopic, fetchCommunities]); 
+  }, [activeTopic, fetchCommunities]);
 
   const handleTopicClick = (topic) => {
     setActiveTopic(topic);
@@ -96,10 +97,10 @@ function Explore() {
     const url = `${MEMBERSHIP_API_URL}/${action}`;
     const method = 'POST';
 
-    setCommunities(prevCommunities => 
-        prevCommunities.map(c => 
-            c._id === communityId ? { ...c, isMember: !currentlyMember } : c
-        )
+    setCommunities(prevCommunities =>
+      prevCommunities.map(c =>
+        c._id === communityId ? { ...c, isMember: !currentlyMember } : c
+      )
     );
 
     try {
@@ -112,10 +113,10 @@ function Explore() {
       });
 
       if (!response.ok) {
-        setCommunities(prevCommunities => 
-            prevCommunities.map(c => 
-                c._id === communityId ? { ...c, isMember: currentlyMember } : c
-            )
+        setCommunities(prevCommunities =>
+          prevCommunities.map(c =>
+            c._id === communityId ? { ...c, isMember: currentlyMember } : c
+          )
         );
         throw new Error(`Failed to ${action} community. Status: ${response.status}`);
       }
@@ -123,9 +124,9 @@ function Explore() {
     } catch (err) {
       console.error(`Error during ${action}:`, err);
       setError(`Failed to ${action} community. Try again.`);
-      setCommunities(prevCommunities => 
-        prevCommunities.map(c => 
-            c._id === communityId ? { ...c, isMember: currentlyMember } : c
+      setCommunities(prevCommunities =>
+        prevCommunities.map(c =>
+          c._id === communityId ? { ...c, isMember: currentlyMember } : c
         )
       );
     }
@@ -133,40 +134,47 @@ function Explore() {
 
 
   const renderCommunityCard = (community) => {
-    const isMember = community.isMember; 
-    
+    const isMember = community.isMember;
+
     return (
-        <div key={community._id} className="explore-community-card">
-            <div className="explore-community-icon-wrapper">
-                <img 
-                    src={community.avatar || '/default-avatar.png'} 
-                    alt={`${community.name} icon`} 
-                    className="explore-community-avatar" 
-                />
-            </div>
-            
-            <div className="explore-community-info">
-                <h3 className="explore-community-name">r/{community.name}</h3>
-                <p className="explore-community-topics-desc">{community.description}</p>
-                <p className="explore-community-topics-hint">
-                    {community.topics && community.topics.length > 0 ? community.topics.slice(0, 3).join(' • ') : 'General'}
-                </p>
-            </div>
-            
-            <button 
-                className={`explore-community-join-btn ${isMember ? 'explore-community-join-btn--joined' : ''}`}
-                onClick={() => handleJoin(community._id, isMember)}
-            >
-                {isMember ? 'Joined' : 'Join'}
-            </button>
+      <div key={community._id} className="explore-community-card">
+        <div className="explore-community-icon-wrapper">
+          <img
+            src={community.avatar || '/default-avatar.png'}
+            alt={`${community.name} icon`}
+            className="explore-community-avatar"
+          />
         </div>
+
+        <div className="explore-community-info">
+          <h3 className="explore-community-name">
+            <Link
+              to={`/community/${community.name}`}
+              className="explore-community-link"
+            >
+              r/{community.name}
+            </Link>
+          </h3>
+          <p className="explore-community-topics-desc">{community.description}</p>
+          <p className="explore-community-topics-hint">
+            {community.topics && community.topics.length > 0 ? community.topics.slice(0, 3).join(' • ') : 'General'}
+          </p>
+        </div>
+
+        <button
+          className={`explore-community-join-btn ${isMember ? 'explore-community-join-btn--joined' : ''}`}
+          onClick={() => handleJoin(community._id, isMember)}
+        >
+          {isMember ? 'Joined' : 'Join'}
+        </button>
+      </div>
     );
   };
 
   return (
     <>
-      <Header/>
-      <Sidebar/>
+      <Header />
+      <Sidebar />
       <main className="explore-main-content">
         <h2>Explore Communities</h2>
 
@@ -182,14 +190,14 @@ function Explore() {
           ))}
         </div>
 
-        <hr className="explore-divider"/>
+        <hr className="explore-divider" />
 
         <section className="explore-community-list-section">
           <h3>Recommended for you</h3>
 
           {loading && <p className="explore-loading-message">Loading communities...</p>}
           {error && <p className="explore-error-message">{error}</p>}
-          
+
           {!loading && !error && (
             <>
               {communities.length > 0 ? (
@@ -198,7 +206,7 @@ function Explore() {
                 </div>
               ) : (
                 <p className="explore-no-results">
-                    No communities found for the topic: **{activeTopic}**.
+                  No communities found for the topic: **{activeTopic}**.
                 </p>
               )}
             </>

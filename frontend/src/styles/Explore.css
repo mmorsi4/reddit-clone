@@ -155,3 +155,11 @@
     border-color: #005aa3;
     color: #005aa3;
 }
+
+.explore-community-link {
+    text-decoration: none;
+    color: inherit;
+}
+.explore-community-link:hover {
+    text-decoration: underline;
+}
