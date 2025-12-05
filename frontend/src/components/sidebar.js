@@ -38,7 +38,7 @@ function Sidebar() {
   const handleCloseModal = () => setIsModalOpen(false);
 
   // ✅ Fetch all communities
-  const fetchCommunities = useCallback(async () => {
+  const fetchCommunities = async () => {
     try {
       const res = await fetch("/api/communities/");
       if (!res.ok) throw new Error("Failed to fetch communities");
@@ -47,12 +47,12 @@ function Sidebar() {
     } catch (err) {
       console.error("Error fetching communities:", err);
     }
-  }, []);
+  };
 
   // Initial load
   useEffect(() => {
-    fetchCommunities();
-  }, [fetchCommunities]);
+  fetchCommunities();
+}, []);
 
   // fetch joined comms only to show under community section
   const fetchJoinedCommunities = useCallback(async () => {

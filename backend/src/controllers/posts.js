@@ -354,3 +354,36 @@ export async function getHomeTopPosts(req, res) {
     res.status(500).json({ message: "Internal server error" });
   }
 }
+
+
+export async function getPopularPosts(req, res) {
+  try {
+    const { limit = 20, page = 1 } = req.query;
+    const skip = (Number(page) - 1) * Number(limit);
+
+    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+
+    const posts = await Post.find({ community: { $exists: true, $ne: null } })
+      .populate('author', 'username displayName avatarUrl')
+      .populate('community', 'name title avatar _id')
+      .lean();
+
+    // Calculate 24-hour score for each post
+    const postsWithRecentScore = posts.map(post => {
+      const recentVotes = post.votes?.filter(v => v.createdAt >= twentyFourHoursAgo) || [];
+      const recentScore = recentVotes.reduce((sum, v) => sum + (v.value || 0), 0);
+      return { ...post, recentScore };
+    });
+
+    // Sort by recentScore descending
+    postsWithRecentScore.sort((a, b) => b.recentScore - a.recentScore);
+
+    // Apply pagination manually
+    const paginatedPosts = postsWithRecentScore.slice(skip, skip + Number(limit));
+
+    res.json(paginatedPosts);
+  } catch (err) {
+    console.error("Error fetching popular posts:", err);
+    res.status(500).json({ message: "Internal server error" });
+  }
+}
