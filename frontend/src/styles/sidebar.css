@@ -6,7 +6,7 @@
     padding: 0;
     margin: 0;
     background-color: white;
-    width: 220px;
+    width: 240px;
     padding: 4px 16px;
     border-right: 1px solid rgba(0, 0, 0, 0.2); 
     height: calc(100vh - 57px);
@@ -236,7 +236,7 @@
 .sidebar-collapse-toggle {
     position: absolute;
     top: 80px; 
-    right: -17px; 
+    right: -39px; 
     padding: 8px; 
     border: 1px solid rgba(0, 0, 0, 0.2); 
     background-color: white; 
@@ -249,7 +249,7 @@
 
 .sidebar-container.collapsed .sidebar-collapse-toggle {
     transform: none; 
-    right: -18px;
+    right: -39px;
 }
 
 .sidebar-collapse-toggle img {

@@ -18,34 +18,8 @@ import Post from "../components/post";
 import Sidebar from "../components/sidebar";
 import Header from "../components/header";
 import React, { useState, useEffect, useCallback } from "react";
+import HomeRightSidebar from "../components/HomeRightSidebar";
 
-
-const HomeRightSidebar = () => {
-  return (
-    // Added style to the inline div for the new background color
-    <div className="right-sidebar-column" style={{ backgroundColor: '#f7f8f9' }}>
-      <div className="right-sidebar-card">
-        <h3 className="card-title">RECENT POSTS</h3>
-        <Link to="/r/community1/post/abc" className="right-sidebar-post-link">
-          <p className="sidebar-community">r/CommunityName1</p>
-          <p className="sidebar-post-title">This is a recent post title...</p>
-          <p className="sidebar-details">45 upvotes · 3 comments</p>
-        </Link>
-        <Link to="/r/community2/post/xyz" className="right-sidebar-post-link">
-          <p className="sidebar-community">r/CommunityName2</p>
-          <p className="sidebar-post-title">Another interesting discussion thread.</p>
-          <p className="sidebar-details">120 upvotes · 15 comments</p>
-        </Link>
-        <Link to="/r/community3/post/lmn" className="right-sidebar-post-link">
-          <p className="sidebar-community">r/CommunityName3</p>
-          <p className="sidebar-post-title">Help needed with MERN stack layout!</p>
-          <p className="sidebar-details">12 upvotes · 5 comments</p>
-        </Link>
-        {/* You can add more cards here for "Trending" or "About Reddit" */}
-      </div>
-    </div>
-  );
-};
 
 
 function Home() {
@@ -247,12 +221,12 @@ function Home() {
                       textPreview={p.body || ""}
                       preview={p.mediaUrl || ""}
                       avatar={p.author?.avatarUrl || "../images/avatar.png"}
-                      initialVotes={p.score}
+                      initialVotes={p.recentScore || 0}
                       initialVote={p.userVote}
                       initialComments={p.commentCount}
                       community={communityName}
                       isAllFeed={isAllFeed}
-                      communityAvatarUrl={p.community?.avatar || "../images/default-community.svg"}
+                      communityAvatarUrl={p.community?.avatar || "../images/community-avatar-placeholder.png"}
                       isJoined={isJoined}
                       onToggleJoin={(name) => handleToggleJoin(name, p.community?._id, isJoined)}
                       viewType={viewType}

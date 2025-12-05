@@ -133,6 +133,9 @@ transition: background-color 0.2s ease;
     border-radius: 50px;
     padding-top: 0;
     display: none;
+    margin-left: 80px;
+    margin-right: auto;
+   
 }
 
 @media (min-width: 1024px) {

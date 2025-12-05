@@ -3,8 +3,9 @@ const { Schema, model } = mongoose;
 
 const VoteSchema = new Schema({
   user: { type: Schema.Types.ObjectId, ref: 'User' },
-  value: { type: Number, enum: [1,-1] }
-}, {_id:false});
+  value: { type: Number, enum: [1, -1] },
+  createdAt: { type: Date, default: Date.now }  
+}, { _id: false });
 
 const PostSchema = new Schema({
   title: { type: String, required: true },

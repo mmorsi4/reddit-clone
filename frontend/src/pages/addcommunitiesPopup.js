@@ -91,7 +91,7 @@ function AddCommunitiesModal({ feed, onClose, onCommunityAdded }) {
                                 {selectedCommunities.map(c => (
                                     <li key={c._id} className="selected-community-item">
                                         <div className="community-info">
-                                            <img src={c.avatar || "../images/default-community.svg"} alt={c.name} />
+                                            <img src={c.avatar || "../images/community-avatar-placeholder.png"} alt={c.name} />
                                             <span>r/{c.name}</span>
                                         </div>
                                         <button className="remove-button" onClick={() => handleCommunitySelect(c)}>Remove</button>
