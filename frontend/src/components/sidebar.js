@@ -13,6 +13,10 @@ function Sidebar() {
   const location = useLocation();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [communitiesCache, setCommunitiesCache] = useState(null);
+  const [joinedCache, setJoinedCache] = useState(null);
+  const [recentCache, setRecentCache] = useState(null);
+  const [customFeedsCache, setCustomFeedsCache] = useState(null);
 
   const getLinkClass = (path) => {
     const currentURL = location.pathname + location.search;
@@ -39,33 +43,41 @@ function Sidebar() {
 
   // ✅ Fetch all communities
   const fetchCommunities = async () => {
+    if (communitiesCache) {
+      setCommunities(communitiesCache);
+      return;
+    }
     try {
       const res = await fetch("/api/communities/");
       if (!res.ok) throw new Error("Failed to fetch communities");
       const data = await res.json();
       setCommunities(data);
+      setCommunitiesCache(data); // cache it
     } catch (err) {
       console.error("Error fetching communities:", err);
     }
   };
-
   // Initial load
   useEffect(() => {
-  fetchCommunities();
-}, []);
+    fetchCommunities();
+  }, []);
 
   // fetch joined comms only to show under community section
   const fetchJoinedCommunities = useCallback(async () => {
+    if (joinedCache) {
+      setJoinedCommunities(joinedCache);
+      return;
+    }
     try {
       const res = await fetch("/api/memberships/joined");
       if (!res.ok) throw new Error("Failed to fetch joined communities");
       const data = await res.json();
-      console.log(data)
       setJoinedCommunities(data);
+      setJoinedCache(data); // cache it
     } catch (err) {
       console.error("Error fetching joined communities:", err);
     }
-  }, []);
+  }, [joinedCache]);
 
   // intial load joined communities
   useEffect(() => {
@@ -80,18 +92,19 @@ function Sidebar() {
 
   // get recent communities
   const fetchRecentCommunities = useCallback(async () => {
+    if (recentCache) {
+      setRecent(recentCache);
+      return;
+    }
     try {
-      const res = await fetch('/api/users/recent-communities', {
-        credentials: "include"
-      });
-
+      const res = await fetch('/api/users/recent-communities', { credentials: "include" });
       const data = await res.json();
       setRecent(data);
-
+      setRecentCache(data); // cache it
     } catch (err) {
       console.error("Error fetching recent communities:", err);
     }
-  }, []);
+  }, [recentCache]);
 
   // initial load
   useEffect(() => {
@@ -121,15 +134,20 @@ function Sidebar() {
   };
 
   const fetchCustomFeeds = useCallback(async () => {
+    if (customFeedsCache) {
+      setCustomFeeds(customFeedsCache);
+      return;
+    }
     try {
       const res = await fetch("/api/customfeeds", { credentials: "include" });
       if (!res.ok) throw new Error("Failed to fetch custom feeds");
       const data = await res.json();
       setCustomFeeds(data);
+      setCustomFeedsCache(data); // cache it
     } catch (err) {
       console.error("Error fetching custom feeds:", err);
     }
-  }, []);
+  }, [customFeedsCache]);
 
   useEffect(() => {
     fetchCustomFeeds();
@@ -168,22 +186,22 @@ function Sidebar() {
     }
   };
 
-   const toggleCollapse = () => {
+  const toggleCollapse = () => {
     setIsCollapsed(prev => !prev);
   };
 
 
   return (
-  <div className={`sidebar-container ${isCollapsed ? 'collapsed' : ''}`}>
-    <button 
-      className="sidebar-collapse-toggle"
-      onClick={toggleCollapse} 
-    >
-      <img 
-        src="../images/collapse.svg" 
-        alt="Collapse Sidebar" 
-      />
-    </button>
+    <div className={`sidebar-container ${isCollapsed ? 'collapsed' : ''}`}>
+      <button
+        className="sidebar-collapse-toggle"
+        onClick={toggleCollapse}
+      >
+        <img
+          src="../images/collapse.svg"
+          alt="Collapse Sidebar"
+        />
+      </button>
 
       <ul className="sidebar">
         {/* HOME / POPULAR / ALL */}
@@ -213,7 +231,7 @@ function Sidebar() {
                 <div className="sidebar-section-item-details">All</div>
               </Link>
             </li>
-            
+
             {/* Create Community button */}
             <li>
               <button
@@ -269,7 +287,7 @@ function Sidebar() {
               </li>
             ))}
 
-            
+
           </ul>
         </li>
 

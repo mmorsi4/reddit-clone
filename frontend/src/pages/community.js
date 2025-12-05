@@ -5,18 +5,28 @@ import MainSidebar from "../components/main-sidebar";
 import Header from "../components/header";
 import CommunityHeader from "../components/communityHeader";
 import Post from "../components/post";
-import CommunitySidebar from "../components/CommunitySidebar"; // ADD THIS IMPORT
+import CommunitySidebar from "../components/CommunitySidebar";
 
 function Community() {
   const { name } = useParams();
+  
   const [community, setCommunity] = useState(null);
   const [posts, setPosts] = useState([]);
   const [loadingCommunity, setLoadingCommunity] = useState(true);
   const [loadingPosts, setLoadingPosts] = useState(true);
-  const [currentUser, setCurrentUser] = useState(null); // ADD THIS STATE
+  const [currentUser, setCurrentUser] = useState(null);
 
-  // ADD THIS: Fetch current user
+  // 🔹 Caching
+  const [communitiesCache, setCommunitiesCache] = useState({});
+  const [userCache, setUserCache] = useState(null);
+
+  // Fetch current user with caching
   useEffect(() => {
+    if (userCache) {
+      setCurrentUser(userCache); // use cached user
+      return;
+    }
+
     const fetchCurrentUser = async () => {
       try {
         const res = await fetch("/api/users/me", {
@@ -26,29 +36,43 @@ function Community() {
         if (res.ok) {
           const userData = await res.json();
           setCurrentUser(userData);
+          setUserCache(userData); // cache it
         }
       } catch (error) {
         console.error("Failed to fetch user:", error);
       }
     };
-    fetchCurrentUser();
-  }, []);
 
+    fetchCurrentUser();
+  }, [userCache]);
+
+  // Fetch community with caching
   useEffect(() => {
     const fetchCommunity = async () => {
       setLoadingCommunity(true);
+
+      // Check cache first
+      if (communitiesCache[name]) {
+        setCommunity(communitiesCache[name]);
+        setLoadingCommunity(false);
+        return;
+      }
+
       try {
-        const res = await fetch(`/api/communities`, {
-          method: "GET",
-          credentials: "include",
-        });
-
+        const res = await fetch(`/api/communities`, { method: "GET", credentials: "include" });
+        if (res.status === 429) {
+          console.warn("Too many requests, try again later.");
+          return;
+        }
         if (!res.ok) throw new Error("Failed to fetch communities");
-        const data = await res.json();
 
-        // find the community by name safely
+        const data = await res.json();
         const found = data.find(c => c?.name?.toLowerCase() === name.toLowerCase());
+
         setCommunity(found || null);
+
+        // Save to cache
+        setCommunitiesCache(prev => ({ ...prev, [name]: found || null }));
       } catch (err) {
         console.error("Error fetching community:", err);
       } finally {
@@ -57,9 +81,9 @@ function Community() {
     };
 
     fetchCommunity();
-  }, [name]);
+  }, [name, communitiesCache]);
 
-  // Fetch posts for this community from backend
+  // Fetch posts for this community
   useEffect(() => {
     if (!community) return;
 
@@ -70,7 +94,6 @@ function Community() {
           method: "GET",
           credentials: "include",
         });
-
         if (!res.ok) throw new Error("Failed to fetch posts");
         const data = await res.json();
         setPosts(data);
@@ -84,13 +107,8 @@ function Community() {
     fetchPosts();
   }, [community]);
 
-  if (loadingCommunity) {
-    // return <p>Loading community...</p>;
-  }
-
-  if (!community) {
-    return <h2 style={{ textAlign: "center", marginTop: "50px" }}>Community not found</h2>;
-  }
+  if (loadingCommunity) return <p>Loading community...</p>;
+  if (!community) return <h2 style={{ textAlign: "center", marginTop: "50px" }}>Community not found</h2>;
 
   return (
     <>
@@ -127,25 +145,25 @@ function Community() {
                     initialVote={p.userVote}
                     initialComments={p.commentCount}
                     community={community.name}
-                    isAllFeed={false}         
-                    isCommunityPage={true} 
-                    communityAvatarUrl={null} 
+                    isAllFeed={false}
+                    isCommunityPage={true}
+                    communityAvatarUrl={null}
                     viewType={"card"}
                   />
                 ))
               )}
             </div>
           </div>
-          
+
           {/* REPLACE MainSidebar with CommunitySidebar */}
           <div className="community-sidebar-column">
             <div className="community-sidebar-container">
-              <CommunitySidebar 
+              <CommunitySidebar
                 communityId={community._id}
                 post={null} // No specific post on community page
                 currentUser={currentUser}
                 showJoinButton={false}
-                isCommunityPage={true} 
+                isCommunityPage={true}
               />
             </div>
           </div>
