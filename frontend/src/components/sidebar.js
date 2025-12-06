@@ -84,12 +84,6 @@ function Sidebar() {
     fetchJoinedCommunities();
   }, [fetchJoinedCommunities]);
 
-  // // Load recent
-  // useEffect(() => {
-  //     const recentData = JSON.parse(localStorage.getItem("recentCommunities")) || [];
-  //     setRecent(recentData);
-  //   }, []);
-
   // get recent communities
   const fetchRecentCommunities = useCallback(async () => {
     if (recentCache) {
