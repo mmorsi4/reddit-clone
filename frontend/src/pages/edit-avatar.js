@@ -3,6 +3,8 @@ import { Link, useNavigate } from "react-router-dom";
 import Sidebar from "../components/sidebar";
 import SearchBar from "../components/searchbar";
 import Header from "../components/header"
+import DefaultAvatarSVG from "../components/DefaultAvatarSVG";
+
 
 const AvatarCustomizer = ({ headerAvatarRef }) => {
     const [activeTab, setActiveTab] = useState("Outfits");
@@ -12,31 +14,22 @@ const AvatarCustomizer = ({ headerAvatarRef }) => {
     const navigate = useNavigate();
 
     const avatarSets = {
-        Outfits: ["../images/outfit1.png", "../images/outfit2.png", "../images/outfit3.png", "../images/outfit4.png"],
         Tops: ["../images/top1.png", "../images/top2.png", "../images/top3.png", "../images/top4.png"],
         Bottoms: ["../images/bottom1.png", "../images/bottom2.png", "../images/bottom3.png", "../images/bottom4.png"],
         Hair: ["../images/hair1.png", "../images/hair2.png", "../images/hair3.png", "../images/hair4.png"],
-        Face: ["../images/face1.png", "../images/face2.png", "../images/face3.png", "../images/face4.png"],
-        Eyes: ["../images/eyes1.png", "../images/eyes2.png", "../images/eyes3.png", "../images/eyes4.png"],
-        Hats: ["../images/hat1.png", "../images/hat2.png", "../images/hat3.png", "../images/hat4.png"],
-        "Right Hand": ["../images/right1.png", "../images/right2.png", "../images/right3.png", "../images/right4.png"],
-        "Left Hand": ["../images/left1.png", "../images/left2.png", "../images/left3.png", "../images/left4.png"],
-        Backgrounds: ["../images/bg1.png", "../images/bg2.png", "../images/bg3.png", "../images/bg4.png"],
-        Colors: ["../images/color1.png", "../images/color2.png", "../images/color3.png", "../images/color4.png"],
     };
 
     const layerOrder = {
         Backgrounds: 0,
-        Colors: 1,
-        Bottoms: 2,
-        Outfits: 3,
-        Tops: 4,
-        "Left Hand": 5,
-        "Right Hand": 6,
-        Face: 7,
-        Eyes: 8,
-        Hair: 9,
-        Hats: 10,
+        Bottoms: 1,
+        Hair: 2,
+        Tops: 3,
+    };
+
+    const layerPlacement = {
+        Hair: { top: "4%", left: "-5%", width: "100%", height: "100%" },
+        Tops: { top: "37.5%", left: "33%", width: "39%", height: "75%" },
+        Bottoms: { top: "59%", left: "39%", width: "26%", height: "55%" },
     };
 
     // 🟠 Load saved avatar AND layers on mount
@@ -58,14 +51,25 @@ const AvatarCustomizer = ({ headerAvatarRef }) => {
         }
     }, [headerAvatarRef]);
 
-    // 🧱 Add or replace a layer
+    // 🧱 Add or replace a layer OR REMOVE it if it's the same item
     const addOrReplaceLayer = (category, src) => {
-        const newLayers = {
-            ...layers,
-            [category]: { src, zIndex: layerOrder[category] || 1 },
-        };
-        setLayers(newLayers);
+        let newLayers;
         
+        // Check if the layer for this category and src already exists (i.e., it's currently selected)
+        if (layers[category] && layers[category].src === src) {
+            // If it exists and the src is the same, remove it (toggle off)
+            newLayers = { ...layers };
+            delete newLayers[category]; // Remove the layer for this category
+        } else {
+            // Otherwise, add or replace the layer (toggle on)
+            newLayers = {
+                ...layers,
+                [category]: { src, zIndex: layerOrder[category] || 1 },
+            };
+        }
+        
+        setLayers(newLayers);
+
         // 🆕 Immediately save layers to localStorage
         localStorage.setItem("avatarLayers", JSON.stringify(newLayers));
     };
@@ -143,13 +147,13 @@ const AvatarCustomizer = ({ headerAvatarRef }) => {
             }
 
             const finalAvatar = canvas.toDataURL("image/png");
-            
+
             // 1. Save to localStorage (for immediate UI updates)
             localStorage.setItem("userAvatar", finalAvatar);
-            
+
             // 🆕 Also save layers to localStorage (so avatar remembers outfits)
             localStorage.setItem("avatarLayers", JSON.stringify(layers));
-            
+
             // 2. Save to database (for profile page and comments)
             const saveToDatabase = async (avatarDataUrl) => {
                 try {
@@ -179,7 +183,7 @@ const AvatarCustomizer = ({ headerAvatarRef }) => {
 
             // Save to database
             const dbSuccess = await saveToDatabase(finalAvatar);
-            
+
             // Update UI - including the header avatar!
             if (headerAvatarRef?.current) {
                 headerAvatarRef.current.src = finalAvatar;
@@ -193,18 +197,18 @@ const AvatarCustomizer = ({ headerAvatarRef }) => {
                 if (dbSuccess) {
                     saveBtn.textContent = "Saved!";
                     saveBtn.style.backgroundColor = "#4CAF50";
-                    
+
                     setTimeout(() => {
                         fetch('http://localhost:5001/api/users/me', {
                             credentials: 'include'
                         })
-                        .then(res => res.json())
-                        .then(userData => {
-                            navigate(`/profile/${userData.username}`);
-                        })
-                        .catch(err => {
-                            console.error('Error fetching user data:', err);
-                        });
+                            .then(res => res.json())
+                            .then(userData => {
+                                navigate(`/profile/${userData.username}`);
+                            })
+                            .catch(err => {
+                                console.error('Error fetching user data:', err);
+                            });
                     }, 1200);
                 } else {
                     saveBtn.textContent = "Save Failed!";
@@ -236,13 +240,13 @@ const AvatarCustomizer = ({ headerAvatarRef }) => {
         if (headerAvatarRef?.current) {
             headerAvatarRef.current.src = avatarSrc;
         }
-        
+
         // Update any other avatar images on the page
         const allAvatars = document.querySelectorAll('img[class*="avatar"], img[alt*="avatar"], .profile-avatar, .comment-avatar');
         allAvatars.forEach(avatar => {
             avatar.src = avatarSrc;
         });
-        
+
         // 🆕 Also update localStorage so other pages can use it
         localStorage.setItem("userAvatar", avatarSrc);
     };
@@ -250,7 +254,7 @@ const AvatarCustomizer = ({ headerAvatarRef }) => {
     return (
         <>
             <Header />
-            <Sidebar/>
+            <Sidebar />
             <div className="main">
                 <div className="avatar-preview">
                     <div
@@ -264,7 +268,7 @@ const AvatarCustomizer = ({ headerAvatarRef }) => {
                         }}
                     >
                         <div ref={layerContainerRef} className="avatar-layers">
-                            <img src="../images/default.PNG" alt="Default Avatar" className="default-avatar" />
+                            <DefaultAvatarSVG />
                             {Object.entries(layers).map(([category, data]) => (
                                 <img
                                     key={category}
@@ -273,12 +277,13 @@ const AvatarCustomizer = ({ headerAvatarRef }) => {
                                     data-category={category}
                                     style={{
                                         position: "absolute",
-                                        top: 0,
-                                        left: 0,
-                                        width: "100%",
-                                        height: "100%",
-                                        objectFit: "contain",
                                         zIndex: data.zIndex,
+                                        objectFit: "contain",
+
+                                        top: layerPlacement[category]?.top || 0,
+                                        left: layerPlacement[category]?.left || 0,
+                                        width: layerPlacement[category]?.width || "100%",
+                                        height: layerPlacement[category]?.height || "100%",
                                     }}
                                 />
                             ))}
@@ -303,15 +308,24 @@ const AvatarCustomizer = ({ headerAvatarRef }) => {
                     </div>
 
                     <div className="avatar-grid" ref={avatarGridRef}>
-                        {avatarSets[activeTab]?.map((src, i) => (
-                            <div key={i} className="avatar-item" data-category={activeTab}>
-                                <img
-                                    src={src}
-                                    alt=""
-                                    onClick={() => addOrReplaceLayer(activeTab, src)}
-                                />
-                            </div>
-                        ))}
+                        {avatarSets[activeTab]?.map((src, i) => {
+                            // Determine if this item is currently selected to apply a class
+                            const isSelected = layers[activeTab] && layers[activeTab].src === src;
+
+                            return (
+                                <div 
+                                    key={i} 
+                                    className={`avatar-item ${isSelected ? "selected" : ""}`} // Apply selected class
+                                    data-category={activeTab}
+                                >
+                                    <img
+                                        src={src}
+                                        alt=""
+                                        onClick={() => addOrReplaceLayer(activeTab, src)}
+                                    />
+                                </div>
+                            );
+                        })}
                     </div>
                 </div>
             </div>

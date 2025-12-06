@@ -44,12 +44,7 @@ function Login() {
     </svg>
   );
 
-  // Load existing users from localStorage
-  useEffect(() => {
-    const storedUsers = JSON.parse(localStorage.getItem("users")) || [];
-    setUsers(storedUsers);
-  }, []);
-
+  
   // Toggle password visibility
   const togglePassword = () => setShowPassword((prev) => !prev);
 
