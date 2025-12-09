@@ -126,29 +126,29 @@ export async function votePost(req, res) {
 
 // Add this function to your posts controller
 export async function getMyPosts(req, res) {
-  try {
-    const posts = await Post.find({ author: req.userId })
-      .populate('author', 'username displayName avatarUrl')
-      .populate('community', 'name title')
-      .sort({ createdAt: -1 })
-      .lean();
+  try {
+    const posts = await Post.find({ author: req.userId })
+      .populate('author', 'username displayName avatarUrl')
+      .populate('community', 'name title avatar _id') // ✨ FIXED: Added 'avatar' and '_id'
+      .sort({ createdAt: -1 })
+      .lean();
 
-  const normalized = posts.map(post => {
-    const userVote = post.votes?.find(v => v.user.toString() === req.userId);
-    const score = post.votes?.reduce((sum, v) => sum + v.value, 0) || 0;
-    return {
-        ...post,
-        userVote: userVote ? userVote.value : 0,
-        score,
-        commentCount: post.commentCount ?? 0
-      };
-  });
+  const normalized = posts.map(post => {
+    const userVote = post.votes?.find(v => v.user.toString() === req.userId);
+    const score = post.votes?.reduce((sum, v) => sum + v.value, 0) || 0;
+    return {
+        ...post,
+        userVote: userVote ? userVote.value : 0,
+        score,
+        commentCount: post.commentCount ?? 0
+      };
+  });
 
-    res.json(normalized);
-  } catch (err) {
-    console.error("Error fetching user posts:", err);
-    res.status(500).json({ message: "Internal server error" });
-  }
+    res.json(normalized);
+  } catch (err) {
+    console.error("Error fetching user posts:", err);
+    res.status(500).json({ message: "Internal server error" });
+  }
 }
 
 export async function getAllFeedPosts(req, res) {

@@ -70,8 +70,8 @@ function PostPage() {
     const fetchCurrentUser = async () => {
       try {
         const res = await fetch("/api/users/me", {
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
+          headers: { "Content-Type": "application/json" }
+          // REMOVED: credentials: "include"
         });
         
         if (res.ok) {
@@ -100,9 +100,7 @@ function PostPage() {
   const fetchPost = useCallback(async () => {
     try {
       setIsLoading(true);
-      const res = await fetch(`http://localhost:5001/api/posts/${postId}`, {
-        credentials: "include"
-      });
+      const res = await fetch(`/api/posts/${postId}`); // REMOVED: localhost:5001 and credentials
       if (!res.ok) throw new Error("Post not found");
       const data = await res.json();
       setPost(data.post);
@@ -195,11 +193,10 @@ function PostPage() {
         value = currentVote === -1 ? 0 : -1;
       }
       
-      const res = await fetch(`http://localhost:5001/api/posts/${postId}/vote`, {
+      const res = await fetch(`/api/posts/${postId}/vote`, { // REMOVED: localhost:5001
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ value })
+        headers: { "Content-Type": "application/json" }
+        // REMOVED: credentials: "include"
       });
 
       if (res.ok) {
@@ -219,14 +216,10 @@ function PostPage() {
     if (!newComment.trim()) return;
 
     try {
-      const res = await fetch("http://localhost:5001/api/comments", {
+      const res = await fetch("/api/comments", { // REMOVED: localhost:5001
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({
-          post: postId,
-          body: newComment,
-        }),
+        headers: { "Content-Type": "application/json" }
+        // REMOVED: credentials: "include"
       });
 
       if (!res.ok) throw new Error("Failed to save comment");
@@ -384,7 +377,6 @@ function PostPage() {
         <div className="post-page-content">
           {/* Main Content Column */}
           <div className="post-main-column">
-            {/* Combined Back Button and Community Info */}
             {/* Combined Back Button and Community Info */}
             <div className="post-header-navigation">
               <button className="back-button" onClick={() => window.history.back()}>

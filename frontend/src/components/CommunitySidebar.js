@@ -19,9 +19,8 @@ const CommunitySidebar = ({
       try {
         console.log("Fetching community data for:", communityId);
         
-        const res = await fetch('http://localhost:5001/api/communities', {
-          credentials: "include"
-        });
+        // FIXED: Removed localhost:5001 and credentials
+        const res = await fetch('/api/communities'); // CHANGED
         
         if (res.ok) {
           const communities = await res.json();
@@ -49,10 +48,8 @@ const CommunitySidebar = ({
             
             setCommunityStats(stats);
             
-            // Check if user is a member
-            const memberRes = await fetch('http://localhost:5001/api/communities/joined', {
-              credentials: "include"
-            });
+            // Check if user is a member - FIXED: Removed localhost:5001 and credentials
+            const memberRes = await fetch('/api/communities/joined'); // CHANGED
             
             if (memberRes.ok) {
               const joinedCommunities = await memberRes.json();

@@ -11,14 +11,15 @@ function ViewProfile() {
   const [userComments, setUserComments] = useState([]);
   const [userPosts, setUserPosts] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [joinedCommunityIds, setJoinedCommunityIds] = useState([]); 
   const { username } = useParams(); // get username from url
 
   useEffect(() => {
     const fetchProfile = async () => {
       const res = await fetch(`/api/users/${username}`, {
         method: "GET",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include"
+        headers: { "Content-Type": "application/json" }
+        // REMOVED: credentials: "include"
       });
 
       if (res.status === 404) {
@@ -36,30 +37,47 @@ function ViewProfile() {
     fetchProfile();
   }, [username]);
 
+  useEffect(() => {
+    const fetchJoinedCommunities = async () => {
+        try {
+            const res = await fetch("/api/communities/joined", {
+                method: "GET",
+                headers: { "Content-Type": "application/json" }
+            });
+
+            if (res.ok) {
+                const communities = await res.json();
+                setJoinedCommunityIds(communities.map(c => c._id));
+            } else {
+                console.error("Error fetching joined communities:", await res.text());
+            }
+        } catch (error) {
+            console.error("Error fetching joined communities:", error);
+        }
+    };
+    
+    fetchJoinedCommunities();
+  }, []); 
+
   // Fetch user's comments when Comments tab is clicked
   const fetchUserComments = async () => {
     setLoading(true);
     try {
-     
-      const res = await fetch("http://localhost:5001/api/comments/my", {
+      const res = await fetch("/api/comments/my", { // REMOVED: localhost:5001
         method: "GET",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        credentials: "include"
+        headers: { "Content-Type": "application/json" }
+        // REMOVED: credentials: "include"
       });
-
 
       if (res.ok) {
         const comments = await res.json();
         setUserComments(comments);
-        
       } else {
         const errorText = await res.text();
-        
+        console.error("Error fetching comments:", errorText);
       }
     } catch (error) {
-      
+      console.error("Error fetching comments:", error);
     } finally {
       setLoading(false);
     }
@@ -69,18 +87,17 @@ function ViewProfile() {
   const fetchUserPosts = async () => {
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:5001/api/posts/my/posts", {
+      const res = await fetch("/api/posts/my/posts", { // REMOVED: localhost:5001
         method: "GET",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        credentials: "include"
+        headers: { "Content-Type": "application/json" }
+        // REMOVED: credentials: "include"
       });
       if (res.ok) {
         const posts = await res.json();
         setUserPosts(posts);
       } else {
         const errorText = await res.text();
+        console.error("Error fetching posts:", errorText);
       }
     } catch (error) {
       console.error("Error details:", error.message);
@@ -146,34 +163,32 @@ function ViewProfile() {
 
       return (
         <div>
-          {userPosts.map((post) => (
-            <Post
-              key={post._id}
-              postId={post._id}
-              username={post.author?.username || user.username}
-              time={post.createdAt}
-              title={post.title}
-              preview={post.mediaUrl}
-              textPreview={post.body}
-              avatar={user.avatarUrl || "../images/avatar.png"}
-              initialVotes={post.score || 0}
-              initialVote={post.userVote || 0}
-              initialComments={post.commentCount || 0}
-              community={post.community?.name || "unknown"}
-              isAllFeed={true}
-              communityAvatarUrl={
-                post.community?.avatar 
-                  ? post.community.avatar.startsWith('/') 
-                    ? `..${post.community.avatar}` // Add .. if it starts with /
-                    : post.community.avatar
-                  : "../images/default-community.svg"
-              }
-              isJoined={false}
-              onToggleJoin={null}
-              viewType="normal"
-              isCommunityPage={false}
-            />
-          ))}
+          {userPosts.map((post) => {
+            const isUserJoined = joinedCommunityIds.includes(post.community?._id);
+
+            return (
+              <Post
+                key={post._id}
+                postId={post._id}
+                username={post.author?.username || user.username}
+                time={post.createdAt}
+                title={post.title}
+                preview={post.mediaUrl}
+                textPreview={post.body}
+                avatar={user.avatarUrl || "/images/avatar.png"}
+                initialVotes={post.score || 0}
+                initialVote={post.userVote || 0}
+                initialComments={post.commentCount || 0}
+                community={post.community?.name || "unknown"}
+                isAllFeed={true}
+                communityAvatarUrl={post.community?.avatar} // ✨ FIXED: Only pass the custom URL
+                isJoined={isUserJoined}
+                onToggleJoin={null}
+                viewType="normal"
+                isCommunityPage={false}
+              />
+            );
+          })}
         </div>
       );
     }
@@ -204,28 +219,32 @@ function ViewProfile() {
       return (
         <div className="profile-overview-content">
           {/* Show posts */}
-          {hasPosts && userPosts.map((post) => (
-            <Post
-              key={`post-${post._id}`}
-              postId={post._id}
-              username={post.author?.username || user.username}
-              time={post.createdAt}
-              title={post.title}
-              preview={post.mediaUrl}
-              textPreview={post.body}
-              avatar={user.avatarUrl || "../images/avatar.png"}
-              initialVotes={post.score || 0}
-              initialVote={post.userVote || 0}
-              initialComments={post.commentCount || 0}
-              community={post.community?.name || "unknown"}
-              isAllFeed={false}
-              communityAvatarUrl={post.community?.avatar || "../images/default-community.svg"}
-              isJoined={false}
-              onToggleJoin={null}
-              viewType="normal"
-              isCommunityPage={false}
-            />
-          ))}
+          {hasPosts && userPosts.map((post) => {
+            const isUserJoined = joinedCommunityIds.includes(post.community?._id);
+
+            return (
+              <Post
+                key={`post-${post._id}`}
+                postId={post._id}
+                username={post.author?.username || user.username}
+                time={post.createdAt}
+                title={post.title}
+                preview={post.mediaUrl}
+                textPreview={post.body}
+                avatar={user.avatarUrl || "/images/avatar.png"}
+                initialVotes={post.score || 0}
+                initialVote={post.userVote || 0}
+                initialComments={post.commentCount || 0}
+                community={post.community?.name || "unknown"}
+                isAllFeed={true} 
+                communityAvatarUrl={post.community?.avatar} // ✨ FIXED: Only pass the custom URL
+                isJoined={isUserJoined}
+                onToggleJoin={null}
+                viewType="normal"
+                isCommunityPage={false}
+              />
+            );
+          })}
           
           {/* Show comments as simple cards */}
           {hasComments && userComments.map((comment) => (
@@ -236,7 +255,7 @@ function ViewProfile() {
                 </span>
                 <span className="profile-comment-time">
                   {new Date(comment.createdAt).toLocaleDateString()}
-                </span>
+                </span >
               </div>
               <p className="profile-comment-body">{comment.body || comment.text}</p>
             </div>
@@ -260,6 +279,7 @@ function ViewProfile() {
       </div>
     );
   };
+
   const handleTabClick = (tabName) => {
     setActiveTab(tabName);
     if (tabName === "comments") {
@@ -272,7 +292,6 @@ function ViewProfile() {
   if (user === undefined) return <p></p>; // loading
   if (user === null) return <p>User not found</p>; // user not found
 
-
   return (
     <>
       <Header />
@@ -281,7 +300,7 @@ function ViewProfile() {
         <div className="profile-header">
           <img
             id="profile-avatar"
-            src={user.avatarUrl ? user.avatarUrl : "../images/avatar.png"}
+            src={user.avatarUrl ? user.avatarUrl : "/images/avatar.png"} // Fixed to root-relative path
             alt="Avatar"
             className="profile-avatar"
           />
