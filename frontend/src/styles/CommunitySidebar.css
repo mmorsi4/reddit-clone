@@ -158,6 +158,15 @@
   gap: 6px;
   font-size: 12px;
   color: #787c7e;
+  position: relative;
+}
+.community-created svg {
+  width: 16px !important;
+  height: 16px !important;
+  fill: #787c7e;
+  /* IMPORTANT: Override position and transform to disable the massive sizing/float */
+  position: static !important; 
+  transform: none !important;
 }
 
 /* Section Titles */
