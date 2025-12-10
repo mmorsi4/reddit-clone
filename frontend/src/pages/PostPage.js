@@ -50,20 +50,7 @@ function PostPage() {
     }
   }, [post?.community?.name, allCommunities]);
 
-  // Debug community data
-  useEffect(() => {
-    if (post && post.community) {
-      console.log("🔍 COMMUNITY DEBUG:", {
-        communityName: post.community.name,
-        avatarPath: post.community.avatar
-      });
-      
-      const img = new Image();
-      img.onload = () => console.log("✅ Image should work:", post.community.avatar);
-      img.onerror = () => console.log("❌ Image won't load:", post.community.avatar);
-      img.src = post.community.avatar;
-    }
-  }, [post]);
+  
 
   // Fetch current user info
   useEffect(() => {
@@ -98,6 +85,12 @@ function PostPage() {
   }, []);
 
   const fetchPost = useCallback(async () => {
+    if (!postId) {
+        setIsLoading(false);
+        setPost(null); // Or set an error state
+        console.error("Post ID is missing. Cannot fetch.");
+        return; 
+    }
     try {
       setIsLoading(true);
       const res = await fetch(`/api/posts/${postId}`); // REMOVED: localhost:5001 and credentials
