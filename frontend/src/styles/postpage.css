@@ -483,11 +483,11 @@
   gap: 6px;
   background: var(--post-action-bg);
   border: 1px solid var(--post-action-border);
+  color: var(--post-text);
   padding: 6px 12px;
   border-radius: 20px;
   font-size: 12px;
   font-weight: 600;
-  color: var(--post-text);
   cursor: pointer;
   transition: all 0.2s, background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
 }
@@ -1307,3 +1307,38 @@
   transition: none !important;
   animation: none !important;
 }
+/* From Uiverse.io by AlimurtuzaCodes */ 
+.summarize-button {
+  border: none;
+  padding: 6px 12px; /* same padding as .post-action-btn */
+  gap: 6px;
+  width: fit-content; /* shrink to content size like other buttons */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  background: var(--post-action-bg);
+  cursor: pointer;
+  transition: all 200ms ease-in-out;
+  color: var(--post-text);
+  border: 1px solid var(--post-action-border);
+  text-align: left;
+  border-radius: 15px;
+  margin-top: 10px;
+}
+
+.sparkle {
+  fill: #AAAAAA;
+  transition: all 800ms ease;
+}
+
+.summarize-button:hover {
+  color: white;
+  background: linear-gradient(0deg,#ff581c,#ff4500);
+  box-shadow: inset 0px -4px 0px 0px rgba(0, 0, 0, 0.2)
+}
+
+.summarize-button:hover .sparkle {
+  fill: white;
+  transform: scale(1.2);
+} 
