@@ -237,7 +237,6 @@ export async function getCustomFeedPosts(req, res) {
   }
 }
 
-// Repeat the same pattern for Best, New, Top posts:
 export async function getHomeBestPosts(req, res) {
   try {
     const { limit = 20, page = 1, home } = req.query;
@@ -254,18 +253,17 @@ export async function getHomeBestPosts(req, res) {
     const posts = await Post.find(query)
       .populate('author', 'username displayName avatarUrl')
       .populate('community', 'name title avatar _id')
-      .sort({ votesScore: -1, createdAt: -1 })
+      .sort({ score: -1, createdAt: -1 }) // Sort by score field (already calculated in pre-save)
       .skip(skip)
       .limit(Number(limit))
       .lean();
 
     const normalized = posts.map(post => {
-      const userVote = post.votes?.find(v => v.user.toString() === req.userId);
-      const score = post.votes?.reduce((sum, v) => sum + v.value, 0) || 0;
+      const userVote = post.votes?.find(v => v.user && v.user.toString() === req.userId);
       return {
           ...post,
           userVote: userVote ? userVote.value : 0,
-          score,
+          score: post.score || 0,
           commentCount: post.commentCount ?? 0
         };
     });
@@ -299,12 +297,11 @@ export async function getHomeNewPosts(req, res) {
       .lean();
 
     const normalized = posts.map(post => {
-      const userVote = post.votes?.find(v => v.user.toString() === req.userId);
-      const score = post.votes?.reduce((sum, v) => sum + v.value, 0) || 0;
+      const userVote = post.votes?.find(v => v.user && v.user.toString() === req.userId);
       return {
           ...post,
           userVote: userVote ? userVote.value : 0,
-          score,
+          score: post.score || 0,
           commentCount: post.commentCount ?? 0
         };
     });
@@ -329,21 +326,50 @@ export async function getHomeTopPosts(req, res) {
       query.community = { $in: joinedCommunityIds };
     }
 
-    const posts = await Post.find(query)
-      .populate('author', 'username displayName avatarUrl')
-      .populate('community', 'name title avatar _id')
-      .sort({ 'votes.length': -1, createdAt: -1 })
-      .skip(skip)
-      .limit(Number(limit))
-      .lean();
+    // Use aggregation pipeline for better performance with vote count
+    const posts = await Post.aggregate([
+      { $match: query },
+      { 
+        $addFields: {
+          voteCount: { $size: { $ifNull: ["$votes", []] } } // Calculate number of votes
+        }
+      },
+      { $sort: { voteCount: -1, createdAt: -1 } },
+      { $skip: skip },
+      { $limit: Number(limit) },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'author',
+          foreignField: '_id',
+          as: 'author',
+          pipeline: [
+            { $project: { username: 1, displayName: 1, avatarUrl: 1 } }
+          ]
+        }
+      },
+      { $unwind: '$author' },
+      {
+        $lookup: {
+          from: 'communities',
+          localField: 'community',
+          foreignField: '_id',
+          as: 'community',
+          pipeline: [
+            { $project: { name: 1, title: 1, avatar: 1 } }
+          ]
+        }
+      },
+      { $unwind: { path: '$community', preserveNullAndEmptyArrays: true } }
+    ]);
 
+    // Add user vote information
     const normalized = posts.map(post => {
-      const userVote = post.votes?.find(v => v.user.toString() === req.userId);
-      const score = post.votes?.reduce((sum, v) => sum + v.value, 0) || 0;
+      const userVote = post.votes?.find(v => v.user && v.user.toString() === req.userId);
       return {
           ...post,
           userVote: userVote ? userVote.value : 0,
-          score,
+          score: post.score || 0,
           commentCount: post.commentCount ?? 0
         };
     });
