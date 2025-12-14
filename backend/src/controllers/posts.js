@@ -3,6 +3,10 @@ import Comment from '../models/Comment.js';
 import Community from '../models/Community.js';
 import Membership from '../models/Membership.js';
 import mongoose from 'mongoose';
+import ModelClient, { isUnexpected } from "@azure-rest/ai-inference";
+import { AzureKeyCredential } from "@azure/core-auth";
+import path from 'path'
+import fs from 'fs'
 
 export async function createPost(req,res){
   const { title, body, url, community } = req.body;
@@ -98,6 +102,68 @@ export async function getPost(req, res) {
   } catch (err) {
     console.error("Error fetching post:", err);
     res.status(500).json({ message: "Internal server error" });
+  }
+}
+
+export async function getPostSummary(req, res) {
+  try {
+    const post = await Post.findById(req.params.id).lean();
+    if (!post) return res.status(404).json({ message: "Post not found" });
+
+    const messages = [
+      {
+        role: "system",
+        content:
+          "You are an assistant that summarizes social media (Reddit) posts. " +
+          "If the post is text-only, summarize the text clearly. " +
+          "If an image exists, describe its content and combine it with the text. " +
+          "If a video exists, do NOT attempt to analyze the actual video file, but acknowledge it is a video and summarize based on any textual context. " +
+          "Be concise and factual." +
+          "Do not mention that you are guessing or inferring." +
+          "Refuse to summarize any explicit content."
+      }
+    ];
+
+    const userContent = [{ type: "text", text: `Title:\n${post.title}` }];
+
+    if (post.body) {
+      userContent.push({ type: "text", text: `Body:\n${post.body}` });
+    }
+
+    if (post.mediaUrl) {
+      const ext = path.extname(post.mediaUrl).toLowerCase();
+      const mimeMap = { ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".png": "image/png", ".webp": "image/webp" };
+
+      if ([".jpg", ".jpeg", ".png", ".webp"].includes(ext)) {
+        const imagePath = path.join(process.cwd(), post.mediaUrl);
+        const imageBase64 = fs.readFileSync(imagePath, { encoding: "base64" });
+        const mime = mimeMap[ext] || "image/jpeg";
+        userContent.push({ type: "image_url", image_url: { url: `data:${mime};base64,${imageBase64}` } });
+      } else if ([".mp4", ".webm"].includes(ext)) {
+        userContent.push({
+          type: "text",
+          text: `Media: This post contains a video file (${ext}). Please summarize based on the text context, ignoring the actual video content.`
+        });
+      }
+    }
+
+    messages.push({ role: "user", content: userContent });
+
+    const client = ModelClient(
+      "https://models.github.ai/inference",
+      new AzureKeyCredential(process.env.GITHUB_MODELS_TOKEN)
+    );
+
+    const response = await client.path("/chat/completions").post({
+      body: { model: "openai/gpt-4.1", messages, max_tokens: 120, temperature: 0.4 }
+    });
+
+    if (isUnexpected(response)) throw response.body.error;
+
+    res.json({ summary: response.body.choices[0].message.content });
+  } catch (err) {
+    console.error("Summary error:", err);
+    res.status(500).json({ message: "Failed to generate summary" });
   }
 }
 

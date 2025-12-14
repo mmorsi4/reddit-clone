@@ -25,6 +25,34 @@ function PostPage() {
   const [allCommunities, setAllCommunities] = useState([]);
   const [currentCommunity, setCurrentCommunity] = useState(null);
 
+  const [summary, setSummary] = useState("");
+  const [isSummarizing, setIsSummarizing] = useState(false);
+
+  const handleSummarize = async () => {
+    if (!post) return;
+    setIsSummarizing(true);
+    setSummary("");
+
+    try {
+      const res = await fetch(`/api/posts/${postId}/summary`, {
+        method: "GET",
+        headers: { "Content-Type": "application/json" }
+      });
+
+      if (!res.ok) throw new Error("Failed to summarize");
+
+      const data = await res.json();
+      const text = data.summary || "No summary available.";
+
+      setSummary(text);
+    } catch (err) {
+      console.error("Summarize error:", err);
+      setSummary("Failed to summarize post.");
+    } finally {
+      setIsSummarizing(false);
+    }
+  };
+
   // Fetch ALL communities like sidebar does
   useEffect(() => {
     const fetchAllCommunities = async () => {
@@ -48,9 +76,7 @@ function PostPage() {
       );
       setCurrentCommunity(foundCommunity);
     }
-  }, [post?.community?.name, allCommunities]);
-
-  
+  }, [post?.community?.name, allCommunities]);  
 
   // Fetch current user info
   useEffect(() => {
@@ -487,7 +513,20 @@ function PostPage() {
                   <span>Share</span>
                 </button>
               </div>
+              <button
+              className="summarize-button"
+              onClick={!summary ? handleSummarize : undefined}
+              style={{ display: "flex", alignItems: "center", gap: "6px", cursor: !summary ? "pointer" : "default" }}
+            >
+              <span className="text">
+                {isSummarizing ? "Processing..." : summary || "Summarize"}
+              </span>
+            </button>
             </div>
+
+            
+
+
 
             {/* Comment Section */}
             <div className="comments-section">
