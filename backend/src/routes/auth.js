@@ -1,6 +1,7 @@
 import express from 'express';
-import { signup, login } from '../controllers/auth.js';
+import { signup, login , checkAuth , logout} from '../controllers/auth.js';
 import { validate } from '../middleware/validate.js';
+import { authMiddleware } from '../middleware/auth.js';
 import Joi from 'joi';
 
 const router = express.Router();
@@ -18,5 +19,8 @@ const loginSchema = Joi.object({
 
 router.post('/signup', validate(signupSchema), signup);
 router.post('/login', validate(loginSchema), login);
+router.get('/check', authMiddleware, checkAuth);
+router.post('/logout', logout);
+
 
 export default router;

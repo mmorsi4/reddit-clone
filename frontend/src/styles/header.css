@@ -64,7 +64,6 @@
     width: 115px;
 }
 
-/* FORCE REDDIT LOGO TO NEVER HAVE FILTER */
 .reddit-logo,
 [data-theme="dark"] .reddit-logo,
 .header a .reddit-logo,
@@ -72,6 +71,7 @@
     filter: none !important;
     -webkit-filter: none !important;
 }
+
 
 .header-actions {
     display: flex;
@@ -430,4 +430,29 @@ img {
                 color 0.3s ease,
                 box-shadow 0.3s ease,
                 filter 0.3s ease;
+}
+
+
+.logout-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  color: inherit;
+  transition: background-color 0.2s ease;
+}
+
+.logout-button:hover {
+  background-color: var(--menu-item-hover);
+}
+
+.logout-button:active {
+  background-color: var(--menu-item-active);
 }
