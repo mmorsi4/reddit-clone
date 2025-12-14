@@ -189,7 +189,7 @@
   transform: scale(1.05);
 }
 
-svg :not(.icon-success):not(.icon-warn){
+svg:not(.icon-success):not(.icon-warn) {
   position: absolute;
   top: 50%;
   left: 50%;
@@ -202,6 +202,7 @@ svg :not(.icon-success):not(.icon-warn){
   filter: brightness(var(--svg-brightness, 1));
   transition: filter 0.3s ease;
 }
+
 
 /* Add brightness variables for images */
 :root {
