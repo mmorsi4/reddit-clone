@@ -1,8 +1,45 @@
+:root {
+  /* Light theme variables */
+  --bg-color: #ffffff;
+  --text-color: #333333;
+  --border-color: #e6e7eb;
+  --hover-bg: #e9e8e8;
+  --menu-bg: #ffffff;
+  --menu-border: #ddd;
+  --menu-hover: #dbdbdc;
+  --sidebar-bg: #f3f3f3;
+  --sidebar-hover: #fafafa;
+  --sidebar-border: #eee;
+  --sidebar-text: #333;
+  --sidebar-community: #0079d3;
+  --sidebar-details: #777;
+  --card-title: #555;
+}
+
+[data-theme="dark"] {
+  /* Dark theme variables */
+  --bg-color: #1a1a1a;
+  --text-color: #f5f5f5;
+  --border-color: #444;
+  --hover-bg: #333;
+  --menu-bg: #2d2d2d;
+  --menu-border: #555;
+  --menu-hover: #444;
+  --sidebar-bg: #252525;
+  --sidebar-hover: #333;
+  --sidebar-border: #444;
+  --sidebar-text: #e0e0e0;
+  --sidebar-community: #66b0ff;
+  --sidebar-details: #aaa;
+  --card-title: #bbb;
+}
+
+/* Apply variables to your existing CSS */
 .posts-header {
   display: flex;
   align-items: center;
   gap: 14px;
-  border-bottom: 1px solid #e6e7eb;
+  border-bottom: 1px solid var(--border-color);
   padding-bottom: 6px;
   margin-bottom: 12px;
 }
@@ -10,16 +47,14 @@
 .mini-sort, .mini-view {
   position: relative;
   border-radius: 6px;
-  background-color: transparent; /* or white if you prefer */
+  background-color: transparent;
 }
 
-/* Hover effect for the whole div */
 .mini-sort:hover,
 .mini-view:hover {
-  background-color: #e9e8e8; /* gray on hover */
+  background-color: var(--hover-bg);
 }
 
-/* Button inside dropdown */
 .mini-sort-btn,
 .mini-view-btn {
   background: none;
@@ -30,6 +65,7 @@
   gap: 4px;
   padding: 6px 12px;
   cursor: pointer;
+  color: var(--text-color);
 }
 
 .down-icon {
@@ -37,75 +73,46 @@
   opacity: 0.7;
 }
 
-/* SORT MENU */
 .mini-sort-menu, 
 .mini-view-menu {
   position: absolute;
   top: 26px;
   left: 0;
-  background: white;
-  border: 1px solid #ddd;
+  background: var(--menu-bg);
+  border: 1px solid var(--menu-border);
   border-radius: 6px;
   list-style: none;
   padding: 6px 0;
   display: none;
   width: 120px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
   font-size: 13px;
   z-index: 50;
 }
 
-/* Menu items */
 .mini-sort-menu li,
 .mini-view-menu li {
-  display: flex; /* keep flex if you have icon + text */
+  display: flex;
   align-items: center;
   gap: 6px;
   padding: 8px 12px;
   cursor: pointer;
-
-  /* Add this to make hover span full width */
   width: 100%;
   box-sizing: border-box;
-
   border-radius: 6px;
   transition: background-color 0.2s ease;
+  color: var(--text-color);
 }
 
-/* Hover effect */
 .mini-sort-menu li:hover,
 .mini-view-menu li:hover {
-  background-color: #dbdbdc;
-transition: background-color 0.2s ease;
-
+  background-color: var(--menu-hover);
 }
-
-.mini-sort-menu li img,
-.mini-view-menu li img {
-  vertical-align: middle;
-  margin-right: 6px; /* spacing for icons */
-}
-
-
-
-
-.mini-sort-menu,
-.mini-view-menu {
-  z-index: 1000; /* was 50, increase to be safe */
-}
-
 
 .mini-sort-menu.open,
 .mini-view-menu.open {
-  display: block; /* show when open */
+  display: block;
 }
-
-
-.view-icon {
-  font-size: 14px;
-  opacity: 0.7;
-}
-
 
 .home-layout-wrapper {
     max-width: 1000px;
@@ -115,16 +122,16 @@ transition: background-color 0.2s ease;
     align-items: flex-start;
     gap: 24px;
     padding-top: 8px;
+    background-color: var(--bg-color);
+    color: var(--text-color);
 }
 
-/* Posts Column Styling */
 .main-posts-column {
     flex-shrink: 0;
     width: 100%;
     max-width: 640px;
 }
 
-/* Right Sidebar Column Styling (Sticky for scroll effect) */
 .right-sidebar-column {
     flex-shrink: 0;
     width: 310px;
@@ -135,7 +142,6 @@ transition: background-color 0.2s ease;
     display: none;
     margin-left: 80px;
     margin-right: auto;
-   
 }
 
 @media (min-width: 1024px) {
@@ -144,7 +150,6 @@ transition: background-color 0.2s ease;
     }
 }
 
-/* Existing post list container */
 .post-list {
     display: flex;
     flex-direction: column;
@@ -152,40 +157,37 @@ transition: background-color 0.2s ease;
 }
 
 .right-sidebar-card {
-    background-color: #f3f3f3;
+    background-color: var(--sidebar-bg);
     border-radius: 8px;
     padding: 12px;
-
 }
 
 .card-title {
     font-size: 10px;
     font-weight: 700;
-    color: #555;
+    color: var(--card-title);
     margin-bottom: 8px;
     text-transform: uppercase;
-    border-bottom: 1px solid #eee;
+    border-bottom: 1px solid var(--sidebar-border);
     padding-bottom: 4px;
 }
 
-/* Target the new unique class name */
 .right-sidebar-post-link {
     display: block;
     padding: 8px 0;
-    /* This style now only applies to the right sidebar */
     text-decoration: none;
-    color: #333;
-    border-bottom: 1px solid #f0f0f0;
+    color: var(--sidebar-text);
+    border-bottom: 1px solid var(--sidebar-border);
     transition: background-color 0.2s;
 }
 
 .right-sidebar-post-link:hover {
-    background-color: #fafafa;
+    background-color: var(--sidebar-hover);
 }
 
 .sidebar-community {
     font-size: 12px;
-    color: #0079d3;
+    color: var(--sidebar-community);
     font-weight: 500;
     margin-bottom: 2px;
 }
@@ -199,5 +201,13 @@ transition: background-color 0.2s ease;
 
 .sidebar-details {
     font-size: 11px;
-    color: #777;
+    color: var(--sidebar-details);
 }
+
+/* Add this for body background */
+body {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+

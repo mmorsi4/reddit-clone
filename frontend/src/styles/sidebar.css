@@ -1,3 +1,43 @@
+:root {
+  /* Light theme variables for sidebar */
+  --sidebar-bg: white;
+  --sidebar-border: rgba(0, 0, 0, 0.2);
+  --sidebar-border-light: rgba(0, 0, 0, 0.1);
+  --sidebar-text: rgb(33, 39, 42);
+  --sidebar-text-light: rgb(87, 111, 118);
+  --sidebar-hover: rgb(246, 248, 249);
+  --sidebar-active: rgba(0, 0, 0, 0.16);
+  --sidebar-active-bg: #e6f2ff;
+  --sidebar-favorite-hover: rgb(219, 228, 233);
+  --sidebar-scrollbar: transparent;
+  --sidebar-scrollbar-thumb: #ccc;
+  --sidebar-copyright: rgb(67, 67, 67);
+  --sidebar-toggle-bg: white;
+  --sidebar-toggle-border: rgba(0, 0, 0, 0.2);
+  --sidebar-toggle-shadow: rgba(0, 0, 0, 0.1);
+  --sidebar-icon-color: #333;
+}
+
+[data-theme="dark"] {
+  /* Dark theme variables for sidebar */
+  --sidebar-bg: #1a1a1a;
+  --sidebar-border: rgba(255, 255, 255, 0.1);
+  --sidebar-border-light: rgba(255, 255, 255, 0.05);
+  --sidebar-text: #f5f5f5;
+  --sidebar-text-light: #aaa;
+  --sidebar-hover: rgba(255, 255, 255, 0.05);
+  --sidebar-active: rgba(255, 255, 255, 0.1);
+  --sidebar-active-bg: rgba(0, 121, 211, 0.2);
+  --sidebar-favorite-hover: rgba(255, 255, 255, 0.1);
+  --sidebar-scrollbar: transparent;
+  --sidebar-scrollbar-thumb: #444;
+  --sidebar-copyright: #888;
+  --sidebar-toggle-bg: #2d2d2d;
+  --sidebar-toggle-border: rgba(255, 255, 255, 0.1);
+  --sidebar-toggle-shadow: rgba(0, 0, 0, 0.3);
+  --sidebar-icon-color: #f5f5f5;
+}
+
 .sidebar {
     position: fixed;
     left: 0;
@@ -5,30 +45,29 @@
     list-style: none;
     padding: 0;
     margin: 0;
-    background-color: white;
+    background-color: var(--sidebar-bg);
     width: 240px;
     padding: 4px 16px;
-    border-right: 1px solid rgba(0, 0, 0, 0.2); 
+    border-right: 1px solid var(--sidebar-border);
     height: calc(100vh - 57px);
     overflow-y: auto;
     scrollbar-width: thin;
-    scrollbar-color: transparent  transparent;
-    transition: transform 0.3s ease;
+    scrollbar-color: var(--sidebar-scrollbar) transparent;
+    transition: transform 0.3s ease, background-color 0.3s ease, border-color 0.3s ease;
 }
 
 .sidebar:hover {
-    scrollbar-color: auto;
+    scrollbar-color: var(--sidebar-scrollbar-thumb) transparent;
 }
 
 .sidebar > li {
-    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    border-bottom: 1px solid var(--sidebar-border-light);
     padding: 12px 0;
 }
 
 .sidebar > li:last-child {
     border-bottom: none;
 }
-
 
 .sidebar-section {
     list-style: none;
@@ -41,23 +80,30 @@
     align-items: center;
     gap: 8px;
     padding: 4px 16px;
-    color: rgb(33, 39, 42);
+    color: var(--sidebar-text);
     font-size: 14px;
     text-decoration: none;
+    transition: background-color 0.2s ease, color 0.3s ease;
 }
 
 .sidebar-link:hover {
-    background-color: rgb(246, 248, 249);
+    background-color: var(--sidebar-hover);
     border-radius: 8px;
     cursor: pointer;
 }
 
 .sidebar-link:active {
-    background-color: rgba(0, 0, 0, 0.16);
+    background-color: var(--sidebar-active);
 }
 
 .sidebar-link > img {
     padding: 6px;
+    transition: filter 0.3s ease;
+}
+
+/* FIXED: Dark mode icon fix - EXCLUDE REDDIT LOGO */
+[data-theme="dark"] .sidebar-link > img:not(.sidebar-link-icon-round):not(.reddit-logo) {
+    filter: invert(1) brightness(1.5);
 }
 
 .sidebar-collapse-checkbox {
@@ -75,17 +121,18 @@
     padding: 10px 16px;
     font-size: 13px;
     text-transform: uppercase;
-    color: rgb(87, 111, 118);
+    color: var(--sidebar-text-light);
+    transition: background-color 0.2s ease, color 0.3s ease;
 }
 
 .sidebar-collapse-label:hover {
-    background-color: rgb(246, 248, 249);
+    background-color: var(--sidebar-hover);
     border-radius: 8px;
     cursor: pointer;
 }
 
 .sidebar-collapse-label:active {
-    background-color: rgba(0, 0, 0, 0.16);
+    background-color: var(--sidebar-active);
 }
 
 .sidebar-collapse-checkbox:checked ~ .sidebar-collapse-label > img {
@@ -99,6 +146,7 @@
 
 .sidebar-link > .sidebar-link-icon-round {
     padding: 0;
+    filter: none !important; /* Keep avatar icons unchanged */
 }
 
 .sidebar-section-item-details {
@@ -112,11 +160,12 @@
 
 .sidebar-section-item-details .community-name {
   display: inline-block;
-  max-width: 120px; 
+  max-width: 120px;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
   vertical-align: middle;
+  color: var(--sidebar-text);
 }
 
 .sidebar-section-item-details .make-favourite {
@@ -133,24 +182,31 @@
   height: 16px;
   vertical-align: middle;
   pointer-events: none;
+  transition: filter 0.3s ease;
+}
+
+/* FIXED: Dark mode favorite icon - EXCLUDE REDDIT LOGO */
+[data-theme="dark"] .sidebar-section-item-details .make-favourite img:not(.reddit-logo) {
+    filter: invert(1) brightness(1.5);
 }
 
 .sidebar-section-item-details .make-favourite:hover {
     cursor: pointer;
-    background-color: rgb(219, 228, 233);
+    background-color: var(--sidebar-favorite-hover);
     border-radius: 20px;
 }
 
 .sidebar-section-item-details .make-favourite:active {
-    background-color: rgba(0, 0, 0, 0.16);
+    background-color: var(--sidebar-active);
 }
 
 .copyright-link {
     display: block;
     text-decoration: none;
-    color: rgb(67, 67, 67);
+    color: var(--sidebar-copyright);
     font-size: 9px;
     padding: 24px 16px 0;
+    transition: color 0.3s ease;
 }
 
 .copyright-link:hover {
@@ -158,19 +214,25 @@
 }
 
 .sidebar-link.active {
-  background-color: #e6f2ff; 
+  background-color: var(--sidebar-active-bg);
   border-radius: 8px;
   font-weight: 600;
+  color: var(--sidebar-text);
 }
 
-.sidebar-link.active img {
+.sidebar-link.active img:not(.sidebar-link-icon-round):not(.reddit-logo) {
   filter: brightness(0) saturate(100%) invert(36%) sepia(93%) saturate(2263%) hue-rotate(197deg) brightness(97%) contrast(94%);
+}
+
+/* Dark mode active link icon */
+[data-theme="dark"] .sidebar-link.active img:not(.sidebar-link-icon-round):not(.reddit-logo) {
+    filter: brightness(0) saturate(100%) invert(36%) sepia(93%) saturate(2263%) hue-rotate(197deg) brightness(97%) contrast(94%);
 }
 
 .clear-recent-btn {
   background: none;
   border: none;
-  color: #888;
+  color: var(--sidebar-text-light);
   font-size: 12px;
   cursor: pointer;
   margin-left: 8px;
@@ -186,24 +248,24 @@
 }
 
 .sidebar-link.create-btn {
-  width: 100%; 
+  width: 100%;
   text-align: left;
   background: none;
   border: none;
-  display: flex; 
+  display: flex;
   align-items: center;
   padding: 4px 16px;
-  color: rgb(33, 39, 42);
+  color: var(--sidebar-text);
 }
 
 .sidebar-link.create-btn:hover {
-  background-color: rgb(246, 248, 249);
+  background-color: var(--sidebar-hover);
   border-radius: 8px;
   cursor: pointer;
 }
 
 .sidebar-link.create-btn:active {
-  background-color: rgba(0, 0, 0, 0.16);
+  background-color: var(--sidebar-active);
 }
 
 .sidebar-link-icon-round {
@@ -214,51 +276,122 @@
 }
 
 .main {
-    margin-left: 280px; 
+    margin-left: 280px;
     transition: margin-left 0.3s ease;
 }
 
 .sidebar-container.collapsed ~ .main {
-    margin-left: 20px; 
+    margin-left: 20px;
 }
 
 .sidebar-container {
-    position: fixed; 
+    position: fixed;
     top: 0;
     left: 0;
-    width: 250px; 
+    width: 250px;
     height: 100vh;
-    transition: transform 0.3s ease; 
+    transition: transform 0.3s ease;
     z-index: 10;
-    border-right: none; 
+    border-right: none;
 }
 
 .sidebar-collapse-toggle {
     position: absolute;
-    top: 80px; 
-    right: -39px; 
-    padding: 8px; 
-    border: 1px solid rgba(0, 0, 0, 0.2); 
-    background-color: white; 
-    border-radius: 100%; 
+    top: 80px;
+    right: -39px;
+    padding: 8px;
+    border: 1px solid var(--sidebar-toggle-border);
+    background-color: var(--sidebar-toggle-bg);
+    border-radius: 100%;
     cursor: pointer;
     z-index: 11;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); 
-    transition: none; 
+    box-shadow: 0 1px 3px var(--sidebar-toggle-shadow);
+    transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* FIXED: Dark mode toggle arrow icon */
+[data-theme="dark"] .sidebar-collapse-toggle img:not(.reddit-logo) {
+    filter: invert(1) brightness(1.5);
 }
 
 .sidebar-container.collapsed .sidebar-collapse-toggle {
-    transform: none; 
+    transform: none;
     right: -39px;
 }
 
 .sidebar-collapse-toggle img {
     width: 15px;
     height: 15px;
-    vertical-align: middle; 
-    transition: transform 0.3s ease;
+    vertical-align: middle;
+    transition: transform 0.3s ease, filter 0.3s ease;
 }
+
 .sidebar-container.collapsed {
-    transform: translateX(calc(17px - 250px)); 
-    width: 250px; 
+    transform: translateX(calc(17px - 250px));
+    width: 250px;
+}
+
+/* Custom scrollbar for webkit browsers */
+.sidebar::-webkit-scrollbar {
+    width: 8px;
+}
+
+.sidebar::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+    background-color: var(--sidebar-scrollbar);
+    border-radius: 4px;
+}
+
+.sidebar:hover::-webkit-scrollbar-thumb {
+    background-color: var(--sidebar-scrollbar-thumb);
+}
+
+/* Smooth transitions for all color changes */
+.sidebar,
+.sidebar-link,
+.sidebar-collapse-label,
+.sidebar-collapse-toggle,
+.copyright-link,
+.clear-recent-btn {
+    transition: background-color 0.3s ease,
+                border-color 0.3s ease,
+                color 0.3s ease,
+                box-shadow 0.3s ease;
+}
+
+/* Ensure buttons also get dark background */
+[data-theme="dark"] .sidebar-link.create-btn,
+[data-theme="dark"] .make-favourite {
+    background-color: transparent !important;
+}
+
+/* ULTIMATE FIX: Force Reddit logo to never have filters */
+/* Add this at the VERY END of your CSS file */
+.reddit-logo,
+.header .reddit-logo,
+.header a .reddit-logo,
+.sidebar .reddit-logo,
+.sidebar-container .reddit-logo,
+img.reddit-logo,
+[data-theme="dark"] .reddit-logo,
+[data-theme="dark"] .header .reddit-logo,
+[data-theme="dark"] .header a .reddit-logo,
+[data-theme="dark"] .sidebar .reddit-logo,
+[data-theme="dark"] .sidebar-container .reddit-logo,
+[data-theme="dark"] img.reddit-logo,
+[data-theme="dark"] img[src*="reddit-logo"],
+img[src*="reddit-logo"] {
+    filter: none !important;
+    -webkit-filter: none !important;
+}
+
+/* Make sure ALL sidebar elements use dark mode colors */
+[data-theme="dark"] .sidebar-section,
+[data-theme="dark"] .sidebar > li,
+[data-theme="dark"] .sidebar-section li {
+    background-color: #1a1a1a !important;
+    color: #f5f5f5 !important;
 }

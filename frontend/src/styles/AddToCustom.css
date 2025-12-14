@@ -1,23 +1,75 @@
+:root {
+  /* Light theme variables for custom feed popup */
+  --feed-popup-bg: white;
+  --feed-popup-backdrop: rgba(0, 0, 0, 0.4);
+  --feed-popup-shadow: rgba(0, 0, 0, 0.15);
+  --feed-popup-text: #333;
+  --feed-popup-header-text: #333;
+  --feed-popup-close-bg: #f0f0f0;
+  --feed-popup-close-text: #555;
+  --feed-popup-close-hover: #e0e0e0;
+  --feed-popup-border: #ddd;
+  --feed-popup-avatar-bg: #f0f0f0;
+  --feed-popup-name-text: #333;
+  --feed-popup-count-text: #777;
+  --feed-popup-add-bg: #0079d3;
+  --feed-popup-add-text: white;
+  --feed-popup-add-hover: #0060a9;
+  --feed-popup-remove-bg: white;
+  --feed-popup-remove-text: #0079d3;
+  --feed-popup-remove-border: #0079d3;
+  --feed-popup-remove-hover: #f0f0f0;
+  --feed-popup-create-text: #0079d3;
+  --feed-popup-create-hover: #005fa3;
+}
+
+[data-theme="dark"] {
+  /* Dark theme variables for custom feed popup */
+  --feed-popup-bg: #2d2d2d;
+  --feed-popup-backdrop: rgba(0, 0, 0, 0.6);
+  --feed-popup-shadow: rgba(0, 0, 0, 0.3);
+  --feed-popup-text: #f5f5f5;
+  --feed-popup-header-text: #f5f5f5;
+  --feed-popup-close-bg: #3a3a3a;
+  --feed-popup-close-text: #ccc;
+  --feed-popup-close-hover: #444;
+  --feed-popup-border: #444;
+  --feed-popup-avatar-bg: #3a3a3a;
+  --feed-popup-name-text: #f5f5f5;
+  --feed-popup-count-text: #aaa;
+  --feed-popup-add-bg: #0079d3;
+  --feed-popup-add-text: white;
+  --feed-popup-add-hover: #005fa3;
+  --feed-popup-remove-bg: #2d2d2d;
+  --feed-popup-remove-text: #66b0ff;
+  --feed-popup-remove-border: #66b0ff;
+  --feed-popup-remove-hover: #333;
+  --feed-popup-create-text: #66b0ff;
+  --feed-popup-create-hover: #88c2ff;
+}
+
 .custom-feed-popup-backdrop {
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: rgba(0, 0, 0, 0.4);
+    background-color: var(--feed-popup-backdrop);
     display: flex;
     justify-content: center;
     align-items: center;
     z-index: 1000;
+    transition: background-color 0.3s ease;
 }
 
 .custom-feed-popup-content {
-    background: white;
+    background: var(--feed-popup-bg);
     border-radius: 10px;
     width: 90%;
     max-width: 640px; 
     padding: 0; /* Remove padding from content wrapper */
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 4px 12px var(--feed-popup-shadow);
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .popup-header {
@@ -27,15 +79,17 @@
     margin-bottom: 0; 
     font-size: 0.80rem;
     font-weight: 600; 
+    color: var(--feed-popup-header-text);
+    transition: color 0.3s ease;
 }
 
 .close-btn {
-    background: #f0f0f0; 
+    background: var(--feed-popup-close-bg); 
     border: none;
     font-size: 18px; 
     cursor: pointer;
     line-height: 1;
-    color: #555;
+    color: var(--feed-popup-close-text);
     padding: 8px;
     width: 36px;
     height: 36px;
@@ -44,6 +98,12 @@
     justify-content: center;
     align-items: center;
     margin-left: 10px;
+    transition: all 0.3s ease;
+}
+
+.close-btn:hover {
+    background: var(--feed-popup-close-hover);
+    color: var(--feed-popup-text);
 }
 
 .feed-list {
@@ -58,6 +118,12 @@
     justify-content: space-between;
     align-items: center;
     padding: 10px 0; /* Adjusted vertical padding */
+    border-bottom: 1px solid var(--feed-popup-border);
+    transition: border-color 0.3s ease;
+}
+
+.custom-feed-item:last-child {
+    border-bottom: none;
 }
 
 .feed-info {
@@ -71,19 +137,23 @@
     height: 36px;
     border-radius: 50%;
     object-fit: cover;
-    background-color: #f0f0f0; 
-    border: 1px solid #ddd;
+    background-color: var(--feed-popup-avatar-bg); 
+    border: 1px solid var(--feed-popup-border);
+    transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
 .feed-name {
     font-weight: 600;
     font-size: 0.9rem;
     line-height: 1.2;
+    color: var(--feed-popup-name-text);
+    transition: color 0.3s ease;
 }
 
 .feed-count {
     font-size: 0.8rem;
-    color: #777;
+    color: var(--feed-popup-count-text);
+    transition: color 0.3s ease;
 }
 
 .feed-action-btn {
@@ -91,28 +161,29 @@
     border-radius: 9999px;
     font-weight: 600;
     cursor: pointer;
-    transition: background-color 0.2s;
+    transition: all 0.2s, background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
     font-size: 0.85rem;
 }
 
 .feed-action-btn.add {
-    background-color: #0079d3;
-    color: white;
-    border: 1px solid #0079d3;
+    background-color: var(--feed-popup-add-bg);
+    color: var(--feed-popup-add-text);
+    border: 1px solid var(--feed-popup-add-bg);
 }
 
 .feed-action-btn.add:hover {
-    background-color: #0060a9;
+    background-color: var(--feed-popup-add-hover);
+    border-color: var(--feed-popup-add-hover);
 }
 
 .feed-action-btn.remove {
-    background-color: white;
-    color: #0079d3;
-    border: 1px solid #0079d3;
+    background-color: var(--feed-popup-remove-bg);
+    color: var(--feed-popup-remove-text);
+    border: 1px solid var(--feed-popup-remove-border);
 }
 
 .feed-action-btn.remove:hover {
-    background-color: #f0f0f0;
+    background-color: var(--feed-popup-remove-hover);
 }
 
 .create-new-feed-btn {
@@ -124,13 +195,42 @@
     cursor: pointer;
     font-size: 0.9rem;
     font-weight: 600;
-    color: #0079d3;
+    color: var(--feed-popup-create-text);
     padding: 10px 16px; /* Apply padding */
     width: 100%;
     text-align: left;
+    transition: color 0.3s ease;
+    border-top: 1px solid var(--feed-popup-border);
+}
+
+.create-new-feed-btn:hover {
+    color: var(--feed-popup-create-hover);
 }
 
 .create-new-feed-btn img {
     width: 20px;
     height: 20px;
+    transition: filter 0.3s ease;
+}
+
+/* Dark mode icon fix for plus icon */
+[data-theme="dark"] .create-new-feed-btn img {
+    filter: invert(1) brightness(1.5);
+}
+
+/* Smooth transitions for theme switching */
+.custom-feed-popup-content,
+.popup-header,
+.close-btn,
+.custom-feed-item,
+.feed-avatar,
+.feed-name,
+.feed-count,
+.feed-action-btn,
+.create-new-feed-btn {
+    transition: background-color 0.3s ease,
+                color 0.3s ease,
+                border-color 0.3s ease,
+                box-shadow 0.3s ease,
+                filter 0.3s ease;
 }

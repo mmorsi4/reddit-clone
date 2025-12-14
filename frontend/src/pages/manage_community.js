@@ -49,7 +49,7 @@ function ManageCommunity() {
           c._id === communityId ? { ...c, joined: !currentlyJoined } : c
         )
       );
-      
+
     } catch (err) {
       console.error("Error toggling membership:", err);
       alert("Failed to update membership. Please try again.");
@@ -96,48 +96,52 @@ function ManageCommunity() {
         ) : (
           <div className="community-list">
             {filtered
-            .sort((a, b) => {
-              if (a.favorite && !b.favorite) return -1;
-              if (!a.favorite && b.favorite) return 1;
-              return 0;
-            })
-            .map((community) => (
-              <div className="community-card" key={community._id}>
-                <img src={community.avatar} alt={community.name} />
-                <div className="community-info"> {/* Add this wrapper */}
-                  <p className="community-name">
+              .sort((a, b) => {
+                if (a.favorite && !b.favorite) return -1;
+                if (!a.favorite && b.favorite) return 1;
+                return 0;
+              })
+              .map((community) => (
+                <div className="community-card" key={community._id}>
+                  <img
+                    src={community.avatar}
+                    alt={community.name}
+                    className="community-avatar"  
+                  />
+                  <div className="community-info">
+                    <p className="community-name">
                       <Link className="community-link" to={`/community/${community.name}`}>
                         r/{community.name}
                       </Link>
-                  </p>
-                  <p className="community-description">{community.description}</p>
+                    </p>
+                    <p className="community-description">{community.description}</p>
+                  </div>
+                  <button
+                    className="make-favouriteMC"
+                    onClick={async (e) => {
+                      e.preventDefault();
+                      handleFavoriteToggle(community._id);
+                    }}
+                  >
+                    <img
+                      src={community.favorite ? "/images/star-black.svg" : "/images/star.svg"}
+                      alt="favorite"
+                    />
+                  </button>
+                  <button
+                    className={`join-toggle ${community.joined ? "joined" : ""}`}
+                    onClick={() =>
+                      handleJoinToggle(
+                        community._id,
+                        community.name,
+                        community.joined
+                      )
+                    }
+                  >
+                    {community.joined ? "Joined" : "Join"}
+                  </button>
                 </div>
-                <button
-                  className="make-favouriteMC"
-                  onClick={async (e) => {
-                    e.preventDefault();
-                    handleFavoriteToggle(community._id);
-                  }}
-                >
-                  <img
-                    src={community.favorite ? "/images/star-black.svg" : "/images/star.svg"}
-                    alt="favorite"
-                  />
-                </button>
-                <button
-                  className={`join-toggle ${community.joined ? "joined" : ""}`}
-                  onClick={() =>
-                    handleJoinToggle(
-                      community._id,
-                      community.name,
-                      community.joined
-                    )
-                  }
-                >
-                  {community.joined ? "Joined" : "Join"}
-                </button>
-              </div>
-            ))}
+              ))}
           </div>
         )}
       </div>

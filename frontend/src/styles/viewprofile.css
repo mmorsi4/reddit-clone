@@ -1,9 +1,52 @@
+/* Light theme variables for profile */
+:root {
+  --profile-header-bg: transparent;
+  --profile-avatar-bg: #f0f0f0;
+  --profile-title: #1a1a1a;
+  --profile-username: gray;
+  --profile-tabs-border: #e6e6e6;
+  --profile-tab-text: #555;
+  --profile-tab-bg: transparent;
+  --profile-tab-active-bg: #e6ebf1;
+  --profile-tab-active-text: #1a1a1a;
+  --profile-content-bg: transparent;
+  --profile-showing-bg: #f8f9fa;
+  --profile-showing-text: #333;
+  --profile-create-post-bg: white;
+  --profile-create-post-border: #ccc;
+  --profile-create-post-text: #1a1a1b;
+  --profile-sort-select-text: #555;
+  --profile-empty-text: #1a1a1b;
+}
+
+[data-theme="dark"] {
+  /* Dark theme variables for profile */
+  --profile-header-bg: transparent;
+  --profile-avatar-bg: #3a3a3a;
+  --profile-title: #f5f5f5;
+  --profile-username: #aaa;
+  --profile-tabs-border: #444;
+  --profile-tab-text: #bbb;
+  --profile-tab-bg: transparent;
+  --profile-tab-active-bg: #2a3a4a;
+  --profile-tab-active-text: #f5f5f5;
+  --profile-content-bg: transparent;
+  --profile-showing-bg: #2a2a2a;
+  --profile-showing-text: #ddd;
+  --profile-create-post-bg: #333;
+  --profile-create-post-border: #555;
+  --profile-create-post-text: #f5f5f5;
+  --profile-sort-select-text: #bbb;
+  --profile-empty-text: #f5f5f5;
+}
 
 /* --- Header --- */
 .profile-header {
   display: flex;
   align-items: center;
   gap: 16px;
+  background-color: var(--profile-header-bg);
+  transition: background-color 0.3s ease;
 }
 
 .profile-avatar {
@@ -11,19 +54,23 @@
   height: 96px;
   border-radius: 50%;
   object-fit: cover;
-  background-color: #f0f0f0;
+  background-color: var(--profile-avatar-bg);
+  transition: background-color 0.3s ease;
 }
 
 .profile-info h2 {
   font-size: 24px;
   margin: 0;
   font-weight: 700;
+  color: var(--profile-title);
+  transition: color 0.3s ease;
 }
 
 .profile-username {
-  color: gray;
+  color: var(--profile-username);
   margin-top: 4px;
   font-size: 15px;
+  transition: color 0.3s ease;
 }
 
 /* --- Tabs --- */
@@ -31,35 +78,41 @@
   margin-top: 24px;
   display: flex;
   gap: 20px;
-  border-bottom: 1px solid #e6e6e6;
+  border-bottom: 1px solid var(--profile-tabs-border);
+  transition: border-color 0.3s ease;
 }
 
 .tab {
-  background: none;
+  background: var(--profile-tab-bg);
   border: none;
   padding: 12px 8px;
   font-size: 15px;
   cursor: pointer;
-  color: #555;
+  color: var(--profile-tab-text);
   border-radius: 8px 8px 0 0;
+  transition: all 0.3s ease;
 }
 
 .tab.active {
-  background-color: #e6ebf1;
+  background-color: var(--profile-tab-active-bg);
   font-weight: 600;
+  color: var(--profile-tab-active-text);
 }
 
 /* --- Content --- */
 .profile-content {
   margin-top: 24px;
+  background-color: var(--profile-content-bg);
+  transition: background-color 0.3s ease;
 }
 
 .showing-content {
-  background-color: #f8f9fa;
+  background-color: var(--profile-showing-bg);
   padding: 12px 16px;
   border-radius: 8px;
   margin-bottom: 16px;
-  color: #333;
+  color: var(--profile-showing-text);
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 /* --- Create Post --- */
@@ -71,35 +124,69 @@
 }
 
 .create-post-btn {
-  background-color: white;
-  border: 1px solid #ccc;
+  background-color: var(--profile-create-post-bg);
+  border: 1px solid var(--profile-create-post-border);
   padding: 8px 16px;
   border-radius: 20px;
   font-size: 15px;
   cursor: pointer;
+  color: var(--profile-create-post-text);
+  transition: all 0.3s ease;
 }
 
 .sort-select {
   border: none;
   background: transparent;
   font-size: 15px;
-  color: #555;
+  color: var(--profile-sort-select-text);
   cursor: pointer;
+  transition: color 0.3s ease;
 }
 
 /* --- Empty State --- */
 .empty-state {
   text-align: center;
   margin-top: 80px;
-  color: #1a1a1b;
+  color: var(--profile-empty-text);
+  transition: color 0.3s ease;
 }
 
 .empty-img {
   width: 80px;
   height: 80px;
   margin-bottom: 12px;
+  filter: brightness(var(--empty-img-brightness, 1));
+  transition: filter 0.3s ease;
 }
 
 .empty-text {
   font-weight: 600;
+}
+
+/* Add CSS variable for empty image brightness */
+:root {
+  --empty-img-brightness: 1;
+}
+
+[data-theme="dark"] {
+  --empty-img-brightness: 0.8;
+}
+
+/* Smooth transitions for theme switching */
+.profile-header,
+.profile-avatar,
+.profile-info h2,
+.profile-username,
+.profile-tabs,
+.tab,
+.profile-content,
+.showing-content,
+.create-post-btn,
+.sort-select,
+.empty-state,
+.empty-img {
+  transition: background-color 0.3s ease,
+              color 0.3s ease,
+              border-color 0.3s ease,
+              filter 0.3s ease;
 }

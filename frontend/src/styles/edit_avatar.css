@@ -1,8 +1,48 @@
+/* Light theme variables for avatar editor */
+:root {
+  --avatar-editor-bg: transparent;
+  --avatar-preview-bg: #fafafa;
+  --avatar-container-bg: #f9fafb;
+  --avatar-save-btn-bg: #ff4500;
+  --avatar-save-btn-text: white;
+  --avatar-save-btn-hover: #e03e00;
+  --avatar-tab-bg: #f2f2f2;
+  --avatar-tab-text: #1a1a1a;
+  --avatar-tab-hover: #ddd;
+  --avatar-tab-active-bg: #ff4500;
+  --avatar-tab-active-text: white;
+  --avatar-grid-item-bg: #f9f9f9;
+  --avatar-grid-item-hover-bg: #ffe6d8;
+  --avatar-grid-item-selected-bg: #fff4ec;
+  --avatar-grid-item-selected-border: #ff4500;
+}
+
+[data-theme="dark"] {
+  /* Dark theme variables for avatar editor */
+  --avatar-editor-bg: transparent;
+  --avatar-preview-bg: #2a2a2a;
+  --avatar-container-bg: #333333;
+  --avatar-save-btn-bg: #ff4500;
+  --avatar-save-btn-text: white;
+  --avatar-save-btn-hover: #ff5722;
+  --avatar-tab-bg: #3a3a3a;
+  --avatar-tab-text: #f0f0f0;
+  --avatar-tab-hover: #4a4a4a;
+  --avatar-tab-active-bg: #ff4500;
+  --avatar-tab-active-text: white;
+  --avatar-grid-item-bg: #3a3a3a;
+  --avatar-grid-item-hover-bg: rgba(255, 69, 0, 0.2);
+  --avatar-grid-item-selected-bg: rgba(255, 69, 0, 0.3);
+  --avatar-grid-item-selected-border: #ff4500;
+}
+
 .avatar-editor {
   display: flex;
   gap: 60px;
   width: 100%;
   max-width: 1200px;
+  background-color: var(--avatar-editor-bg);
+  transition: background-color 0.3s ease;
 }
 
 /* Left side: avatar preview */
@@ -12,24 +52,26 @@
   align-items: center;
   justify-content: center;
   flex: 1;
-  background: #fafafa;
+  background: var(--avatar-preview-bg);
   border-radius: 16px;
   padding: 20px;
+  transition: background-color 0.3s ease;
 }
 
 .save-btn {
   margin-top: 20px;
-  background-color: #ff4500;
-  color: white;
+  background-color: var(--avatar-save-btn-bg);
+  color: var(--avatar-save-btn-text);
   border: none;
   border-radius: 8px;
   padding: 10px 24px;
   font-size: 16px;
   cursor: pointer;
+  transition: all 0.3s ease;
 }
 
 .save-btn:hover {
-  background-color: #e03e00;
+  background-color: var(--avatar-save-btn-hover);
 }
 
 /* Avatar container */
@@ -37,12 +79,13 @@
   width: 250px;
   height: 320px;
   position: relative;
-  background: #f9fafb;
+  background: var(--avatar-container-bg);
   border-radius: 16px;
   overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: background-color 0.3s ease;
 }
 
 .default-avatar {
@@ -54,10 +97,8 @@
   position: relative;
   z-index: 0;
   margin-left: 32px;
-  /* move right */
+  filter: brightness(var(--default-avatar-brightness, 1));
 }
-
-
 
 /* Avatar layers (can overlay items, hair, eyes, etc.) */
 #container>div[data-asset-id] {
@@ -81,6 +122,8 @@
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
+  background-color: transparent;
+  transition: background-color 0.3s ease;
 }
 
 .tabs {
@@ -90,21 +133,22 @@
 }
 
 .tab {
-  background: #f2f2f2;
+  background: var(--avatar-tab-bg);
   border: none;
   border-radius: 15px;
   padding: 0.5rem 1rem;
   cursor: pointer;
-  transition: 0.3s;
+  transition: all 0.3s ease;
+  color: var(--avatar-tab-text);
 }
 
 .tab.active {
-  background: #FF4500;
-  color: white;
+  background: var(--avatar-tab-active-bg);
+  color: var(--avatar-tab-active-text);
 }
 
 .tab:hover {
-  background: #ddd;
+  background: var(--avatar-tab-hover);
 }
 
 /* Avatar grid */
@@ -115,17 +159,18 @@
 }
 
 .avatar-item {
-  background: #f9f9f9;
+  background: var(--avatar-grid-item-bg);
   border-radius: 15px;
   display: flex;
   justify-content: center;
   align-items: center;
   padding: 0.5rem;
-  transition: 0.3s;
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
 }
 
 .avatar-item:hover {
-  background: #ffe6d8;
+  background: var(--avatar-grid-item-hover-bg);
   transform: scale(1.05);
 }
 
@@ -133,12 +178,14 @@
   width: 100%;
   height: 100%;
   object-fit: contain;
+  filter: brightness(var(--avatar-item-brightness, 1));
+  transition: filter 0.3s ease;
 }
 
 /* Highlight selected item */
 .avatar-item.selected {
-  border: 3px solid #FF4500;
-  background-color: #fff4ec;
+  border: 3px solid var(--avatar-grid-item-selected-border);
+  background-color: var(--avatar-grid-item-selected-bg);
   transform: scale(1.05);
 }
 
@@ -152,5 +199,37 @@ svg {
   backface-visibility: hidden;
   image-rendering: pixelated;
   shape-rendering: pixelated;
+  filter: brightness(var(--svg-brightness, 1));
+  transition: filter 0.3s ease;
+}
 
+/* Add brightness variables for images */
+:root {
+  --default-avatar-brightness: 1;
+  --avatar-item-brightness: 1;
+  --svg-brightness: 1;
+}
+
+[data-theme="dark"] {
+  --default-avatar-brightness: 0.9;
+  --avatar-item-brightness: 0.9;
+  --svg-brightness: 0.9;
+}
+
+/* Smooth transitions for theme switching */
+.avatar-editor,
+.avatar-preview,
+#container,
+.save-btn,
+.avatar-options,
+.tab,
+.avatar-item,
+.avatar-item img,
+.default-avatar,
+svg {
+  transition: background-color 0.3s ease,
+              color 0.3s ease,
+              border-color 0.3s ease,
+              transform 0.3s ease,
+              filter 0.3s ease;
 }

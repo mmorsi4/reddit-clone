@@ -1,20 +1,76 @@
+:root {
+  /* Light theme variables for header */
+  --header-bg: white;
+  --header-border: rgba(0, 0, 0, 0.2);
+  --header-text: #333;
+  --header-button-hover: rgb(219, 228, 233);
+  --header-button-active: transparent;
+  --tooltip-bg: #1f1f1f;
+  --tooltip-text: white;
+  --menu-bg: white;
+  --menu-shadow-1: rgba(0, 0, 0, 0.1);
+  --menu-shadow-2: rgba(0, 0, 0, 0.25);
+  --menu-item-hover: rgb(246, 248, 249);
+  --menu-item-active: rgba(0, 0, 0, 0.16);
+  --menu-title: rgb(33, 39, 42);
+  --menu-extra: rgb(87, 111, 118);
+  --toggle-bg: #ccc;
+  --toggle-checked: #4caf50;
+  --toggle-knob: white;
+  --online-indicator: rgb(1, 168, 22);
+  --online-border: white;
+}
+
+[data-theme="dark"] {
+  /* Dark theme variables for header */
+  --header-bg: #1a1a1a;
+  --header-border: rgba(255, 255, 255, 0.1);
+  --header-text: #f5f5f5;
+  --header-button-hover: rgba(255, 255, 255, 0.1);
+  --header-button-active: transparent;
+  --tooltip-bg: #333;
+  --tooltip-text: #f5f5f5;
+  --menu-bg: #2d2d2d;
+  --menu-shadow-1: rgba(0, 0, 0, 0.3);
+  --menu-shadow-2: rgba(0, 0, 0, 0.5);
+  --menu-item-hover: rgba(255, 255, 255, 0.05);
+  --menu-item-active: rgba(255, 255, 255, 0.1);
+  --menu-title: #f0f0f0;
+  --menu-extra: #aaa;
+  --toggle-bg: #555;
+  --toggle-checked: #0079d3;
+  --toggle-knob: #f5f5f5;
+  --online-indicator: #00c853;
+  --online-border: #1a1a1a;
+}
+
 .header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 0 16px;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+    border-bottom: 1px solid var(--header-border);
     height: 56px;
-    background-color: white;
+    background-color: var(--header-bg);
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
     z-index: 10;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
 .reddit-logo {
     width: 115px;
+}
+
+/* FORCE REDDIT LOGO TO NEVER HAVE FILTER */
+.reddit-logo,
+[data-theme="dark"] .reddit-logo,
+.header a .reddit-logo,
+[data-theme="dark"] .header a .reddit-logo {
+    filter: none !important;
+    -webkit-filter: none !important;
 }
 
 .header-actions {
@@ -31,16 +87,17 @@
 .header-action > button {
   border: none;
   background-color: transparent;
-  width: auto; /* allow natural width */
+  width: auto;
   height: 40px;
   padding: 0 8px;
-  display: flex;              /* make icon + text align horizontally */
-  align-items: center;        /* vertically center them */
-  gap: 6px;                   /* space between icon and text */
+  display: flex;
+  align-items: center;
+  gap: 6px;
   cursor: pointer;
   font-size: 14px;
   font-weight: 500;
-  color: #333;
+  color: var(--header-text);
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 .header-action-link {
@@ -55,18 +112,19 @@
   cursor: pointer;
   font-size: 14px;
   font-weight: 500;
-  color: #333;
-  text-decoration: none; /* removes underline */
+  color: var(--header-text);
+  text-decoration: none;
   border-radius: 25%;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 .header-action-link:hover {
-  background-color: rgb(219, 228, 233);
+  background-color: var(--header-button-hover);
   border-radius: 25%;
 }
 
 .header-action-link:active {
-  background-color: transparent;
+  background-color: var(--header-button-active);
 }
 
 .header-action > button {
@@ -77,25 +135,28 @@
   align-items: center;
   justify-content: center;
   border-radius: 50%;
+  color: var(--header-text);
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 .header-action > button:hover {
-  background-color: rgb(219, 228, 233);
+  background-color: var(--header-button-hover);
   cursor: pointer;
   border-radius: 50%;
 }
 
 .header-action > button:active {
-    background-color: transparent;
+    background-color: var(--header-button-active);
 }
 
 .header-action-avatar {
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  object-fit: cover;             /* crop nicely */
-  object-position: center 15%;   /* move view upward to focus on head */
+  object-fit: cover;
+  object-position: center 15%;
   display: block;
+  border: 1px solid var(--header-border);
 }
 
 .message-counter {
@@ -117,11 +178,12 @@
     position: absolute;
     right: 3px;
     bottom: 3px;
-    background-color: rgb(1, 168, 22);
+    background-color: var(--online-indicator);
     width: 6px;
     height: 6px;
     border-radius: 50%;
-    border: 1px solid white;
+    border: 1px solid var(--online-border);
+    transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
 .online-indicator-profile-menu {
@@ -134,15 +196,16 @@
     visibility: hidden;
     position: absolute;
     padding: 5px 15px;
-    background-color: #1f1f1f;
-    color: white;
+    background-color: var(--tooltip-bg);
+    color: var(--tooltip-text);
     border-radius: 3px;
     font-size: 16px;
     white-space: nowrap;
     left: 50%;
     bottom: -37px;
     transform: translateX(-50%);
-    transition: opacity 0.3s ease, visibility 0s linear 1s;
+    transition: opacity 0.3s ease, visibility 0s linear 1s, background-color 0.3s ease, color 0.3s ease;
+    z-index: 100;
 }
 
 .header-action > button:hover .header-action-tooltip {
@@ -150,6 +213,7 @@
     visibility: visible;
     transition-delay: 1s, 0s; 
 }
+
 /* --- TOOLTIP --- */
 .profile-menu-button .header-action-tooltip {
     right: 0;
@@ -164,12 +228,13 @@
     top: 50px;
     right: 0;
     width: 240px;
-    background-color: white;
+    background-color: var(--menu-bg);
     border-radius: 10px;
-    box-shadow: rgba(0, 0, 0, 0.1) 0 4px 8px 0, rgba(0, 0, 0, 0.25) 0 6px 12px 0;
-    list-style: none;      
-    padding: 0;            
-    margin: 0;             
+    box-shadow: var(--menu-shadow-1) 0 4px 8px 0, var(--menu-shadow-2) 0 6px 12px 0;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .profile-menu-link {
@@ -191,21 +256,22 @@
 .profile-menu-item {
     display: flex;
     align-items: center;
-    gap: 10px;         
-    padding: 6px 12px;  
+    gap: 10px;
+    padding: 6px 12px;
     margin: 0;
+    transition: background-color 0.2s ease;
 }
 
 .profile-menu-item-info {
     display: flex;
-    justify-content: space-between; /* push content to edges */
-    align-items: center;           /* vertically center text and toggle */
+    justify-content: space-between;
+    align-items: center;
     width: 100%;
-    gap: 8px;                      /* optional spacing */
+    gap: 8px;
 }
 
 .profile-menu-item-title.profile-menu-item-title--dark-mode {
-    margin: 0; /* remove any default margin */
+    margin: 0;
 }
 
 .profile-menu-item-icon {
@@ -213,57 +279,60 @@
   height: 32px;
   display: flex;
   align-items: center;
-  justify-content: center; /* not space-between */
+  justify-content: center;
   position: relative;
   flex-shrink: 0;
-  margin-right: 8px; /* adds spacing between icon and text */
+  margin-right: 8px;
 }
 
-
 .profile-menu-item-left {
-    position: relative; 
-    display: inline-block; 
+    position: relative;
+    display: inline-block;
 }
 
 .online-indicator-profile-menu {
     position: absolute;
-    right: 0;   
-    bottom: 0;  
+    right: 0;
+    bottom: 0;
     width: 6px;
     height: 6px;
     border-radius: 50%;
-    border: 1px solid white;
-    background-color: rgb(1, 168, 22);
+    border: 1px solid var(--online-border);
+    background-color: var(--online-indicator);
+    transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
 .profile-menu-item:hover {
-    background-color: rgb(246, 248, 249);
+    background-color: var(--menu-item-hover);
     cursor: pointer;
 }
 
 .profile-menu-item:active {
-    background-color: rgba(0, 0, 0, 0.16);
+    background-color: var(--menu-item-active);
 }
 
 .profile-menu-item-icon-avatar {
     width: 32px;
     height: 32px;
-    border-radius: 50%; 
-    object-fit: cover;  
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid var(--header-border);
 }
 
 /* --- TEXT --- */
 .profile-menu-item-title {
-    color: rgb(33, 39, 42);
+    color: var(--menu-title);
     font-size: 14px;
+    transition: color 0.3s ease;
 }
 
 .profile-menu-item-info-extra {
     flex-grow: 1;
     display: flex;
     font-size: 12px;
-    color: rgb(87, 111, 118);
+    color: var(--menu-extra);
     margin-top: 2px;
+    transition: color 0.3s ease;
 }
 
 .profile-menu-item-dark-mode {
@@ -293,7 +362,7 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: #ccc;
+    background-color: var(--toggle-bg);
     border-radius: 20px;
     transition: 0.3s;
 }
@@ -305,16 +374,60 @@
     width: 16px;
     left: 2px;
     bottom: 2px;
-    background-color: white;
+    background-color: var(--toggle-knob);
     border-radius: 50%;
     transition: 0.3s;
 }
 
 .toggle-switch input:checked + .slider {
-    background-color: #4caf50;
+    background-color: var(--toggle-checked);
 }
 
 .toggle-switch input:checked + .slider:before {
     transform: translateX(20px);
 }
 
+/* FIXED: ICON DARK MODE - ONLY APPLY TO SPECIFIC ICONS */
+[data-theme="dark"] .header-action-link img:not(.reddit-logo):not(.header-action-avatar),
+[data-theme="dark"] .header-action > button img:not(.reddit-logo):not(.header-action-avatar) {
+    filter: invert(1) brightness(1.5);
+}
+
+[data-theme="dark"] .profile-menu-item-icon img:not(.profile-menu-item-icon-avatar):not(.reddit-logo) {
+    filter: invert(1) brightness(1.5);
+}
+
+/* Keep avatars unchanged */
+[data-theme="dark"] .header-action-avatar,
+[data-theme="dark"] .profile-menu-item-icon-avatar {
+    filter: none !important;
+}
+
+/* NUCLEAR OPTION: Force no filter on Reddit logo at all levels */
+.reddit-logo,
+.header .reddit-logo,
+.header a .reddit-logo,
+.header a img.reddit-logo,
+img.reddit-logo,
+[data-theme="dark"] .reddit-logo,
+[data-theme="dark"] .header .reddit-logo,
+[data-theme="dark"] .header a .reddit-logo,
+[data-theme="dark"] .header a img.reddit-logo,
+[data-theme="dark"] img.reddit-logo {
+    filter: none !important;
+    -webkit-filter: none !important;
+}
+
+/* Smooth transitions */
+.header,
+.header-action-link,
+.header-action > button,
+.profile-menu,
+.profile-menu-item,
+img {
+    transition: background-color 0.3s ease,
+                border-color 0.3s ease,
+                color 0.3s ease,
+                box-shadow 0.3s ease,
+                filter 0.3s ease;
+}
