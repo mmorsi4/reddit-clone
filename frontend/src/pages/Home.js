@@ -221,7 +221,7 @@ function Home() {
                       textPreview={p.body || ""}
                       preview={p.mediaUrl || ""}
                       avatar={p.author?.avatarUrl || "../images/avatar.png"}
-                      initialVotes={p.recentScore || 0}
+                      initialVotes={p.score || 0}
                       initialVote={p.userVote}
                       initialComments={p.commentCount}
                       community={communityName}
