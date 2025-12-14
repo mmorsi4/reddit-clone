@@ -104,11 +104,6 @@ io.on("connection", socket => {
 
 });
 
-const limiter = rateLimit({
-  windowMs: 1000*60,
-  max: 100
-});
-app.use(limiter);
 
 // routes
 app.use('/api/auth', authRoutes);

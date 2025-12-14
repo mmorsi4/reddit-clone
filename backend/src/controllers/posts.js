@@ -8,7 +8,7 @@ import { AzureKeyCredential } from "@azure/core-auth";
 import path from 'path'
 import fs from 'fs'
 
-export async function createPost(req,res){
+export async function createPost(req, res) {
   const { title, body, url, community } = req.body;
   const file = req.file;
   const post = await Post.create({ title, body, url, community, author: req.userId, mediaUrl: file ? `/uploads/${file.filename}` : null, });
@@ -41,11 +41,11 @@ export async function getPosts(req, res) {
       const score = post.votes?.reduce((sum, v) => sum + v.value, 0) || 0;
       console.log(post.commentCount)
       return {
-          ...post,
-          userVote: userVote ? userVote.value : 0,
-          score,
-          commentCount: post.commentCount
-        };
+        ...post,
+        userVote: userVote ? userVote.value : 0,
+        score,
+        commentCount: post.commentCount
+      };
     });
 
     res.json(normalized);
@@ -85,7 +85,7 @@ export async function getPost(req, res) {
           // Add vote information to each comment
           const userVote = comment.votes?.find(v => v.user && v.user.toString() === req.userId);
           const score = comment.votes?.reduce((sum, v) => sum + (v.value || 0), 0) || 0;
-          
+
           return {
             ...comment,
             userVote: userVote ? userVote.value : 0,
@@ -192,41 +192,41 @@ export async function votePost(req, res) {
 
 // Add this function to your posts controller
 export async function getMyPosts(req, res) {
-  try {
-    const posts = await Post.find({ author: req.userId })
-      .populate('author', 'username displayName avatarUrl')
-      .populate('community', 'name title avatar _id') // ✨ FIXED: Added 'avatar' and '_id'
-      .sort({ createdAt: -1 })
-      .lean();
+  try {
+    const posts = await Post.find({ author: req.userId })
+      .populate('author', 'username displayName avatarUrl')
+      .populate('community', 'name title avatar _id') // ✨ FIXED: Added 'avatar' and '_id'
+      .sort({ createdAt: -1 })
+      .lean();
 
-  const normalized = posts.map(post => {
-    const userVote = post.votes?.find(v => v.user.toString() === req.userId);
-    const score = post.votes?.reduce((sum, v) => sum + v.value, 0) || 0;
-    return {
-        ...post,
-        userVote: userVote ? userVote.value : 0,
-        score,
-        commentCount: post.commentCount ?? 0
-      };
-  });
+    const normalized = posts.map(post => {
+      const userVote = post.votes?.find(v => v.user.toString() === req.userId);
+      const score = post.votes?.reduce((sum, v) => sum + v.value, 0) || 0;
+      return {
+        ...post,
+        userVote: userVote ? userVote.value : 0,
+        score,
+        commentCount: post.commentCount ?? 0
+      };
+    });
 
-    res.json(normalized);
-  } catch (err) {
-    console.error("Error fetching user posts:", err);
-    res.status(500).json({ message: "Internal server error" });
-  }
+    res.json(normalized);
+  } catch (err) {
+    console.error("Error fetching user posts:", err);
+    res.status(500).json({ message: "Internal server error" });
+  }
 }
 
 export async function getAllFeedPosts(req, res) {
   try {
-    const { limit = 20, page = 1 } = req.query; 
+    const { limit = 20, page = 1 } = req.query;
     const skip = (Number(page) - 1) * Number(limit);
 
-    const query = { community: { $exists: true, $ne: null } }; 
+    const query = { community: { $exists: true, $ne: null } };
 
-    const posts = await Post.find(query) 
+    const posts = await Post.find(query)
       .populate('author', 'username displayName avatarUrl')
-      .populate('community', 'name title avatar _id') 
+      .populate('community', 'name title avatar _id')
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(Number(limit))
@@ -236,11 +236,11 @@ export async function getAllFeedPosts(req, res) {
       const userVote = post.votes?.find(v => v.user.toString() === req.userId);
       const score = post.votes?.reduce((sum, v) => sum + v.value, 0) || 0;
       return {
-          ...post,
-          userVote: userVote ? userVote.value : 0,
-          score,
-          commentCount: post.commentCount ?? 0
-        };
+        ...post,
+        userVote: userVote ? userVote.value : 0,
+        score,
+        commentCount: post.commentCount ?? 0
+      };
     });
 
     res.json(normalized);
@@ -253,7 +253,7 @@ export async function getAllFeedPosts(req, res) {
 
 export async function getCustomFeedPosts(req, res) {
   try {
-    const { communityIds } = req.body; 
+    const { communityIds } = req.body;
 
     if (!Array.isArray(communityIds) || communityIds.length === 0) {
       return res.status(200).json([]);
@@ -264,22 +264,22 @@ export async function getCustomFeedPosts(req, res) {
         return new mongoose.Types.ObjectId(id);
       } catch (e) {
         console.error("Invalid ID encountered:", id, e);
-        return null; 
+        return null;
       }
     }).filter(id => id !== null);
-    
+
     if (objectCommunityIds.length === 0) {
-        return res.status(200).json([]);
+      return res.status(200).json([]);
     }
 
-    const { limit = 20, page = 1 } = req.query; 
+    const { limit = 20, page = 1 } = req.query;
     const skip = (Number(page) - 1) * Number(limit);
 
-    const query = { community: { $in: objectCommunityIds } }; 
+    const query = { community: { $in: objectCommunityIds } };
 
-    const posts = await Post.find(query) 
+    const posts = await Post.find(query)
       .populate('author', 'username displayName avatarUrl')
-      .populate('community', 'name title avatar _id') 
+      .populate('community', 'name title avatar _id')
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(Number(limit))
@@ -289,11 +289,11 @@ export async function getCustomFeedPosts(req, res) {
       const userVote = post.votes?.find(v => v.user.toString() === req.userId);
       const score = post.votes?.reduce((sum, v) => sum + v.value, 0) || 0;
       return {
-          ...post,
-          userVote: userVote ? userVote.value : 0,
-          score,
-          commentCount: post.commentCount ?? 0
-        };
+        ...post,
+        userVote: userVote ? userVote.value : 0,
+        score,
+        commentCount: post.commentCount ?? 0
+      };
     });
 
     res.json(normalized);
@@ -327,11 +327,11 @@ export async function getHomeBestPosts(req, res) {
     const normalized = posts.map(post => {
       const userVote = post.votes?.find(v => v.user && v.user.toString() === req.userId);
       return {
-          ...post,
-          userVote: userVote ? userVote.value : 0,
-          score: post.score || 0,
-          commentCount: post.commentCount ?? 0
-        };
+        ...post,
+        userVote: userVote ? userVote.value : 0,
+        score: post.score || 0,
+        commentCount: post.commentCount ?? 0
+      };
     });
 
     res.json(normalized);
@@ -365,11 +365,11 @@ export async function getHomeNewPosts(req, res) {
     const normalized = posts.map(post => {
       const userVote = post.votes?.find(v => v.user && v.user.toString() === req.userId);
       return {
-          ...post,
-          userVote: userVote ? userVote.value : 0,
-          score: post.score || 0,
-          commentCount: post.commentCount ?? 0
-        };
+        ...post,
+        userVote: userVote ? userVote.value : 0,
+        score: post.score || 0,
+        commentCount: post.commentCount ?? 0
+      };
     });
 
     res.json(normalized);
@@ -395,7 +395,7 @@ export async function getHomeTopPosts(req, res) {
     // Use aggregation pipeline for better performance with vote count
     const posts = await Post.aggregate([
       { $match: query },
-      { 
+      {
         $addFields: {
           voteCount: { $size: { $ifNull: ["$votes", []] } } // Calculate number of votes
         }
@@ -433,11 +433,11 @@ export async function getHomeTopPosts(req, res) {
     const normalized = posts.map(post => {
       const userVote = post.votes?.find(v => v.user && v.user.toString() === req.userId);
       return {
-          ...post,
-          userVote: userVote ? userVote.value : 0,
-          score: post.score || 0,
-          commentCount: post.commentCount ?? 0
-        };
+        ...post,
+        userVote: userVote ? userVote.value : 0,
+        score: post.score || 0,
+        commentCount: post.commentCount ?? 0
+      };
     });
 
     res.json(normalized);
