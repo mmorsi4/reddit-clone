@@ -187,7 +187,6 @@
   transition: filter 0.3s ease;
 }
 
-/* FIXED: Dark mode favorite icon - EXCLUDE REDDIT LOGO */
 [data-theme="dark"] .sidebar-section-item-details .make-favourite img:not(.reddit-logo) {
     filter: invert(1) brightness(1.5);
 }
@@ -370,6 +369,11 @@
     background-color: transparent !important;
 }
 
+/*  collapse icon to white in dark mode */
+[data-theme="dark"] .sidebar-collapse-label img {
+  filter: brightness(0) invert(1) !important;
+}
+
 /* ULTIMATE FIX: Force Reddit logo to never have filters */
 /* Add this at the VERY END of your CSS file */
 .reddit-logo,
@@ -389,6 +393,12 @@ img[src*="reddit-logo"] {
     filter: none !important;
     -webkit-filter: none !important;
 }
+
+/* FORCE favorite star to white in dark mode */
+[data-theme="dark"] .make-favourite img {
+  filter: brightness(0) invert(1) !important;
+}
+
 
 /* Make sure ALL sidebar elements use dark mode colors */
 [data-theme="dark"] .sidebar-section,

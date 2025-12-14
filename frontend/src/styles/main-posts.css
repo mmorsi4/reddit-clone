@@ -268,7 +268,7 @@
   border-radius: 18px;
   padding: 4px 4px;
   transition: background-color 0.25s ease, box-shadow 0.25s ease;
-  overflow: hidden;
+  overflow: visible;
   margin-top: 10px;
   background-color: var(--post-bg);
   transition: background-color 0.3s ease;
@@ -288,10 +288,26 @@
 }
 
 .post-meta-actions {
-    display: flex;
-    align-items: center;
-    gap: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  position: relative;
 }
+
+.post-dots-wrapper {
+  position: relative;
+}
+
+.post-meta-dots-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 
 .post-user-info {
     display: flex;
@@ -313,9 +329,14 @@
 }
 
 .post-meta-dots {
-    width: 20px;
-    height: 20px;
-    cursor: pointer;
+  width: 20px;
+  height: 20px;
+  opacity: 0.6;
+  transition: opacity 0.2s;
+}
+
+.post-meta-dots-button:hover .post-meta-dots {
+  opacity: 1;
 }
 
 /* Dark mode fix for dots icon */
@@ -486,11 +507,9 @@
 }
 
 .post-fullwidth.compact-view .post-activity-container.post-comment {
-    /* Hide comment count button entirely in compact view for simplicity */
     display: none;
 }
 
-/* Add smooth transitions for theme switching */
 .post,
 .post-header,
 .post-preview,
@@ -505,4 +524,55 @@
                 color 0.3s ease,
                 border-color 0.3s ease,
                 filter 0.3s ease;
+}
+
+
+
+
+.post-dots-menu {
+  position: absolute;
+  top: 28px;
+  right: 0;
+  background: var(--post-bg);
+  border: 1px solid var(--post-border);
+  border-radius: 8px;
+  width: 140px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+  z-index: 999; 
+}
+
+.post-dots-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  color: var(--post-text);
+}
+
+.post-dots-item:hover {
+  background-color: var(--sidebar-hover);
+}
+
+.post-dots-item img {
+  width: 18px;
+  height: 18px;
+}
+
+[data-theme="dark"] .post-dots-item img,
+[data-theme="dark"] .post-meta-dots {
+  filter: brightness(0) invert(1);
+}
+
+
+.post-meta-dots-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  z-index: 10;
 }

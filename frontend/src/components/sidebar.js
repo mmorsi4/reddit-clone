@@ -190,11 +190,12 @@ function Sidebar() {
 
   // Get the correct star icon based on theme
   const getStarIcon = (isFavorite) => {
-    if (isDarkMode()) {
-      return isFavorite ? "/images/star.svg" : "/images/star-white-outline.svg";
-    }
+  if (isDarkMode()) {
     return isFavorite ? "/images/star-black.svg" : "/images/star.svg";
-  };
+  }
+  return isFavorite ? "/images/star-black.svg" : "/images/star.svg";
+};
+
 
   return (
     <div className={`sidebar-container ${isCollapsed ? 'collapsed' : ''}`}>
