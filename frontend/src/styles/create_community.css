@@ -1,33 +1,105 @@
+:root {
+  /* Light theme variables for popup */
+  --popup-overlay: rgba(0, 0, 0, 0.5);
+  --popup-bg: white;
+  --popup-text: #333;
+  --popup-title: #222;
+  --popup-subtitle: #666;
+  --popup-muted: #555;
+  --popup-border: #ccc;
+  --popup-input-bg: white;
+  --popup-input-text: #333;
+  --popup-btn-primary: #007bff;
+  --popup-btn-primary-text: white;
+  --popup-btn-primary-hover: #005ecb;
+  --popup-btn-secondary: #ccc;
+  --popup-btn-secondary-text: black;
+  --popup-btn-secondary-hover: #b3b3b3;
+  --popup-topic-btn-bg: #f8f8f8;
+  --popup-topic-btn-text: #333;
+  --popup-topic-btn-border: #ccc;
+  --popup-topic-btn-hover: #e8f0ff;
+  --popup-topic-btn-hover-border: #007bff;
+  --popup-topic-btn-hover-text: #007bff;
+  --popup-topic-btn-selected: #007bff;
+  --popup-topic-btn-selected-text: white;
+  --popup-count: #777;
+  --popup-community-joined-bg: white;
+  --popup-community-joined-text: rgb(138, 31, 31);
+  --popup-community-joined-border: rgb(138, 31, 31);
+  --popup-community-joined-hover: rgb(250, 230, 230);
+  --popup-community-joined-active: rgb(240, 210, 210);
+}
+
+[data-theme="dark"] {
+  /* Dark theme variables for popup */
+  --popup-overlay: rgba(0, 0, 0, 0.7);
+  --popup-bg: #2d2d2d;
+  --popup-text: #f5f5f5;
+  --popup-title: #f5f5f5;
+  --popup-subtitle: #aaa;
+  --popup-muted: #bbb;
+  --popup-border: #555;
+  --popup-input-bg: #333;
+  --popup-input-text: #f5f5f5;
+  --popup-btn-primary: #007bff;
+  --popup-btn-primary-text: white;
+  --popup-btn-primary-hover: #005ecb;
+  --popup-btn-secondary: #666;
+  --popup-btn-secondary-text: #f5f5f5;
+  --popup-btn-secondary-hover: #777;
+  --popup-topic-btn-bg: #3a3a3a;
+  --popup-topic-btn-text: #f5f5f5;
+  --popup-topic-btn-border: #555;
+  --popup-topic-btn-hover: rgba(0, 123, 255, 0.2);
+  --popup-topic-btn-hover-border: #007bff;
+  --popup-topic-btn-hover-text: #66b0ff;
+  --popup-topic-btn-selected: #007bff;
+  --popup-topic-btn-selected-text: white;
+  --popup-count: #aaa;
+  --popup-community-joined-bg: #2d2d2d;
+  --popup-community-joined-text: #ff6666;
+  --popup-community-joined-border: #ff6666;
+  --popup-community-joined-hover: rgba(255, 102, 102, 0.1);
+  --popup-community-joined-active: rgba(255, 102, 102, 0.2);
+}
+
 .popup-overlay {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: var(--popup-overlay);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
+  transition: background 0.3s ease;
 }
 
 .popup {
-  background: white;
+  background: var(--popup-bg);
   padding: 25px;
   border-radius: 12px;
   width: 400px;
   max-height: 90vh;
   overflow-y: auto;
+  color: var(--popup-text);
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 .popup h2 {
   margin-bottom: 8px;
+  color: var(--popup-title);
+  transition: color 0.3s ease;
 }
 
 .popup p {
-  color: #555;
+  color: var(--popup-muted);
   font-size: 14px;
   margin-bottom: 15px;
+  transition: color 0.3s ease;
 }
 
 .popup input[type="text"],
@@ -36,8 +108,17 @@
   width: 100%;
   padding: 8px;
   margin-bottom: 12px;
-  border: 1px solid #ccc;
+  border: 1px solid var(--popup-border);
   border-radius: 6px;
+  background-color: var(--popup-input-bg);
+  color: var(--popup-input-text);
+  transition: all 0.3s ease;
+}
+
+.popup input[type="text"]:focus,
+.popup textarea:focus {
+  outline: none;
+  border-color: var(--popup-btn-primary);
 }
 
 textarea {
@@ -45,44 +126,62 @@ textarea {
   height: 80px;
 }
 
-
 .btn-primary,
 .btn-secondary {
   padding: 8px 14px;
   border: none;
   border-radius: 6px;
   cursor: pointer;
+  transition: all 0.3s ease;
 }
 
 .btn-primary {
-  background: #007bff;
-  color: white;
+  background: var(--popup-btn-primary);
+  color: var(--popup-btn-primary-text);
+}
+
+.btn-primary:hover {
+  background: var(--popup-btn-primary-hover);
 }
 
 .btn-secondary {
-  background: #ccc;
-  color: black;
+  background: var(--popup-btn-secondary);
+  color: var(--popup-btn-secondary-text);
+}
+
+.btn-secondary:hover {
+  background: var(--popup-btn-secondary-hover);
 }
 
 .topic-step-title {
   font-size: 20px;
   margin-bottom: 6px;
-  color: #222;
+  color: var(--popup-title);
+  transition: color 0.3s ease;
 }
 
 .topic-step-subtitle {
-  color: #666;
+  color: var(--popup-subtitle);
   font-size: 14px;
   margin-bottom: 15px;
+  transition: color 0.3s ease;
 }
 
 .topic-step-search {
   width: 100%;
   padding: 8px 10px;
   margin-bottom: 15px;
-  border: 1px solid #ccc;
+  border: 1px solid var(--popup-border);
   border-radius: 6px;
   font-size: 14px;
+  background-color: var(--popup-input-bg);
+  color: var(--popup-input-text);
+  transition: all 0.3s ease;
+}
+
+.topic-step-search:focus {
+  outline: none;
+  border-color: var(--popup-btn-primary);
 }
 
 .topic-step-list {
@@ -95,33 +194,34 @@ textarea {
 }
 
 .topic-step-btn {
-  border: 1px solid #ccc;
-  background-color: #f8f8f8;
-  color: #333;
+  border: 1px solid var(--popup-topic-btn-border);
+  background-color: var(--popup-topic-btn-bg);
+  color: var(--popup-topic-btn-text);
   border-radius: 20px;
   padding: 6px 14px;
   font-size: 14px;
   cursor: pointer;
-  transition: 0.2s;
+  transition: all 0.2s, background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
 }
 
 .topic-step-btn:hover {
-  background-color: #e8f0ff;
-  border-color: #007bff;
-  color: #007bff;
+  background-color: var(--popup-topic-btn-hover);
+  border-color: var(--popup-topic-btn-hover-border);
+  color: var(--popup-topic-btn-hover-text);
 }
 
 .topic-step-btn.selected {
-  background-color: #007bff;
-  color: white;
-  border-color: #007bff;
+  background-color: var(--popup-topic-btn-selected);
+  color: var(--popup-topic-btn-selected-text);
+  border-color: var(--popup-topic-btn-selected);
 }
 
 .topic-step-count {
   font-size: 13px;
-  color: #777;
+  color: var(--popup-count);
   margin-top: 4px;
   text-align: right;
+  transition: color 0.3s ease;
 }
 
 .topic-step-buttons {
@@ -137,25 +237,25 @@ textarea {
   border-radius: 6px;
   font-weight: 500;
   cursor: pointer;
+  transition: all 0.3s ease;
 }
 
 .topic-step-btn-primary {
-  background: #007bff;
-  color: #fff;
-  transition: background 0.2s;
+  background: var(--popup-btn-primary);
+  color: var(--popup-btn-primary-text);
 }
 
 .topic-step-btn-primary:hover {
-  background: #005ecb;
+  background: var(--popup-btn-primary-hover);
 }
 
 .topic-step-btn-secondary {
-  background: #ccc;
-  color: #000;
+  background: var(--popup-btn-secondary);
+  color: var(--popup-btn-secondary-text);
 }
 
 .topic-step-btn-secondary:hover {
-  background: #b3b3b3;
+  background: var(--popup-btn-secondary-hover);
 }
 
 .preview-img {
@@ -165,8 +265,9 @@ textarea {
   object-fit: cover;
   max-width: 100%;
   height: auto;
+  border: 1px solid var(--popup-border);
+  transition: border-color 0.3s ease;
 }
-
 
 .preview-img[alt*="Avatar"] {
   width: 100px;
@@ -184,28 +285,30 @@ textarea {
   display: block;
   margin-bottom: 10px;
   cursor: pointer;
+  color: var(--popup-text);
+  transition: color 0.3s ease;
 }
 
 .topic-count {
   font-size: 13px;
-  color: #777;
+  color: var(--popup-count);
   margin-top: 8px;
+  transition: color 0.3s ease;
 }
 
 .community-action-join.joined {
-  background-color: white;
-  color: rgb(138, 31, 31);
-  border: 1px solid rgb(138, 31, 31);
+  background-color: var(--popup-community-joined-bg);
+  color: var(--popup-community-joined-text);
+  border: 1px solid var(--popup-community-joined-border);
 }
 
 .community-action-join.joined:hover {
-  background-color: rgb(250, 230, 230);
+  background-color: var(--popup-community-joined-hover);
 }
 
 .community-action-join.joined:active {
-  background-color: rgb(240, 210, 210);
+  background-color: var(--popup-community-joined-active);
 }
-
 
 .community-action-more-container .more-menu {
   display: none;
@@ -221,4 +324,33 @@ textarea {
 
 .no-underline {
   text-decoration: none;
+}
+
+/* Additional styles for radio buttons and checkboxes */
+.popup input[type="radio"],
+.popup input[type="checkbox"] {
+  margin-right: 8px;
+}
+
+.popup label {
+  display: flex;
+  align-items: center;
+  color: var(--popup-text);
+  transition: color 0.3s ease;
+}
+
+/* Smooth transitions for theme switching */
+.popup,
+.popup h2,
+.popup p,
+.topic-step-btn,
+.topic-step-search,
+.topic-step-title,
+.topic-step-subtitle,
+.topic-step-count,
+.radio-group label {
+  transition: background-color 0.3s ease,
+              color 0.3s ease,
+              border-color 0.3s ease,
+              box-shadow 0.3s ease;
 }

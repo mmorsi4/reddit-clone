@@ -148,7 +148,6 @@ function Sidebar() {
   }, [fetchCustomFeeds]);
 
   const handleFeedSubmission = async (feedData) => {
-
     const randomIndex = Math.floor(Math.random() * 11) + 1;
     const imageUrl = `../images/custom_feed_default_${randomIndex}.png`;
 
@@ -184,6 +183,18 @@ function Sidebar() {
     setIsCollapsed(prev => !prev);
   };
 
+  // Function to determine if dark mode is active
+  const isDarkMode = () => {
+    return document.documentElement.getAttribute('data-theme') === 'dark';
+  };
+
+  // Get the correct star icon based on theme
+  const getStarIcon = (isFavorite) => {
+    if (isDarkMode()) {
+      return isFavorite ? "/images/star.svg" : "/images/star-white-outline.svg";
+    }
+    return isFavorite ? "/images/star-black.svg" : "/images/star.svg";
+  };
 
   return (
     <div className={`sidebar-container ${isCollapsed ? 'collapsed' : ''}`}>
@@ -270,18 +281,26 @@ function Sidebar() {
                 <Link to={`/f/${feed._id}`} className={getLinkClass(`/f/${feed._id}`)}>
                   <img
                     src={feed.image}
-                    className="sidebar-link-icon-round" // Use existing style for community image
+                    className="sidebar-link-icon-round"
                     alt={feed.name}
                   />
                   <div className="sidebar-section-item-details">
                     {feed.name}
-                    {feed.isPrivate && <img src="../images/lock.svg" alt="Private" style={{ width: '12px', marginLeft: '5px' }} />}
+                    {feed.isPrivate && (
+                      <img 
+                        src="../images/lock.svg" 
+                        alt="Private" 
+                        style={{ 
+                          width: '12px', 
+                          marginLeft: '5px',
+                          filter: isDarkMode() ? 'invert(1) brightness(1.5)' : 'none'
+                        }} 
+                      />
+                    )}
                   </div>
                 </Link>
               </li>
             ))}
-
-
           </ul>
         </li>
 
@@ -380,7 +399,7 @@ function Sidebar() {
                           }}
                         >
                           <img
-                            src={community.favorite ? "/images/star-black.svg" : "/images/star.svg"}
+                            src={getStarIcon(community.favorite)}
                             alt="favorite"
                           />
                         </button>

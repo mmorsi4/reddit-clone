@@ -1,5 +1,77 @@
-.main {
-    background-color: white; 
+:root {
+  /* Light theme variables for custom feed */
+  --custom-feed-bg: transparent;
+  --custom-feed-header-bg: white;
+  --custom-feed-header-text: #14171a;
+  --custom-feed-creator-text: #657786;
+  --custom-feed-divider: #e6ecf0;
+  --custom-feed-card-bg: rgb(245, 245, 245);
+  --custom-feed-card-header: #1a1a1b;
+  --custom-feed-card-text: #4a4a4a;
+  --custom-feed-private-text: #555;
+  --custom-feed-stat-number: #1a1a1b;
+  --custom-feed-stat-label: #7c7c7c;
+  --custom-feed-section-border: #edeff1;
+  --custom-feed-section-title: #7c7c7c;
+  --custom-feed-search-bg: #e4e6e7;
+  --custom-feed-search-border: transparent;
+  --custom-feed-search-focus-border: #0079d3;
+  --custom-feed-search-focus-bg: white;
+  --custom-feed-search-text: #1a1a1b;
+  --custom-feed-search-placeholder: #878a8c;
+  --custom-feed-creator-link: #1a1a1b;
+  --custom-feed-creator-link-hover: #0079d3;
+  --custom-feed-copyright: #878a8c;
+  --custom-feed-empty-bg: white;
+  --custom-feed-empty-text: #657786;
+  --custom-feed-button-bg: #045ea2;
+  --custom-feed-button-hover: #0079d3;
+  --custom-feed-button-text: white;
+  --custom-feed-action-border: rgba(0, 0, 0, 0.2);
+  --custom-feed-action-hover: #f2f2f2;
+  --custom-feed-menu-bg: white;
+  --custom-feed-menu-shadow: rgba(0, 0, 0, 0.15);
+  --custom-feed-menu-text: #1a1a1b;
+  --custom-feed-menu-hover: #f2f2f2;
+  --custom-feed-delete-text: #ff0000;
+}
+
+[data-theme="dark"] {
+  /* Dark theme variables for custom feed */
+  --custom-feed-bg: transparent;
+  --custom-feed-header-bg: #1a1a1a;
+  --custom-feed-header-text: #f5f5f5;
+  --custom-feed-creator-text: #aaa;
+  --custom-feed-divider: #444;
+  --custom-feed-card-bg: #252525;
+  --custom-feed-card-header: #f5f5f5;
+  --custom-feed-card-text: #ccc;
+  --custom-feed-private-text: #999;
+  --custom-feed-stat-number: #f5f5f5;
+  --custom-feed-stat-label: #aaa;
+  --custom-feed-section-border: #333;
+  --custom-feed-section-title: #999;
+  --custom-feed-search-bg: #2d2d2d;
+  --custom-feed-search-border: transparent;
+  --custom-feed-search-focus-border: #0079d3;
+  --custom-feed-search-focus-bg: #333;
+  --custom-feed-search-text: #f5f5f5;
+  --custom-feed-search-placeholder: #888;
+  --custom-feed-creator-link: #f5f5f5;
+  --custom-feed-creator-link-hover: #66b0ff;
+  --custom-feed-copyright: #888;
+  --custom-feed-empty-bg: #1a1a1a;
+  --custom-feed-empty-text: #aaa;
+  --custom-feed-button-bg: #0079d3;
+  --custom-feed-button-hover: #005fa3;
+  --custom-feed-button-text: white;
+  --custom-feed-action-border: rgba(255, 255, 255, 0.2);
+  --custom-feed-action-hover: #333;
+  --custom-feed-menu-bg: #2d2d2d;
+  --custom-feed-menu-shadow: rgba(0, 0, 0, 0.3);
+  --custom-feed-menu-text: #f5f5f5;
+  --custom-feed-menu-hover: #333;
+  --custom-feed-delete-text: #ff6666;
 }
 
 .custom-feed-content-wrapper {
@@ -9,6 +81,8 @@
     max-width: 1200px; 
     margin: 0 auto;
     padding-top: 16px;
+    background-color: var(--custom-feed-bg);
+    transition: background-color 0.3s ease;
 }
 
 /* Apply the line to a container that spans the necessary width */
@@ -23,8 +97,9 @@
 /* The actual line element */
 .custom-feed-header-divider-line {
     flex-basis: 70%; /* Matches the width of the main column */
-    border-bottom: 1px solid #e6ecf0;
+    border-bottom: 1px solid var(--custom-feed-divider);
     margin-bottom: 20px; /* Space between line and posts */
+    transition: border-color 0.3s ease;
 }
 
 /* The space where the right sidebar would be */
@@ -47,10 +122,11 @@
 
 /* 2. HEADER/BANNER AREA */
 .custom-feed-header {
-    background-color: white;
+    background-color: var(--custom-feed-header-bg);
     border-bottom: none;
     padding: 24px 0;
     margin-bottom: 0;
+    transition: background-color 0.3s ease;
 }
 
 .custom-feed-info-wrapper {
@@ -73,13 +149,15 @@
     font-size: 28px;
     font-weight: 700;
     margin: 0;
-    color: #14171a;
+    color: var(--custom-feed-header-text);
+    transition: color 0.3s ease;
 }
 
 .custom-feed-creator {
     font-size: 14px;
-    color: #657786;
+    color: var(--custom-feed-creator-text);
     margin: 4px 0 0;
+    transition: color 0.3s ease;
 }
 
 .custom-feed-header-actions {
@@ -93,44 +171,50 @@
 
 /* 3. EMPTY STATE STYLES */
 .custom-feed-empty-state {
-    background-color: white;
+    background-color: var(--custom-feed-empty-bg);
     padding: 40px;
     text-align: center;
     margin-top: 20px;
+    border-radius: 8px;
+    transition: background-color 0.3s ease;
 }
 
 .custom-feed-empty-state h2 {
     font-size: 20px;
     font-weight: 600;
     margin: 0 0 10px 0;
+    color: var(--custom-feed-header-text);
+    transition: color 0.3s ease;
 }
 
 .custom-feed-empty-state p {
     font-size: 16px;
-    color: #657786;
+    color: var(--custom-feed-empty-text);
     margin-bottom: 20px;
+    transition: color 0.3s ease;
 }
 
 .add-communities-button {
-    background-color: #045ea2; 
-    color: white;
+    background-color: var(--custom-feed-button-bg);
+    color: var(--custom-feed-button-text);
     border: none;
     padding: 10px 20px;
     border-radius: 9999px; 
     font-weight: 700;
     cursor: pointer;
-    transition: background-color 0.2s;
+    transition: background-color 0.2s, color 0.3s ease;
 }
 
 .add-communities-button:hover {
-    background-color: #0079d3;
+    background-color: var(--custom-feed-button-hover);
 }
 
 .custom-feed-details-card {
-    background-color: rgb(245, 245, 245); 
+    background-color: var(--custom-feed-card-bg); 
     border-radius: 8px;
     margin-bottom: 16px;
     padding: 0; 
+    transition: background-color 0.3s ease;
 }
 
 .feed-info-section {
@@ -146,10 +230,11 @@
 
 .sidebar-card-header h3 {
     font-size: 16px;
-    color: #1a1a1b;
+    color: var(--custom-feed-card-header);
     font-weight: 600;
     margin: 0;
     text-transform: none;
+    transition: color 0.3s ease;
 }
 
 .edit-button-icon {
@@ -161,42 +246,56 @@
 .edit-button-icon img {
     width: 18px;
     height: 18px;
+    transition: filter 0.3s ease;
+}
+
+/* Dark mode icon fix */
+[data-theme="dark"] .edit-button-icon img {
+    filter: invert(1) brightness(1.5);
 }
 
 .feed-private-status {
     font-style: normal;
-    color: #555; 
+    color: var(--custom-feed-private-text); 
     font-size: 14px;
     margin: 0 0 15px 0;
     display: flex;
     align-items: center;
+    transition: color 0.3s ease;
 }
 .feed-private-status img {
     width: 16px;
     height: 16px;
     margin-right: 5px;
     opacity: 0.7;
+    transition: filter 0.3s ease;
+}
+
+/* Dark mode icon fix */
+[data-theme="dark"] .feed-private-status img {
+    filter: invert(1) brightness(1.5);
 }
 
 .feed-description-text {
     font-size: 14px;
-    color: #4a4a4a; 
+    color: var(--custom-feed-card-text); 
     margin: 5px 0 10px 0; 
     line-height: 1.4;
     word-wrap: break-word; 
+    transition: color 0.3s ease;
 }
 
 .feed-private-status {
     margin: 0 0 12px 0; 
 }
 
-
 .feed-stats-row {
     padding: 12px 16px;
     display: flex;
     justify-content: flex-start;
     gap: 30px;
-    border-top: 1px solid #edeff1;
+    border-top: 1px solid var(--custom-feed-section-border);
+    transition: border-color 0.3s ease;
 }
 
 .feed-stat {
@@ -208,45 +307,48 @@
 .stat-number {
     font-size: 16px;
     font-weight: 700;
-    color: #1a1a1b;
+    color: var(--custom-feed-stat-number);
+    transition: color 0.3s ease;
 }
 
 .stat-label {
     font-size: 12px;
-    color: #7c7c7c;
+    color: var(--custom-feed-stat-label);
     font-weight: 400;
     text-transform: none;
+    transition: color 0.3s ease;
 }
-
 
 /* --- Section: Communities Search --- */
 .communities-section {
     padding: 12px 16px;
-    border-top: 1px solid #edeff1; 
+    border-top: 1px solid var(--custom-feed-section-border); 
+    transition: border-color 0.3s ease;
 }
 
 .communities-section h3 {
     font-size: 12px;
-    color: #7c7c7c;
+    color: var(--custom-feed-section-title);
     text-transform: uppercase;
     font-weight: 700;
     margin: 0 0 10px 0;
+    transition: color 0.3s ease;
 }
 
 .search-input-wrapper {
     position: relative;
-    background-color: #e4e6e7;
+    background-color: var(--custom-feed-search-bg);
     border-radius: 20px;
     height: 32px;
     display: flex;
     align-items: center;
-    border: 1px solid transparent; 
-    transition: border-color 0.2s;
+    border: 1px solid var(--custom-feed-search-border); 
+    transition: border-color 0.2s, background-color 0.3s ease;
 }
 
 .search-input-wrapper:focus-within {
-    border-color: #0079d3;
-    background-color: white;
+    border-color: var(--custom-feed-search-focus-border);
+    background-color: var(--custom-feed-search-focus-bg);
 }
 
 .sidebar-search-input {
@@ -258,11 +360,12 @@
     box-sizing: border-box;
     background-color: transparent;
     outline: none;
-    color: #1a1a1b;
+    color: var(--custom-feed-search-text);
+    transition: color 0.3s ease;
 }
 
 .sidebar-search-input::placeholder {
-    color: #878a8c;
+    color: var(--custom-feed-search-placeholder);
 }
 
 .search-icon {
@@ -273,21 +376,28 @@
     width: 18px;
     height: 18px;
     opacity: 0.8;
+    transition: filter 0.3s ease;
 }
 
+/* Dark mode icon fix */
+[data-theme="dark"] .search-icon {
+    filter: invert(1) brightness(1.5);
+}
 
 /* --- Section: Creator Info (Bottom Section) --- */
 .creator-section {
     padding: 12px 16px;
-    border-top: 1px solid #edeff1;
+    border-top: 1px solid var(--custom-feed-section-border);
+    transition: border-color 0.3s ease;
 }
 
 .creator-section h3 {
     font-size: 12px;
-    color: #7c7c7c;
+    color: var(--custom-feed-section-title);
     text-transform: uppercase;
     font-weight: 700;
     margin: 0 0 10px 0;
+    transition: color 0.3s ease;
 }
 
 .creator-section .creator-info {
@@ -298,7 +408,7 @@
 
 .creator-section .creator-info a {
     text-decoration: none;
-    color: #1a1a1b;
+    color: var(--custom-feed-creator-link);
     font-weight: 600;
     display: flex;
     align-items: center;
@@ -306,7 +416,7 @@
 }
 
 .creator-section .creator-info a:hover {
-    color: #0079d3;
+    color: var(--custom-feed-creator-link-hover);
 }
 
 .creator-avatar {
@@ -314,17 +424,21 @@
     height: 24px;
     border-radius: 50%;
     margin-right: 8px;
-    background-color: #dae0e6;
+    background-color: #3a3a3a; /* Darker for dark mode */
+}
+
+[data-theme="dark"] .creator-avatar {
+    background-color: #444;
 }
 
 .copyright-text {
     font-size: 10px;
     line-height: 14px; 
-    color: #878a8c;
+    color: var(--custom-feed-copyright);
     margin-top: 15px;
     padding: 0 16px 15px 16px;
     text-align: left;
-
+    transition: color 0.3s ease;
 }
 
 /* --- Custom Feed Sidebar Actions Styles --- */
@@ -338,7 +452,7 @@
 
 .sidebar-action-button {
     background-color: transparent;
-    border: 1px solid rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--custom-feed-action-border);
     border-radius: 50%; 
     padding: 8px;
     cursor: pointer;
@@ -347,15 +461,22 @@
     display: flex; 
     align-items: center;
     justify-content: center;
+    transition: all 0.3s ease;
 }
 
 .sidebar-action-button img {
     width: 16px;
     height: 16px;
+    transition: filter 0.3s ease;
+}
+
+/* Dark mode icon fix */
+[data-theme="dark"] .sidebar-action-button img {
+    filter: invert(1) brightness(1.5);
 }
 
 .sidebar-action-button:hover {
-    background-color: #f2f2f2;
+    background-color: var(--custom-feed-action-hover);
 }
 
 /* --- New Wrapper for Relative Positioning --- */
@@ -380,15 +501,16 @@
     right: 0; /* Align to the right edge of the buttons */
     z-index: 100; 
     
-    background-color: white;
+    background-color: var(--custom-feed-menu-bg);
     border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); /* Nice floating shadow */
+    box-shadow: 0 4px 12px var(--custom-feed-menu-shadow);
     min-width: 200px;
     padding: 8px 0;
     margin-top: 5px; /* Small gap between button and menu */
     
     /* Ensure the menu doesn't interfere with the card layout */
     transform: translateX(0); 
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .options-menu-item {
@@ -401,25 +523,61 @@
     border: none;
     text-align: left;
     font-size: 14px;
-    color: #1a1a1b;
+    color: var(--custom-feed-menu-text);
     cursor: pointer;
-    transition: background-color 0.1s;
+    transition: background-color 0.1s, color 0.3s ease;
 }
 
 .options-menu-item:hover {
-    background-color: #f2f2f2;
+    background-color: var(--custom-feed-menu-hover);
 }
 
 .options-menu-item img {
     width: 18px;
     height: 18px;
     opacity: 0.8;
+    transition: filter 0.3s ease;
+}
+
+/* Dark mode icon fix */
+[data-theme="dark"] .options-menu-item img {
+    filter: invert(1) brightness(1.5);
 }
 
 .options-menu-item.delete {
-    color: #ff0000;
+    color: var(--custom-feed-delete-text);
 }
 
 .options-menu-item.delete img {
-    filter: invert(34%) sepia(85%) saturate(7499%) hue-rotate(359deg) brightness(100%) contrast(116%); /* Changes icon to red */
+    filter: invert(34%) sepia(85%) saturate(7499%) hue-rotate(359deg) brightness(100%) contrast(116%);
+}
+
+/* Keep red delete icon in both themes */
+[data-theme="dark"] .options-menu-item.delete img {
+    filter: invert(34%) sepia(85%) saturate(7499%) hue-rotate(359deg) brightness(100%) contrast(116%);
+}
+
+/* Smooth transitions for theme switching */
+.custom-feed-header,
+.custom-feed-empty-state,
+.custom-feed-details-card,
+.custom-feed-title,
+.custom-feed-creator,
+.sidebar-card-header h3,
+.feed-private-status,
+.feed-description-text,
+.stat-number,
+.stat-label,
+.communities-section h3,
+.sidebar-search-input,
+.search-input-wrapper,
+.creator-section h3,
+.creator-section .creator-info a,
+.copyright-text,
+.sidebar-action-button,
+.options-menu-item {
+    transition: background-color 0.3s ease,
+                color 0.3s ease,
+                border-color 0.3s ease,
+                box-shadow 0.3s ease;
 }

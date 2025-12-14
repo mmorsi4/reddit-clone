@@ -1,8 +1,66 @@
+:root {
+  /* Light theme variables for explore */
+  --explore-bg: transparent;
+  --explore-tab-bg: #f0f0f0;
+  --explore-tab-border: #ddd;
+  --explore-tab-text: #555;
+  --explore-tab-hover: #e6e6e6;
+  --explore-tab-active-bg: #0079d3;
+  --explore-tab-active-text: white;
+  --explore-divider: #e0e0e0;
+  --explore-card-bg: #fff;
+  --explore-card-border: #e0e0e0;
+  --explore-card-shadow: rgba(0, 0, 0, 0.05);
+  --explore-name-text: #000;
+  --explore-desc-text: #777;
+  --explore-hint-text: #777;
+  --explore-loading-text: #777;
+  --explore-join-btn-bg: #0079d3;
+  --explore-join-btn-text: white;
+  --explore-join-btn-hover: #005aa3;
+  --explore-joined-btn-bg: white;
+  --explore-joined-btn-text: #0079d3;
+  --explore-joined-btn-border: #0079d3;
+  --explore-joined-btn-hover-bg: #f0f8ff;
+  --explore-joined-btn-hover-text: #005aa3;
+  --explore-avatar-border: #ccc;
+}
+
+[data-theme="dark"] {
+  /* Dark theme variables for explore */
+  --explore-bg: transparent;
+  --explore-tab-bg: #2d2d2d;
+  --explore-tab-border: #444;
+  --explore-tab-text: #ddd;
+  --explore-tab-hover: #333;
+  --explore-tab-active-bg: #0079d3;
+  --explore-tab-active-text: white;
+  --explore-divider: #444;
+  --explore-card-bg: #1a1a1a;
+  --explore-card-border: #333;
+  --explore-card-shadow: rgba(0, 0, 0, 0.2);
+  --explore-name-text: #f5f5f5;
+  --explore-desc-text: #aaa;
+  --explore-hint-text: #888;
+  --explore-loading-text: #aaa;
+  --explore-join-btn-bg: #0079d3;
+  --explore-join-btn-text: white;
+  --explore-join-btn-hover: #005aa3;
+  --explore-joined-btn-bg: #1a1a1a;
+  --explore-joined-btn-text: #66b0ff;
+  --explore-joined-btn-border: #66b0ff;
+  --explore-joined-btn-hover-bg: rgba(102, 176, 255, 0.1);
+  --explore-joined-btn-hover-text: #88c2ff;
+  --explore-avatar-border: #555;
+}
+
 .explore-main-content {
     margin-left: 300px;
     padding: 20px;
     padding-top: 80px; 
     max-width: 1200px;
+    background-color: var(--explore-bg);
+    transition: background-color 0.3s ease;
 }
 
 /* Topic Tabs Section */
@@ -13,42 +71,46 @@
     gap: 10px;
     padding: 10px 0;
     margin-bottom: 20px;
-    border-bottom: 1px solid #ccc;
+    border-bottom: 1px solid var(--explore-divider);
+    transition: border-color 0.3s ease;
 }
 
 .explore-topic-tab {
-    background-color: #f0f0f0;
-    border: 1px solid #ddd;
+    background-color: var(--explore-tab-bg);
+    border: 1px solid var(--explore-tab-border);
     border-radius: 20px;
     padding: 8px 15px;
     cursor: pointer;
     font-size: 14px;
-    color: #555;
-    transition: all 0.2s;
+    color: var(--explore-tab-text);
+    transition: all 0.2s, background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
 }
 
 .explore-topic-tab:hover {
-    background-color: #e6e6e6;
+    background-color: var(--explore-tab-hover);
 }
 
 .explore-topic-tab--active {
-    background-color: #0079d3;
-    color: white;
-    border-color: #0079d3;
+    background-color: var(--explore-tab-active-bg);
+    color: var(--explore-tab-active-text);
+    border-color: var(--explore-tab-active-bg);
     font-weight: bold;
 }
 
 .explore-divider {
     border: 0;
     height: 1px;
-    background-color: #e0e0e0;
+    background-color: var(--explore-divider);
     margin: 10px 0;
+    transition: background-color 0.3s ease;
 }
 
 /* Community List Section */
 
 .explore-community-list-section h3 {
     margin-bottom: 15px;
+    color: var(--explore-name-text);
+    transition: color 0.3s ease;
 }
 
 .explore-loading-message,
@@ -57,7 +119,8 @@
     text-align: center;
     padding: 20px;
     font-size: 16px;
-    color: #777;
+    color: var(--explore-loading-text);
+    transition: color 0.3s ease;
 }
 
 .explore-community-grid {
@@ -74,10 +137,11 @@
     align-items: center;
     justify-content: space-between;
     padding: 15px;
-    border: 1px solid #e0e0e0;
+    border: 1px solid var(--explore-card-border);
     border-radius: 8px;
-    background-color: #fff;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    background-color: var(--explore-card-bg);
+    box-shadow: 0 1px 3px var(--explore-card-shadow);
+    transition: all 0.3s ease;
 }
 
 .explore-community-icon-wrapper {
@@ -89,7 +153,8 @@
     height: 40px;
     border-radius: 50%;
     object-fit: cover;
-    border: 1px solid #ccc;
+    border: 1px solid var(--explore-avatar-border);
+    transition: border-color 0.3s ease;
 }
 
 .explore-community-info {
@@ -101,59 +166,63 @@
     margin: 0;
     font-size: 16px;
     font-weight: 600;
-    color: #000;
+    color: var(--explore-name-text);
+    transition: color 0.3s ease;
 }
 
 .explore-community-topics-desc {
     margin: 0 0 0 0;
     font-size: 12px;
-    color: #777;
+    color: var(--explore-desc-text);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     margin-top: -13px;
     margin-bottom: 5px;
+    transition: color 0.3s ease;
 }
 
 .explore-community-topics-hint {
     margin: 2px 0 0 0;
     font-size: 12px;
-    color: #777;
+    color: var(--explore-hint-text);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    transition: color 0.3s ease;
 }
 
 /* Join Button Element and Modifier */
 
 .explore-community-join-btn {
-    background-color: #0079d3;
-    color: white;
+    background-color: var(--explore-join-btn-bg);
+    color: var(--explore-join-btn-text);
     border: none;
     border-radius: 20px;
     padding: 8px 15px;
     font-weight: bold;
     cursor: pointer;
-    transition: background-color 0.2s, border-color 0.2s, color 0.2s;
+    transition: background-color 0.2s, border-color 0.2s, color 0.2s, 
+                background-color 0.3s ease, color 0.3s ease;
     margin-left: 10px; /* Separator from text */
     flex-shrink: 0; /* Prevents button from shrinking */
 }
 
 .explore-community-join-btn:hover {
-    background-color: #005aa3;
+    background-color: var(--explore-join-btn-hover);
 }
 
 /* Joined State Modifier */
 .explore-community-join-btn--joined {
-    background-color: white; 
-    color: #0079d3; 
-    border: 1px solid #0079d3; 
+    background-color: var(--explore-joined-btn-bg); 
+    color: var(--explore-joined-btn-text); 
+    border: 1px solid var(--explore-joined-btn-border); 
 }
 
 .explore-community-join-btn--joined:hover {
-    background-color: #f0f8ff; /* Light hover color */
-    border-color: #005aa3;
-    color: #005aa3;
+    background-color: var(--explore-joined-btn-hover-bg);
+    border-color: var(--explore-joined-btn-hover-text);
+    color: var(--explore-joined-btn-hover-text);
 }
 
 .explore-community-link {
@@ -162,4 +231,17 @@
 }
 .explore-community-link:hover {
     text-decoration: underline;
+}
+
+/* Smooth transitions for theme switching */
+.explore-topic-tab,
+.explore-community-card,
+.explore-community-name,
+.explore-community-topics-desc,
+.explore-community-topics-hint,
+.explore-community-join-btn {
+    transition: background-color 0.3s ease,
+                border-color 0.3s ease,
+                color 0.3s ease,
+                box-shadow 0.3s ease;
 }

@@ -1,3 +1,42 @@
+:root {
+  /* Light theme variables for posts */
+  --post-bg: white;
+  --post-hover: rgba(0, 120, 255, 0.06);
+  --post-border: #e5e7eb;
+  --post-text: rgb(6, 24, 20);
+  --post-preview-text: rgb(23, 59, 53);
+  --post-meta-text: rgb(42, 60, 66);
+  --post-meta-light: rgb(87, 111, 118);
+  --post-activity-bg: rgb(232, 232, 232);
+  --post-activity-hover: rgb(225, 225, 225);
+  --post-activity-active: rgba(186, 186, 186);
+  --post-community-name: #1c1c1c;
+  --post-separator: #7c7c7c;
+  --comment-bg: #fff;
+  --comment-border: #e5e7eb;
+  --comment-input-border: #ccc;
+  --compact-border: #e5e7eb;
+}
+
+[data-theme="dark"] {
+  /* Dark theme variables for posts */
+  --post-bg: #1a1a1a;
+  --post-hover: rgba(255, 255, 255, 0.05);
+  --post-border: #333;
+  --post-text: #f5f5f5;
+  --post-preview-text: #ddd;
+  --post-meta-text: #bbb;
+  --post-meta-light: #999;
+  --post-activity-bg: #2d2d2d;
+  --post-activity-hover: #333;
+  --post-activity-active: #444;
+  --post-community-name: #e0e0e0;
+  --post-separator: #888;
+  --comment-bg: #252525;
+  --comment-border: #444;
+  --comment-input-border: #555;
+  --compact-border: #444;
+}
 
 .main-posts-container {
   flex: 1 1 600px;
@@ -17,7 +56,6 @@
     padding-top: 0;
 }
 
-
 .post-meta {
     display: flex;
     gap: 8px;
@@ -27,7 +65,7 @@
     display: flex;
     align-items: center;
     gap: 4px;
-    color: rgb(42, 60, 66);
+    color: var(--post-meta-text);
     font-size: 12px;
     font-weight: 500;
 }
@@ -43,22 +81,24 @@
     display: flex;
     align-items: center;
     font-size: 12px;
-    color: rgb(87, 111, 118);
+    color: var(--post-meta-light);
 }
 
 .post-header {
     margin-top: 10px;
-    color: rgb(6, 24, 20);
+    color: var(--post-text);
     font-size: 18px;
     font-weight: 500;
+    transition: color 0.3s ease;
 }
 
 .post-preview {
     margin-top: 15px;
     margin-bottom: 12px;
-    color: rgb(23, 59, 53);
+    color: var(--post-preview-text);
     font-size: 14px;
     line-height: 1.4;
+    transition: color 0.3s ease;
 }
 
 .post-preview img {
@@ -74,23 +114,31 @@
 .post-activity {
     display: flex;
     gap: 8px;
-    color: black;
+    color: var(--post-text);
     font-size: 12px;
     font-weight: 500;
+    transition: color 0.3s ease;
 }
 
 .post-activity-container {
     display: flex;
     align-items: center;
     gap: 6px;
-    background-color: rgb(232, 232, 232);
+    background-color: var(--post-activity-bg);
     border-radius: 20px;
     padding: 8px 12px;
+    transition: background-color 0.3s ease;
 }
 
 .post-activity-container img {
     width: 16px;
     height: 16px;
+    transition: filter 0.3s ease;
+}
+
+/* Dark mode icon fix for post activity icons */
+[data-theme="dark"] .post-activity-container img {
+    filter: invert(1) brightness(1.5);
 }
 
 .post-activity-button {
@@ -98,24 +146,22 @@
     align-items: center;
 }
 
-
 .post-activity-button img {
   cursor: pointer;
-  transition: transform 0.2s;
+  transition: transform 0.2s, filter 0.3s ease;
 }
 
 .post-activity-button img:hover {
   transform: scale(1.1);
 }
 
-
 .post-activity-button:hover {
-    background-color: rgb(225, 225, 225);
+    background-color: var(--post-activity-hover);
     cursor: pointer;
 }
 
 .post-activity-button:active, .post-vote .post-activity-button:hover {
-    background-color: rgba(186, 186, 186);
+    background-color: var(--post-activity-active);
 }
 
 .post-vote {
@@ -155,16 +201,19 @@
 }
 
 .post-comments-container {
-  background-color: #fff;
-  border: 1px solid #e5e7eb;
+  background-color: var(--comment-bg);
+  border: 1px solid var(--comment-border);
   border-radius: 8px;
   padding: 12px;
   margin-top: 10px;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
 .comment {
   padding: 8px;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--comment-border);
+  color: var(--post-text);
+  transition: border-color 0.3s ease, color 0.3s ease;
 }
 
 .comment:last-child {
@@ -181,7 +230,10 @@
   flex-grow: 1;
   padding: 8px 10px;
   border-radius: 6px;
-  border: 1px solid #ccc;
+  border: 1px solid var(--comment-input-border);
+  background-color: var(--post-bg);
+  color: var(--post-text);
+  transition: all 0.3s ease;
 }
 
 .comment-submit {
@@ -196,7 +248,6 @@
 .comment-submit:hover {
   background-color: #e03d00;
 }
-
 
 .main-posts {
   max-width: 100%;
@@ -219,8 +270,14 @@
   transition: background-color 0.25s ease, box-shadow 0.25s ease;
   overflow: hidden;
   margin-top: 10px;
+  background-color: var(--post-bg);
+  transition: background-color 0.3s ease;
 }
 
+.post:hover {
+    cursor: pointer;
+    background-color: var(--post-hover);
+}
 
 .post-meta {
     display: flex;
@@ -243,14 +300,16 @@
 
 .post-community-name {
     font-weight: bold;
-    color: #1c1c1c; 
+    color: var(--post-community-name); 
     margin-right: 8px;
+    transition: color 0.3s ease;
 }
 
 .post-separator-meta {
-    color: #7c7c7c;
+    color: var(--post-separator);
     font-weight: normal;
     white-space: nowrap;
+    transition: color 0.3s ease;
 }
 
 .post-meta-dots {
@@ -259,6 +318,10 @@
     cursor: pointer;
 }
 
+/* Dark mode fix for dots icon */
+[data-theme="dark"] .post-meta-dots {
+    filter: invert(1) brightness(1.5);
+}
 
 .post-join-button {
     padding: 4px 10px;    
@@ -282,24 +345,23 @@
 
 /* Style for the 'Joined' state */
 .post-join-button.joined {
-    background-color: white;
+    background-color: var(--post-bg);
     color: #0079D3;
     border: 1px solid #0079D3;
 }
 
 .post-join-button.joined:hover {
-    background-color: #F7F8F9; /* Slight grey background on hover */
+    background-color: var(--post-hover);
     color: #1484D6;
 }
 
 /* Small visual adjustment for the "Posted by" line */
 .post-separator {
     font-size: 12px;
-    color: #777; /* Subtle text */
+    color: var(--post-separator); /* Subtle text */
     margin-left: 8px;
+    transition: color 0.3s ease;
 }
-
-/* main-posts.css or relevant styles file */
 
 /* --------------------------------------
    DEFAULT/CARD VIEW STYLES
@@ -311,14 +373,13 @@
   padding: 4px 4px; 
   transition: background-color 0.25s ease, box-shadow 0.25s ease;
   overflow: hidden;
-  /* Removed margin-top and border from here as it's now on .post-fullwidth */
-  background-color: white; /* Card background */
+  background-color: var(--post-bg);
   border: none; /* REMOVED BORDER FOR CARD VIEW */
 }
 
 .post:hover {
     cursor: pointer;
-    background-color: rgba(0, 120, 255, 0.06);
+    background-color: var(--post-hover);
 }
 
 .post-header {
@@ -338,10 +399,12 @@
 
 /* Post Card/Fullwidth Container - Separator for Compact View */
 .post-fullwidth.compact-view {
-    border-bottom: 1px solid #e5e7eb; /* Separator line for compact mode */
+    border-bottom: 1px solid var(--compact-border); /* Separator line for compact mode */
     margin-top: 0;
     padding-bottom: 0;
+    transition: border-color 0.3s ease;
 }
+
 .post-fullwidth.compact-view:last-child {
     border-bottom: none; /* No separator after the last post */
 }
@@ -379,6 +442,8 @@
 
 .post-fullwidth.compact-view .post-vote-score {
     padding: 2px 0; /* Space between up/downvote buttons */
+    color: var(--post-text);
+    transition: color 0.3s ease;
 }
 
 .post-fullwidth.compact-view .post-link {
@@ -423,4 +488,21 @@
 .post-fullwidth.compact-view .post-activity-container.post-comment {
     /* Hide comment count button entirely in compact view for simplicity */
     display: none;
+}
+
+/* Add smooth transitions for theme switching */
+.post,
+.post-header,
+.post-preview,
+.post-meta,
+.post-community-name,
+.post-separator,
+.post-activity,
+.post-vote-score,
+.comment,
+.comment-input {
+    transition: background-color 0.3s ease,
+                color 0.3s ease,
+                border-color 0.3s ease,
+                filter 0.3s ease;
 }

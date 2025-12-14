@@ -9,20 +9,46 @@ function Header() {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [customAvatar, setCustomAvatar] = useState(null);
   const [users, setUsers] = useState([]);
+  const [darkMode, setDarkMode] = useState(false);
+
+  // Initialize dark mode from localStorage or system preference
+  useEffect(() => {
+    const savedTheme = localStorage.getItem("theme");
+    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+
+    if (savedTheme === "dark" || (!savedTheme && prefersDark)) {
+      setDarkMode(true);
+      document.documentElement.setAttribute("data-theme", "dark");
+    }
+  }, []);
+
+  // Toggle dark mode function
+  const toggleDarkMode = () => {
+    const newDarkMode = !darkMode;
+    setDarkMode(newDarkMode);
+
+    if (newDarkMode) {
+      document.documentElement.setAttribute("data-theme", "dark");
+      localStorage.setItem("theme", "dark");
+    } else {
+      document.documentElement.removeAttribute("data-theme");
+      localStorage.setItem("theme", "light");
+    }
+  };
 
   useEffect(() => {
-      const loadUsers = async () => {
-        try {
-          const res = await fetch("/api/users");
-          if (!res.ok) throw new Error("Failed to load users");
-          const data = await res.json();
-          setUsers(data);
-        } catch (err) {
-          console.error(err);
-        }
-      };
-      loadUsers();
-    }, []);
+    const loadUsers = async () => {
+      try {
+        const res = await fetch("/api/users");
+        if (!res.ok) throw new Error("Failed to load users");
+        const data = await res.json();
+        setUsers(data);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    loadUsers();
+  }, []);
 
   useEffect(() => {
     const fetchCurrentUser = async () => {
@@ -35,12 +61,10 @@ function Header() {
           const data = await res.json();
           setCurrentUser(data);
           console.log(data)
-          
-          // 🆕 Check for custom avatar in database first, then localStorage
+
           if (data.avatarUrl && data.avatarUrl.startsWith('data:image')) {
             setCustomAvatar(data.avatarUrl);
           } else {
-            // Fallback to localStorage
             const savedAvatar = localStorage.getItem("userAvatar");
             if (savedAvatar) {
               setCustomAvatar(savedAvatar);
@@ -54,7 +78,6 @@ function Header() {
 
     fetchCurrentUser();
 
-    // 🆕 Listen for avatar updates from other components
     const handleAvatarUpdate = () => {
       const savedAvatar = localStorage.getItem("userAvatar");
       if (savedAvatar) {
@@ -62,10 +85,8 @@ function Header() {
       }
     };
 
-    // 🆕 Custom event listener for avatar updates
     window.addEventListener('avatarUpdated', handleAvatarUpdate);
-    
-    // 🆕 Also check localStorage periodically (in case of multiple tabs)
+
     const interval = setInterval(() => {
       const savedAvatar = localStorage.getItem("userAvatar");
       if (savedAvatar && savedAvatar !== customAvatar) {
@@ -84,30 +105,32 @@ function Header() {
     setIsChatOpen(prev => !prev);
   };
 
-  // 🆕 Function to get the correct avatar URL
   const getAvatarUrl = () => {
     return customAvatar || "../images/avatar.png";
   };
 
   const profileLink = currentUser ? `/profile/${currentUser.username}` : "#";
-  
+
   return (
     <>
-      {/* ---------- HEADER ---------- */}
       <div className="header">
         <a>
-          <img src="../images/reddit-logo.png" className="reddit-logo" />
+          <img
+            src="../images/reddit-logo.png"
+            className="reddit-logo"
+            style={{ filter: darkMode ? 'none' : 'none' }}
+          />
+
         </a>
 
-        <SearchBar users={users}/>
+        <SearchBar users={users} />
 
         <ul className="header-actions">
 
           <li className="header-action">
             <button onClick={toggleChat}>
-              <div className="header-action-link"> 
+              <div className="header-action-link">
                 <img src="../images/chat.svg" />
-                {/* <div className="message-counter">1</div> */}
                 <div className="header-action-tooltip">Open chat</div>
               </div>
             </button>
@@ -123,13 +146,11 @@ function Header() {
           <li className="header-action">
             <button className="profile-menu-button">
               <label htmlFor="profile-menu-visibility-checkbox">
-                {/* 🆕 UPDATED: Use custom avatar */}
-                <img 
-                  src={getAvatarUrl()} 
-                  className="header-action-avatar" 
+                <img
+                  src={getAvatarUrl()}
+                  className="header-action-avatar"
                   alt="User avatar"
                   onError={(e) => {
-                    // Fallback if custom avatar fails to load
                     e.target.src = "../images/avatar.png";
                   }}
                 />
@@ -141,34 +162,34 @@ function Header() {
             <ul className="profile-menu">
 
               <li className="profile-menu-item">
-              <Link to={profileLink} className="profile-menu-link">
-                <div className="profile-menu-item-icon">
-                  {/* 🆕 UPDATED: Use custom avatar in profile menu too */}
-                  <img
-                    src={getAvatarUrl()}
-                    className="profile-menu-item-icon-avatar"
-                    alt="Profile avatar"
-                    onError={(e) => {
-                      e.target.src = "../images/avatar.png";
-                    }}
-                  />
-                  <div className="online-indicator online-indicator-profile-menu"></div>
-                </div>
-                <div className="profile-menu-item-info">
-                  <div className="profile-menu-item-title">View Profile</div>
-                </div>
-              </Link>
-            </li>
-            <li className="profile-menu-item">
-              <Link to="/edit-avatar" className="profile-menu-link">
-                <div className="profile-menu-item-icon">
-                  <img src="../images/edit-avatar.svg" alt="Edit avatar icon" />
-                </div>
-                <div className="profile-menu-item-info">
-                  <div className="profile-menu-item-title">Edit Avatar</div>
-                </div>
-              </Link>
-            </li>
+                <Link to={profileLink} className="profile-menu-link">
+                  <div className="profile-menu-item-icon">
+                    <img
+                      src={getAvatarUrl()}
+                      className="profile-menu-item-icon-avatar"
+                      alt="Profile avatar"
+                      onError={(e) => {
+                        e.target.src = "../images/avatar.png";
+                      }}
+                    />
+                    <div className="online-indicator online-indicator-profile-menu"></div>
+                  </div>
+                  <div className="profile-menu-item-info">
+                    <div className="profile-menu-item-title">View Profile</div>
+                  </div>
+                </Link>
+              </li>
+
+              <li className="profile-menu-item">
+                <Link to="/edit-avatar" className="profile-menu-link">
+                  <div className="profile-menu-item-icon">
+                    <img src="../images/edit-avatar.svg" alt="Edit avatar icon" />
+                  </div>
+                  <div className="profile-menu-item-info">
+                    <div className="profile-menu-item-title">Edit Avatar</div>
+                  </div>
+                </Link>
+              </li>
 
               <li className="profile-menu-item">
                 <div className="profile-menu-link">
@@ -178,7 +199,12 @@ function Header() {
                   <div className="profile-menu-item-info">
                     <div className="profile-menu-item-title">Dark Mode</div>
                     <label className="toggle-switch">
-                      <input type="checkbox" />
+                      {/* Add onChange handler and checked state */}
+                      <input
+                        type="checkbox"
+                        checked={darkMode}
+                        onChange={toggleDarkMode}
+                      />
                       <span className="slider"></span>
                     </label>
                   </div>
@@ -195,13 +221,14 @@ function Header() {
                   </div>
                 </Link>
               </li>
-              
+
             </ul>
           </li>
         </ul>
       </div>
-      {isChatOpen && <Chat currentUserId={currentUser._id} onClose={() => setIsChatOpen(false)} users={users} />} 
+      {isChatOpen && <Chat currentUserId={currentUser._id} onClose={() => setIsChatOpen(false)} users={users} />}
     </>
-)};
+  );
+}
 
 export default Header;
