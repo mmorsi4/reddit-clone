@@ -17,6 +17,7 @@
   --profile-create-post-text: #1a1a1b;
   --profile-sort-select-text: #555;
   --profile-empty-text: #1a1a1b;
+  --empty-img-brightness: 1;
 }
 
 [data-theme="dark"] {
@@ -38,117 +39,257 @@
   --profile-create-post-text: #f5f5f5;
   --profile-sort-select-text: #bbb;
   --profile-empty-text: #f5f5f5;
+  --empty-img-brightness: 0.8;
 }
 
-/* --- Header --- */
-.profile-header {
+/* Profile page layout - Updated for sidebar */
+.profile-page-container {
+  max-width: 1200px;
+  margin: 80px auto 20px 280px; /* Adjusted for sidebar */
+  padding: 20px;
+  background-color: var(--post-page-bg);
+  transition: background-color 0.3s ease;
+}
+
+.profile-page-content {
+  display: flex;
+  gap: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.profile-main-column {
+  flex: 1;
+  min-width: 0;
+}
+
+.profile-sidebar-column {
+  width: 312px;
+  flex-shrink: 0;
+}
+
+/* Updated header styling */
+.profile-header-main {
+  background: var(--post-card-bg);
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border: 1px solid var(--post-border);
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.profile-header-avatar-info {
   display: flex;
   align-items: center;
   gap: 16px;
-  background-color: var(--profile-header-bg);
-  transition: background-color 0.3s ease;
 }
 
-.profile-avatar {
-  width: 96px;
-  height: 96px;
+.profile-avatar-main {
+  width: 80px;
+  height: 80px;
   border-radius: 50%;
   object-fit: cover;
-  background-color: var(--profile-avatar-bg);
-  transition: background-color 0.3s ease;
-}
-
-.profile-info h2 {
-  font-size: 24px;
-  margin: 0;
-  font-weight: 700;
-  color: var(--profile-title);
-  transition: color 0.3s ease;
-}
-
-.profile-username {
-  color: var(--profile-username);
-  margin-top: 4px;
-  font-size: 15px;
-  transition: color 0.3s ease;
-}
-
-/* --- Tabs --- */
-.profile-tabs {
-  margin-top: 24px;
-  display: flex;
-  gap: 20px;
-  border-bottom: 1px solid var(--profile-tabs-border);
+  border: 3px solid var(--post-action-bg);
   transition: border-color 0.3s ease;
 }
 
-.tab {
-  background: var(--profile-tab-bg);
+.profile-info-main {
+  display: flex;
+  flex-direction: column;
+}
+
+.profile-name-main {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--post-text);
+  margin: 0 0 4px 0;
+  transition: color 0.3s ease;
+}
+
+.profile-username-main {
+  font-size: 16px;
+  color: var(--post-meta-text);
+  margin: 0;
+  transition: color 0.3s ease;
+}
+
+.profile-edit-btn {
+  background: var(--post-comment-submit-bg);
+  color: var(--post-comment-submit-text);
   border: none;
-  padding: 12px 8px;
-  font-size: 15px;
-  cursor: pointer;
-  color: var(--profile-tab-text);
-  border-radius: 8px 8px 0 0;
-  transition: all 0.3s ease;
-}
-
-.tab.active {
-  background-color: var(--profile-tab-active-bg);
+  border-radius: 20px;
+  padding: 10px 20px;
+  font-size: 14px;
   font-weight: 600;
-  color: var(--profile-tab-active-text);
+  cursor: pointer;
+  text-decoration: none;
+  transition: background-color 0.2s;
 }
 
-/* --- Content --- */
-.profile-content {
-  margin-top: 24px;
-  background-color: var(--profile-content-bg);
-  transition: background-color 0.3s ease;
+.profile-edit-btn:hover {
+  background: var(--post-comment-submit-hover);
+  text-decoration: none;
 }
 
-.showing-content {
-  background-color: var(--profile-showing-bg);
-  padding: 12px 16px;
+/* Updated tabs styling */
+.profile-tabs-main {
+  display: flex;
+  background: var(--post-card-bg);
   border-radius: 8px;
   margin-bottom: 16px;
-  color: var(--profile-showing-text);
-  transition: background-color 0.3s ease, color 0.3s ease;
+  border: 1px solid var(--post-border);
+  overflow: hidden;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
-/* --- Create Post --- */
-.create-post {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 40px;
-}
-
-.create-post-btn {
-  background-color: var(--profile-create-post-bg);
-  border: 1px solid var(--profile-create-post-border);
-  padding: 8px 16px;
-  border-radius: 20px;
-  font-size: 15px;
+.profile-tab {
+  flex: 1;
+  padding: 14px 0;
+  background: none;
+  border: none;
+  border-right: 1px solid var(--post-border);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--post-meta-text);
   cursor: pointer;
-  color: var(--profile-create-post-text);
+  transition: all 0.2s;
+}
+
+.profile-tab:last-child {
+  border-right: none;
+}
+
+.profile-tab:hover {
+  background: var(--post-vote-bg);
+  color: var(--post-text);
+}
+
+.profile-tab-active {
+  background: var(--post-vote-bg);
+  color: var(--post-text);
+  position: relative;
+}
+
+.profile-tab-active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--post-comment-submit-bg);
+}
+
+/* Updated content area */
+.profile-content-main {
+  background: var(--post-card-bg);
+  border-radius: 8px;
+  padding: 20px;
+  border: 1px solid var(--post-border);
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.profile-content-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--post-light-border);
+}
+
+.showing-content-main {
+  font-size: 14px;
+  color: var(--post-meta-text);
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+.profile-create-post {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.profile-create-post-btn {
+  background: var(--post-comment-submit-bg);
+  color: var(--post-comment-submit-text);
+  border: none;
+  border-radius: 20px;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.profile-create-post-btn:hover {
+  background: var(--post-comment-submit-hover);
+}
+
+.profile-sort-select {
+  padding: 8px 12px;
+  border: 1px solid var(--post-action-border);
+  border-radius: 20px;
+  background: var(--post-card-bg);
+  color: var(--post-text);
+  font-size: 14px;
+  cursor: pointer;
   transition: all 0.3s ease;
 }
 
-.sort-select {
-  border: none;
-  background: transparent;
-  font-size: 15px;
-  color: var(--profile-sort-select-text);
-  cursor: pointer;
+.profile-sort-select:hover {
+  border-color: var(--post-action-hover);
+}
+
+/* Comment cards for overview */
+.profile-comment-card {
+  background: var(--post-comment-bg);
+  border: 1px solid var(--post-light-border);
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 12px;
+  transition: all 0.3s ease;
+}
+
+.profile-comment-card:hover {
+  border-color: var(--post-action-border);
+}
+
+.profile-comment-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.profile-comment-meta {
+  font-size: 13px;
+  color: var(--post-text);
+  font-weight: 500;
   transition: color 0.3s ease;
 }
 
-/* --- Empty State --- */
+.profile-comment-time {
+  font-size: 12px;
+  color: var(--post-meta-text);
+  transition: color 0.3s ease;
+}
+
+.profile-comment-body {
+  font-size: 14px;
+  color: var(--post-text);
+  line-height: 1.5;
+  margin: 0;
+  transition: color 0.3s ease;
+}
+
+/* Empty state */
 .empty-state {
   text-align: center;
-  margin-top: 80px;
-  color: var(--profile-empty-text);
-  transition: color 0.3s ease;
+  padding: 40px 20px;
 }
 
 .empty-img {
@@ -160,31 +301,155 @@
 }
 
 .empty-text {
-  font-weight: 600;
+  font-size: 16px;
+  color: var(--post-meta-text);
+  margin: 0;
+  transition: color 0.3s ease;
 }
 
-/* Add CSS variable for empty image brightness */
-:root {
-  --empty-img-brightness: 1;
+/* Comments list */
+.comments-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
-[data-theme="dark"] {
-  --empty-img-brightness: 0.8;
+.comment-item {
+  background: var(--post-comment-bg);
+  border: 1px solid var(--post-light-border);
+  border-radius: 8px;
+  padding: 16px;
+  transition: all 0.3s ease;
+}
+
+.comment-item:hover {
+  border-color: var(--post-action-border);
+}
+
+.comment-text {
+  font-size: 14px;
+  color: var(--post-text);
+  line-height: 1.5;
+  margin: 0 0 8px 0;
+  transition: color 0.3s ease;
+}
+
+.comment-meta {
+  font-size: 12px;
+  color: var(--post-meta-text);
+  margin: 0;
+  transition: color 0.3s ease;
+}
+
+/* Overview content */
+.profile-overview-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Responsive design */
+@media (max-width: 960px) {
+  .profile-page-container {
+    margin-left: 0;
+    margin-top: 80px;
+  }
+  
+  .profile-sidebar-column {
+    width: 100%;
+    order: -1;
+  }
+  
+  .profile-page-content {
+    flex-direction: column;
+  }
+  
+  .profile-header-main {
+    flex-direction: column;
+    gap: 16px;
+    text-align: center;
+  }
+  
+  .profile-header-avatar-info {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .profile-content-header {
+    flex-direction: column;
+    gap: 12px;
+    align-items: flex-start;
+  }
+  
+  .profile-tabs-main {
+    flex-wrap: wrap;
+  }
+  
+  .profile-tab {
+    flex: 0 0 33.333%;
+    border-bottom: 1px solid var(--post-border);
+  }
+  
+  .profile-tab:nth-child(3n) {
+    border-right: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .profile-page-container {
+    padding: 8px;
+  }
+  
+  .profile-tab {
+    flex: 0 0 50%;
+  }
+  
+  .profile-tab:nth-child(2n) {
+    border-right: none;
+  }
+  
+  .profile-create-post {
+    width: 100%;
+    justify-content: space-between;
+  }
+}
+
+@media (max-width: 480px) {
+  .profile-tab {
+    flex: 0 0 100%;
+    border-right: none;
+    border-bottom: 1px solid var(--post-border);
+  }
+  
+  .profile-tab:last-child {
+    border-bottom: none;
+  }
 }
 
 /* Smooth transitions for theme switching */
-.profile-header,
-.profile-avatar,
-.profile-info h2,
-.profile-username,
-.profile-tabs,
-.tab,
-.profile-content,
-.showing-content,
-.create-post-btn,
-.sort-select,
+.profile-page-container,
+.profile-header-main,
+.profile-avatar-main,
+.profile-name-main,
+.profile-username-main,
+.profile-edit-btn,
+.profile-tabs-main,
+.profile-tab,
+.profile-content-main,
+.profile-content-header,
+.showing-content-main,
+.profile-create-post-btn,
+.profile-sort-select,
+.profile-comment-card,
+.profile-comment-meta,
+.profile-comment-time,
+.profile-comment-body,
 .empty-state,
-.empty-img {
+.empty-img,
+.empty-text,
+.comment-item,
+.comment-text,
+.comment-meta {
   transition: background-color 0.3s ease,
               color 0.3s ease,
               border-color 0.3s ease,

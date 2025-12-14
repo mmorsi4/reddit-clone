@@ -1,0 +1,541 @@
+/* Profile Sidebar Styles - Updated with all your fixes */
+
+/* Main container */
+.profile-sidebar-container {
+  width: 312px;
+  flex-shrink: 0;
+}
+
+/* Card styling - GREY BACKGROUND & ROUNDED CORNERS */
+.profile-sidebar-card {
+  background: #f6f7f8; /* More grey background */
+  border-radius: 12px; /* Rounded corners */
+  border: 1px solid #edeff1;
+  overflow: hidden;
+  margin-bottom: 16px;
+  font-family: 'IBM Plex Sans', Arial, sans-serif;
+}
+
+/* Blue Banner - EVEN DARKER BLUE WITH GRADIENT */
+.profile-sidebar-banner {
+  height: 64px;
+  background: linear-gradient(135deg, #001a33 0%, #003366 100%); /* EVEN darker gradient blue */
+  width: 100%;
+}
+
+/* Username Section - UNDER the banner - LEFT ALIGNED */
+.profile-sidebar-username-section {
+  padding: 20px 16px;
+  text-align: left; /* LEFT ALIGNED */
+}
+
+.profile-sidebar-username {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1a1a1b;
+  margin: 0 0 16px 0;
+  line-height: 24px;
+}
+
+/* Share Button - UNDER username - DARKER GREY NO BORDER - NUCLEAR FIXED */
+.profile-sidebar-share-btn {
+  background: #e5e7eb; /* DARKER GREY background */
+  color: #1a1a1b; /* Black text */
+  border: none; /* NO BORDER */
+  border-radius: 9999px; /* Same rounded shape */
+  padding: 8px 20px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  transition: all 0.2s !important;
+  width: auto;
+  position: relative !important;
+}
+
+.profile-sidebar-share-btn:hover {
+  background: #d1d5db; /* Even darker grey on hover */
+}
+
+/* NUCLEAR FIX: Share button icon container */
+.profile-sidebar-share-btn-icon {
+  display: inline-block !important;
+  width: 18px !important;
+  height: 18px !important;
+  position: relative !important;
+  flex-shrink: 0 !important;
+  vertical-align: middle !important;
+}
+
+/* NUCLEAR FIX: Share button SVG */
+.profile-sidebar-share-btn-icon svg {
+  position: absolute !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  width: 16px !important;
+  height: 16px !important;
+  display: block !important;
+  color: #1a1a1b !important;
+  fill: currentColor !important;
+  transition: none !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  box-sizing: border-box !important;
+  overflow: visible !important;
+}
+
+/* Followers Section - Fixed font and color - LEFT ALIGNED - NO DIVIDER */
+.profile-sidebar-followers-section {
+  padding: 16px;
+  background: #f6f7f8; /* Match card background */
+  text-align: left; /* LEFT ALIGNED */
+}
+
+.profile-sidebar-followers-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start; /* LEFT ALIGNED */
+  gap: 4px;
+}
+
+.profile-sidebar-followers-count {
+  font-size: 14px; /* Same font size as label */
+  font-weight: 400; /* Same font weight as label */
+  color: #7c7c7c; /* Same color as label */
+  line-height: 18px;
+}
+
+.profile-sidebar-followers-label {
+  font-size: 14px;
+  color: #7c7c7c;
+  font-weight: 400;
+  line-height: 18px;
+}
+
+/* Karma & Contributions Section - LEFT ALIGNED - NO DIVIDER */
+.profile-sidebar-karma-section {
+  padding: 16px;
+  display: flex;
+  justify-content: flex-start; /* LEFT ALIGNED */
+  align-items: flex-start;
+  background: #f6f7f8; /* Match card background */
+  gap: 32px; /* Add gap between items */
+}
+
+.profile-sidebar-karma-stat,
+.profile-sidebar-contributions-stat {
+  flex: 0; /* Don't flex */
+}
+
+.profile-sidebar-karma-value-container,
+.profile-sidebar-contributions-value-container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start; /* LEFT ALIGNED */
+}
+
+.profile-sidebar-karma-value,
+.profile-sidebar-contributions-value {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1a1a1b;
+  line-height: 24px;
+  margin-bottom: 4px;
+}
+
+.profile-sidebar-karma-label,
+.profile-sidebar-contributions-label {
+  font-size: 12px;
+  color: #7c7c7c;
+  font-weight: 400;
+  line-height: 16px;
+}
+
+/* Age & Active Section - LEFT ALIGNED - NO DIVIDER */
+.profile-sidebar-age-section {
+  padding: 16px;
+  display: flex;
+  justify-content: flex-start; /* LEFT ALIGNED */
+  gap: 32px; /* Add gap between items */
+  background: #f6f7f8; /* Match card background */
+}
+
+.profile-sidebar-age-stat,
+.profile-sidebar-active-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start; /* LEFT ALIGNED */
+}
+
+.profile-sidebar-age-label,
+.profile-sidebar-active-label {
+  font-size: 12px;
+  color: #7c7c7c;
+  font-weight: 400;
+  line-height: 16px;
+  margin-bottom: 4px;
+}
+
+.profile-sidebar-age-value,
+.profile-sidebar-active-value {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1a1a1b;
+  line-height: 18px;
+}
+
+/* Gold Section - LEFT ALIGNED - NO DIVIDER */
+.profile-sidebar-gold-section {
+  padding: 16px;
+  background: #f6f7f8; /* Match card background */
+}
+
+.profile-sidebar-gold-stat {
+  display: flex;
+  justify-content: space-between; /* Keep space-between for this one */
+  align-items: center;
+}
+
+.profile-sidebar-gold-label {
+  font-size: 12px;
+  color: #7c7c7c;
+  font-weight: 400;
+  line-height: 16px;
+}
+
+.profile-sidebar-gold-value {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1a1a1b;
+  line-height: 18px;
+}
+
+/* Follow Section - LEFT ALIGNED */
+.profile-sidebar-follow-section {
+  padding: 16px;
+  background: #f6f7f8;
+  border-bottom-left-radius: 12px;
+  border-bottom-right-radius: 12px;
+}
+
+.profile-sidebar-follow-btn {
+  background: #0079d3;
+  color: white;
+  border: none;
+  border-radius: 9999px;
+  padding: 10px 0;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  width: 100%;
+  display: block;
+  text-align: center; /* Center text in button */
+}
+
+.profile-sidebar-follow-btn:hover {
+  background: #005ba1;
+}
+
+.profile-sidebar-follow-btn.profile-sidebar-following {
+  background: #24a0ed;
+  color: white;
+}
+
+.profile-sidebar-follow-btn.profile-sidebar-following:hover {
+  background: #1484d6;
+}
+
+/* Settings Section - SAME BACKGROUND COLOR */
+.profile-sidebar-settings-section {
+  padding: 20px 16px;
+  background: #f6f7f8; /* SAME as rest of sidebar */
+  border-top: 1px solid #edeff1;
+  border-bottom-left-radius: 12px;
+  border-bottom-right-radius: 12px;
+}
+
+.profile-sidebar-settings-title {
+  font-size: 10px;
+  font-weight: 700;
+  color: #7c7c7c;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 0 0 16px 0;
+  line-height: 12px;
+}
+
+.profile-sidebar-settings-item {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 20px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #edeff1;
+}
+
+.profile-sidebar-settings-item:last-child {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+/* NUCLEAR FIX: Icon alignment with !important overrides */
+.profile-sidebar-settings-icon {
+  display: inline-block !important;
+  width: 24px !important;
+  height: 24px !important;
+  margin-right: 12px !important;
+  position: relative !important;
+  flex-shrink: 0 !important;
+  vertical-align: top !important;
+  margin-top: 0 !important;
+}
+
+.profile-sidebar-settings-icon svg {
+  position: absolute !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  width: 20px !important;
+  height: 20px !important;
+  display: block !important;
+  color: #1a1a1b !important;
+  stroke: currentColor !important;
+  stroke-width: 2 !important;
+  fill: none !important;
+  transition: none !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  box-sizing: border-box !important;
+  overflow: visible !important;
+}
+
+.profile-sidebar-settings-item-content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  flex: 1;
+  margin-right: 16px;
+}
+
+/* THINNER FONT for Settings section */
+.profile-sidebar-settings-item-title {
+  font-size: 14px;
+  font-weight: 500; /* THINNER font weight */
+  color: #1a1a1b;
+  line-height: 18px;
+  margin-bottom: 4px;
+}
+
+.profile-sidebar-settings-item-description {
+  font-size: 12px;
+  color: #7c7c7c;
+  font-weight: 400; /* THINNER font weight */
+  line-height: 16px;
+}
+
+/* Update Button - DARK GREY BACKGROUND, NO BORDER (like Share button) */
+.profile-sidebar-settings-update-btn {
+  background: #e5e7eb; /* DARK GREY background like Share button */
+  color: #1a1a1b; /* Black text */
+  border: none; /* NO BORDER */
+  border-radius: 9999px; /* Same rounded shape */
+  padding: 6px 16px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  flex-shrink: 0;
+  align-self: flex-start;
+  margin-top: 0;
+}
+
+.profile-sidebar-settings-update-btn:hover {
+  background: #d1d5db; /* Even darker grey on hover */
+}
+
+/* Skeleton Loading */
+.profile-sidebar-skeleton {
+  width: 312px;
+  background: #f6f7f8;
+  border-radius: 12px;
+  border: 1px solid #edeff1;
+  padding: 16px;
+}
+
+.profile-sidebar-skeleton-line {
+  height: 12px;
+  background: #e5e7eb;
+  border-radius: 4px;
+  margin-bottom: 12px;
+  text-align: left; /* LEFT ALIGNED */
+}
+
+.profile-sidebar-skeleton-line:nth-child(2) {
+  width: 60%;
+}
+
+.profile-sidebar-skeleton-line:nth-child(3) {
+  width: 40%;
+}
+
+.profile-sidebar-skeleton-line:nth-child(4) {
+  width: 80%;
+}
+
+/* Responsive Design */
+@media (max-width: 960px) {
+  .profile-sidebar-container {
+    width: 100%;
+    margin-left: 0;
+    margin-top: 16px;
+  }
+}
+
+@media (max-width: 768px) {
+  .profile-sidebar-card {
+    margin: 0 8px 16px 8px;
+  }
+  
+  .profile-sidebar-age-section {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .profile-sidebar-settings-item {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .profile-sidebar-settings-update-btn {
+    align-self: flex-end;
+  }
+}
+
+/* Dark theme adjustments */
+[data-theme="dark"] .profile-sidebar-card {
+  background: #1a1a1b;
+  border-color: #343536;
+}
+
+[data-theme="dark"] .profile-sidebar-banner {
+  background: linear-gradient(135deg, #000d1a 0%, #001a33 100%); /* Even darker gradient for dark mode */
+}
+
+[data-theme="dark"] .profile-sidebar-username {
+  color: #d7dadc;
+}
+
+[data-theme="dark"] .profile-sidebar-share-btn {
+  background: #4b5563; /* Darker grey for dark mode */
+  color: #d7dadc; /* Light text for dark mode */
+}
+
+[data-theme="dark"] .profile-sidebar-share-btn:hover {
+  background: #6b7280; /* Lighter grey on hover */
+}
+
+[data-theme="dark"] .profile-sidebar-share-btn-icon svg {
+  color: #d7dadc !important; /* Light icon for dark mode */
+}
+
+[data-theme="dark"] .profile-sidebar-followers-section,
+[data-theme="dark"] .profile-sidebar-karma-section,
+[data-theme="dark"] .profile-sidebar-age-section,
+[data-theme="dark"] .profile-sidebar-gold-section,
+[data-theme="dark"] .profile-sidebar-follow-section,
+[data-theme="dark"] .profile-sidebar-settings-section {
+  background: #1a1a1b; /* Same dark background */
+}
+
+[data-theme="dark"] .profile-sidebar-followers-count {
+  color: #818384; /* Same as label in dark mode */
+}
+
+[data-theme="dark"] .profile-sidebar-followers-label {
+  color: #818384;
+}
+
+[data-theme="dark"] .profile-sidebar-karma-value,
+[data-theme="dark"] .profile-sidebar-contributions-value,
+[data-theme="dark"] .profile-sidebar-age-value,
+[data-theme="dark"] .profile-sidebar-active-value,
+[data-theme="dark"] .profile-sidebar-gold-value {
+  color: #d7dadc;
+}
+
+[data-theme="dark"] .profile-sidebar-karma-label,
+[data-theme="dark"] .profile-sidebar-contributions-label,
+[data-theme="dark"] .profile-sidebar-age-label,
+[data-theme="dark"] .profile-sidebar-active-label,
+[data-theme="dark"] .profile-sidebar-gold-label {
+  color: #818384;
+}
+
+[data-theme="dark"] .profile-sidebar-settings-section {
+  border-top-color: #343536;
+}
+
+[data-theme="dark"] .profile-sidebar-settings-item {
+  border-bottom-color: #343536;
+}
+
+[data-theme="dark"] .profile-sidebar-settings-icon svg {
+  color: #d7dadc !important; /* White icon for dark mode */
+  stroke: #d7dadc !important;
+}
+
+[data-theme="dark"] .profile-sidebar-settings-item-title {
+  color: #d7dadc;
+}
+
+[data-theme="dark"] .profile-sidebar-settings-item-description {
+  color: #818384;
+}
+
+[data-theme="dark"] .profile-sidebar-settings-update-btn {
+  background: #4b5563; /* Dark grey for dark mode */
+  color: #d7dadc; /* Light text for dark mode */
+}
+
+[data-theme="dark"] .profile-sidebar-settings-update-btn:hover {
+  background: #6b7280; /* Lighter grey on hover */
+}
+
+[data-theme="dark"] .profile-sidebar-follow-btn {
+  background: #0079d3;
+  color: white;
+}
+
+[data-theme="dark"] .profile-sidebar-follow-btn:hover {
+  background: #005ba1;
+}
+
+[data-theme="dark"] .profile-sidebar-follow-btn.profile-sidebar-following {
+  background: #24a0ed;
+}
+
+[data-theme="dark"] .profile-sidebar-follow-btn.profile-sidebar-following:hover {
+  background: #1484d6;
+}
+
+[data-theme="dark"] .profile-sidebar-skeleton {
+  background: #1a1a1b;
+  border-color: #343536;
+}
+
+[data-theme="dark"] .profile-sidebar-skeleton-line {
+  background: #343536;
+}
+
+/* GLOBAL FIX: Override the problematic SVG transition rule */
+.profile-sidebar-card svg,
+.profile-sidebar-settings-icon svg,
+.profile-sidebar-share-btn-icon svg {
+  transition: none !important;
+  animation: none !important;
+}

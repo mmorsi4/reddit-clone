@@ -50,21 +50,36 @@ function PostPage() {
     }
   }, [post?.community?.name, allCommunities]);
 
-  
-
   // Fetch current user info
   useEffect(() => {
     const fetchCurrentUser = async () => {
       try {
+        const token = localStorage.getItem('token');
+        
+        if (!token) {
+          // If no token, set a default user
+          const savedUsername = localStorage.getItem("username") || "your_username";
+          const savedAvatar = localStorage.getItem("userAvatar") || "../images/avatar.png";
+          
+          setCurrentUser({
+            username: savedUsername,
+            avatarUrl: savedAvatar
+          });
+          return;
+        }
+        
         const res = await fetch("/api/users/me", {
-          headers: { "Content-Type": "application/json" }
-          // REMOVED: credentials: "include"
+          headers: { 
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          }
         });
         
         if (res.ok) {
           const userData = await res.json();
           setCurrentUser(userData);
         } else {
+          // Fallback to localStorage data
           const savedUsername = localStorage.getItem("username") || "your_username";
           const savedAvatar = localStorage.getItem("userAvatar") || "../images/avatar.png";
           
@@ -86,14 +101,14 @@ function PostPage() {
 
   const fetchPost = useCallback(async () => {
     if (!postId) {
-        setIsLoading(false);
-        setPost(null); // Or set an error state
-        console.error("Post ID is missing. Cannot fetch.");
-        return; 
+      setIsLoading(false);
+      setPost(null);
+      console.error("Post ID is missing. Cannot fetch.");
+      return; 
     }
     try {
       setIsLoading(true);
-      const res = await fetch(`/api/posts/${postId}`); // REMOVED: localhost:5001 and credentials
+      const res = await fetch(`/api/posts/${postId}`);
       if (!res.ok) throw new Error("Post not found");
       const data = await res.json();
       setPost(data.post);
@@ -186,10 +201,20 @@ function PostPage() {
         value = currentVote === -1 ? 0 : -1;
       }
       
-      const res = await fetch(`/api/posts/${postId}/vote`, { // REMOVED: localhost:5001
+      const token = localStorage.getItem('token');
+      
+      if (!token) {
+        alert("You need to be logged in to vote!");
+        return;
+      }
+      
+      const res = await fetch(`/api/posts/${postId}/vote`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" }
-        // REMOVED: credentials: "include"
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({ value: value })
       });
 
       if (res.ok) {
@@ -199,6 +224,9 @@ function PostPage() {
           score: responseData.score,
           userVote: value
         }));
+      } else {
+        const errorText = await res.text();
+        console.error("Vote failed:", errorText);
       }
     } catch (error) {
       console.error("Vote error:", error);
@@ -206,39 +234,51 @@ function PostPage() {
   };
 
   const handleAddComment = async () => {
-    if (!newComment.trim()) return;
+    if (!newComment.trim() || !postId) return;
 
     try {
-      const res = await fetch("/api/comments", { // REMOVED: localhost:5001
+      const token = localStorage.getItem('token');
+      
+      if (!token) {
+        alert("You need to be logged in to comment!");
+        return;
+      }
+
+      const res = await fetch("/api/comments", {
         method: "POST",
-        headers: { "Content-Type": "application/json" }
-        // REMOVED: credentials: "include"
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          post: postId,
+          body: newComment,
+          parent: null
+        })
       });
 
-      if (!res.ok) throw new Error("Failed to save comment");
+      if (!res.ok) {
+        const errorText = await res.text();
+        console.error("Failed to save comment:", errorText);
+        throw new Error(`Failed to save comment: ${errorText}`);
+      }
 
       const savedComment = await res.json();
       
-      const commentToAdd = {
-        _id: savedComment._id || Date.now().toString(),
-        body: newComment,
-        author: {
-          username: currentUser?.username || "You",
-          avatar: currentUser?.avatar || "/default-avatar.png"
-        },
-        createdAt: new Date().toISOString(),
-        upvotes: 0,
-        userVote: null
-      };
-      
-      setComments((prev) => [...prev, commentToAdd]);
+      // Update comments with the server response
+      setComments((prev) => [savedComment, ...prev]);
       setNewComment("");
       setShowFormattingToolbar(false);
-      await fetchPost();
+      
+      // Update comment count
+      setPost(prev => ({
+        ...prev,
+        commentCount: (prev.commentCount || 0) + 1
+      }));
 
     } catch (error) {
       console.error("Error saving comment:", error);
-      alert("Failed to post comment");
+      alert("Failed to post comment: " + error.message);
     }
   };
 
@@ -314,9 +354,12 @@ function PostPage() {
           </div>
           <div className="search-container">
             <div className="search-input-wrapper">
-              <svg className="search-icon" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
-              </svg>
+              {/* NUCLEAR FIX: Search icon container */}
+              <span className="search-icon-container">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+                </svg>
+              </span>
               <input
                 type="text"
                 className="search-input"
@@ -372,10 +415,13 @@ function PostPage() {
           <div className="post-main-column">
             {/* Combined Back Button and Community Info */}
             <div className="post-header-navigation">
+              {/* NUCLEAR FIX: Back button with icon container */}
               <button className="back-button" onClick={() => window.history.back()}>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
-                </svg>
+                <span className="back-button-icon">
+                  <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
+                  </svg>
+                </span>
               </button>
               
               {/* UPDATED: Using unique post-page class names */}
@@ -405,15 +451,18 @@ function PostPage() {
               {/* Options Button with Dropdown - MOVED OUTSIDE community-info div */}
               <div className="post-options-wrapper">
                 <div className="post-options-container">
+                  {/* NUCLEAR FIX: Options button with icon container */}
                   <button 
                     className="post-options-button"
                     onClick={() => setShowDropdown(!showDropdown)}
                   >
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                      <circle cx="5" cy="12" r="1.5"/>
-                      <circle cx="12" cy="12" r="1.5"/>
-                      <circle cx="19" cy="12" r="1.5"/>
-                    </svg>
+                    <span className="post-options-icon">
+                      <svg viewBox="0 0 24 24" fill="currentColor">
+                        <circle cx="5" cy="12" r="1.5"/>
+                        <circle cx="12" cy="12" r="1.5"/>
+                        <circle cx="19" cy="12" r="1.5"/>
+                      </svg>
+                    </span>
                   </button>
                   
                   {showDropdown && (

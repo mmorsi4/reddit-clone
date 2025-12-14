@@ -147,9 +147,9 @@
   padding: 8px 0;
 }
 
-/* FIX 1A: Back button - Set position: relative to anchor the SVG */
+/* NUCLEAR FIX 1: Back button */
 .back-button {
-  all: unset;
+  all: unset !important;
   background: var(--post-action-bg) !important;
   border: none !important;
   border-radius: 50% !important;
@@ -157,12 +157,12 @@
   height: 32px !important;
   
   /* Use standard Flex properties for centering */
-  display: flex; 
-  align-items: center;
-  justify-content: center;
+  display: flex !important; 
+  align-items: center !important;
+  justify-content: center !important;
   
   /* Critical Fix: Anchors the absolute SVG inside */
-  position: relative; 
+  position: relative !important; 
   
   cursor: pointer !important;
   transition: background-color 0.2s !important;
@@ -177,34 +177,48 @@
   background: var(--post-action-hover) !important;
 }
 
-/* FIX 1B: Back button SVG - Override global absolute positioning if necessary */
-.back-button svg {
-  color: var(--post-text) !important;
+/* NUCLEAR FIX: Back button icon container */
+.back-button-icon {
+  display: inline-block !important;
   width: 20px !important;
   height: 20px !important;
+  position: relative !important;
+  flex-shrink: 0 !important;
+  vertical-align: middle !important;
+}
+
+/* NUCLEAR FIX: Back button SVG */
+.back-button-icon svg {
+  position: absolute !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  width: 16px !important;
+  height: 16px !important;
   display: block !important;
-  margin: 0 !important;
-  
-  /* Explicitly override global SVG position to use Flex centering */
-  position: static !important;
-  top: unset !important;
-  left: unset !important;
-  transform: none !important;
+  color: var(--post-text) !important;
+  fill: currentColor !important;
+  stroke: currentColor !important;
+  transition: none !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  box-sizing: border-box !important;
+  overflow: visible !important;
 }
 
 /* Dark mode icon fix for back button */
-[data-theme="dark"] .back-button svg {
-  filter: invert(1) brightness(1.5);
+[data-theme="dark"] .back-button-icon svg {
+  filter: invert(1) brightness(1.5) !important;
 }
 
-/* FIX 2A: Options Container - Set position: relative to anchor the dropdown */
+/* NUCLEAR FIX 2A: Options Container - Set position: relative to anchor the dropdown */
 .post-options-container {
   position: relative;
 }
 
-/* FIX 2B: Options button - Set position: relative to anchor the SVG */
+/* NUCLEAR FIX 2B: Options button */
 .post-options-button {
-  all: unset;
+  all: unset !important;
   background: var(--post-vote-bg) !important;
   border: none !important;
   border-radius: 50% !important;
@@ -212,12 +226,12 @@
   height: 32px !important;
   
   /* Use standard Flex properties for centering */
-  display: flex; 
-  align-items: center;
-  justify-content: center;
+  display: flex !important; 
+  align-items: center !important;
+  justify-content: center !important;
   
   /* Critical Fix: Anchors the absolute SVG inside */
-  position: relative; 
+  position: relative !important; 
   
   cursor: pointer !important;
   transition: all 0.2s !important;
@@ -234,24 +248,38 @@
   background: var(--post-vote-hover) !important;
 }
 
-/* FIX 2C: Options button SVG - Override global absolute positioning if necessary */
-.post-options-button svg {
-  color: var(--post-meta-text) !important;
+/* NUCLEAR FIX: Options button icon container */
+.post-options-icon {
+  display: inline-block !important;
   width: 20px !important;
   height: 20px !important;
+  position: relative !important;
+  flex-shrink: 0 !important;
+  vertical-align: middle !important;
+}
+
+/* NUCLEAR FIX: Options button SVG */
+.post-options-icon svg {
+  position: absolute !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  width: 16px !important;
+  height: 16px !important;
   display: block !important;
-  margin: 0 !important;
-  
-  /* Explicitly override global SVG position to use Flex centering */
-  position: static !important; 
-  top: unset !important;
-  left: unset !important;
-  transform: none !important;
+  color: var(--post-meta-text) !important;
+  fill: currentColor !important;
+  stroke: currentColor !important;
+  transition: none !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  box-sizing: border-box !important;
+  overflow: visible !important;
 }
 
 /* Dark mode icon fix for options button */
-[data-theme="dark"] .post-options-button svg {
-  filter: invert(1) brightness(1.5);
+[data-theme="dark"] .post-options-icon svg {
+  filter: invert(1) brightness(1.5) !important;
 }
 
 /* Options button wrapper (outermost) */
@@ -773,22 +801,42 @@
   box-shadow: 0 0 0 2px var(--post-search-focus-shadow);
 }
 
-.search-icon {
-  position: absolute;
-  left: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 16px;
-  height: 16px;
-  color: var(--post-meta-text);
-  flex-shrink: 0;
-  pointer-events: none;
-  transition: color 0.3s ease;
+/* NUCLEAR FIX: Search icon container */
+.search-icon-container {
+  display: inline-block !important;
+  width: 18px !important;
+  height: 18px !important;
+  position: absolute !important;
+  left: 12px !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  flex-shrink: 0 !important;
+  vertical-align: middle !important;
+  pointer-events: none !important;
+}
+
+/* NUCLEAR FIX: Search icon SVG */
+.search-icon-container svg {
+  position: absolute !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  width: 16px !important;
+  height: 16px !important;
+  display: block !important;
+  color: var(--post-meta-text) !important;
+  fill: currentColor !important;
+  stroke: currentColor !important;
+  transition: none !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  box-sizing: border-box !important;
+  overflow: visible !important;
 }
 
 /* Dark mode icon fix for search icon */
-[data-theme="dark"] .search-icon {
-  filter: invert(1) brightness(1.5);
+[data-theme="dark"] .search-icon-container svg {
+  filter: invert(1) brightness(1.5) !important;
 }
 
 .search-input {
@@ -996,4 +1044,266 @@
               color 0.3s ease,
               border-color 0.3s ease,
               box-shadow 0.3s ease;
+}
+
+/* --- CommentWithVotes Component Specific Styles --- */
+
+.comment-item {
+    display: flex;
+    /* Base padding to allow space for the vertical line and button on the left */
+    padding: 8px 0 0 0;
+    margin-bottom: 4px; /* Space between sibling comments */
+}
+
+/* Container for the vertical line and expand/collapse button */
+.comment-line-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 24px; /* Fixed width for the left column */
+    flex-shrink: 0;
+}
+
+.expand-collapse-btn {
+    all: unset;
+    cursor: pointer;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    line-height: 1;
+    font-weight: bold;
+    color: var(--post-meta-text);
+    background-color: transparent;
+    border: 1px solid transparent;
+    margin-bottom: 4px;
+    transition: all 0.2s;
+}
+
+.expand-collapse-btn:hover {
+    background-color: var(--post-vote-hover);
+    color: var(--post-text);
+    border-color: var(--post-action-border);
+}
+
+.comment-vertical-line {
+    /* The main visual element for nesting */
+    width: 2px;
+    flex-grow: 1; /* Make it take up the remaining height */
+    background-color: var(--post-light-border);
+    cursor: pointer; /* Inherit the clickable area of the thread */
+    transition: background-color 0.3s ease;
+}
+
+.comment-vertical-line:hover {
+    background-color: #0079d3; /* Highlight color on hover */
+}
+
+.comment-content {
+    flex: 1;
+    min-width: 0;
+    padding-left: 8px; /* Space between line container and content */
+}
+
+/* Header (Author, Time) */
+.comment-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 4px;
+}
+
+.comment-author {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.comment-avatar {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.comment-username {
+    font-weight: 600;
+    font-size: 13px;
+    color: var(--post-username-text);
+    transition: color 0.3s ease;
+}
+
+.comment-time {
+    font-size: 12px;
+    color: var(--post-meta-text);
+    transition: color 0.3s ease;
+}
+
+/* Comment Body */
+.comment-text {
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--post-text);
+    width: 100%;
+    overflow-wrap: break-word;
+    transition: color 0.3s ease;
+}
+
+.comment-text strong, .comment-text em, .comment-text code, .comment-text s {
+    /* Ensure markdown styles inherit main comment text color */
+    color: inherit; 
+}
+
+/* Actions below comment (Votes, Reply button) */
+.comment-actions {
+    display: flex;
+    align-items: center;
+    margin-top: 8px;
+    margin-bottom: 4px;
+}
+
+.comment-votes-below {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 0; /* Add a little space around the vote area */
+}
+
+.comment-votes-below img {
+    cursor: pointer;
+    width: 20px;
+    height: 20px;
+    padding: 4px;
+    border-radius: 50%;
+    transition: background-color 0.2s, filter 0.3s ease;
+}
+
+.comment-votes-below img:hover {
+    background-color: var(--post-vote-hover);
+}
+
+/* Specific vote button filter adjustments (ensure they match the post-voting section) */
+.comment-votes-below img[src$="upvote.svg"]:hover,
+.comment-votes-below img[src$="upvote-active.svg"] {
+    filter: brightness(0) saturate(100%) invert(33%) sepia(99%) saturate(2485%) hue-rotate(1deg) brightness(102%) contrast(106%);
+}
+
+.comment-votes-below img[src$="downvote.svg"]:hover,
+.comment-votes-below img[src$="downvote-active.svg"] {
+    filter: brightness(0) saturate(100%) invert(44%) sepia(98%) saturate(605%) hue-rotate(194deg) brightness(97%) contrast(101%);
+}
+
+[data-theme="dark"] .comment-votes-below img {
+    filter: invert(1) brightness(1.5);
+}
+
+.comment-vote-score {
+    font-weight: 700;
+    font-size: 12px;
+    color: var(--post-text);
+    min-width: 16px;
+    text-align: center;
+    transition: color 0.3s ease;
+}
+
+.comment-reply-icon {
+    margin-left: 12px; /* Space between votes and reply icon */
+}
+
+.reply-count {
+    font-size: 12px;
+    color: var(--post-meta-text);
+    margin-left: 8px;
+    transition: color 0.3s ease;
+}
+
+/* Reply Input Area */
+.reply-input-area {
+    margin-top: 8px;
+    padding: 8px;
+    border: 1px solid var(--post-light-border);
+    border-radius: 4px;
+    background-color: var(--post-comment-input-bg);
+    transition: border-color 0.3s ease, background-color 0.3s ease;
+}
+
+.reply-textarea {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid var(--post-comment-input-border);
+    border-radius: 4px;
+    resize: vertical;
+    font-family: inherit;
+    font-size: 13px;
+    transition: border-color 0.2s, background-color 0.3s ease, color 0.3s ease;
+    min-height: 60px;
+    display: block;
+    background-color: var(--post-card-bg); /* Use a slightly different bg for contrast */
+    color: var(--post-text);
+    box-sizing: border-box;
+}
+
+.reply-textarea:focus {
+    outline: none;
+    border-color: #0079d3;
+}
+
+.reply-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.reply-cancel-btn,
+.reply-submit-btn {
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.reply-cancel-btn {
+    background: var(--post-comment-btn-bg);
+    border: 1px solid var(--post-comment-btn-border);
+    color: var(--post-comment-btn-text);
+}
+
+.reply-cancel-btn:hover {
+    background: var(--post-vote-hover);
+    border-color: var(--post-action-border);
+}
+
+.reply-submit-btn {
+    background: var(--post-comment-submit-bg);
+    color: var(--post-comment-submit-text);
+    border: none;
+}
+
+.reply-submit-btn:hover:not(:disabled) {
+    background: var(--post-comment-submit-hover);
+}
+
+.reply-submit-btn:disabled {
+    background: #666;
+    cursor: not-allowed;
+}
+
+/* Nested Replies Container */
+.comment-replies {
+    /* No additional padding needed here, as the recursion handles the structure */
+    margin-top: 4px;
+    width: 100%;
+}
+
+/* GLOBAL FIX: Override the problematic SVG transition rule for post page */
+.back-button-icon svg,
+.post-options-icon svg,
+.search-icon-container svg {
+  transition: none !important;
+  animation: none !important;
 }

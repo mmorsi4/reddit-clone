@@ -27,109 +27,209 @@ function CommentWithVotes({ comment, onReplyAdded, depth = 0 }) {
 
     // Fetch current user info
     useEffect(() => {
-        const fetchCurrentUser = async () => {
-            try {
-                const res = await fetch('http://localhost:5001/api/auth/me', {
-                    credentials: "include"
-                });
-                if (res.ok) {
-                    const userData = await res.json();
-                    setCurrentUser(userData);
-                }
-            } catch (error) {
-                console.error("Failed to fetch user:", error);
+        // In CommentWithVotes.js, change fetchCurrentUser:
+const fetchCurrentUser = async () => {
+    try {
+        const token = localStorage.getItem('token');
+        
+        if (!token) {
+            console.log("No token found for fetching user");
+            return;
+        }
+        
+        // ✅ CORRECT ENDPOINT:
+        const res = await fetch('/api/users/me', {
+            headers: { 
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
             }
-        };
+        });
+        
+        if (res.ok) {
+            const userData = await res.json();
+            setCurrentUser(userData);
+        }
+    } catch (error) {
+        console.error("Failed to fetch user:", error);
+    }
+};
         fetchCurrentUser();
     }, []);
 
     const handleUpvote = async () => {
-        try {
-            const newVote = vote === 1 ? 0 : 1;
-            const res = await fetch(`http://localhost:5001/api/comments/${comment._id}/vote`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                credentials: "include",
-                body: JSON.stringify({ value: newVote })
-            });
-
-            if (res.ok) {
-                const data = await res.json();
-                setVote(newVote);
-                setVoteCount(data.score);
-            }
-        } catch (error) {
-            console.error("Vote error:", error);
+    console.log("=== DEBUG UPVOTE START ===");
+    console.log("Comment ID:", comment._id);
+    
+    try {
+        const newVote = vote === 1 ? 0 : 1;
+        const token = localStorage.getItem('token');
+        
+        if (!token) {
+            alert("You need to be logged in to vote!");
+            return;
         }
-    };
+        
+        const res = await fetch(`/api/comments/${comment._id}/vote`, {
+            method: "POST",
+            headers: { 
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
+            },
+            body: JSON.stringify({ value: newVote })
+        });
+
+        console.log("Vote response status:", res.status);
+        
+        if (res.ok) {
+            const data = await res.json();
+            console.log("Vote successful, new score:", data.score);
+            setVote(newVote);
+            setVoteCount(data.score);
+        } else {
+            const errorText = await res.text();
+            console.error("Upvote failed:", errorText);
+            alert("Failed to vote: " + errorText);
+        }
+    } catch (error) {
+        console.error("Vote error:", error);
+    }
+    console.log("=== DEBUG UPVOTE END ===");
+};
 
     const handleDownvote = async () => {
-        try {
-            const newVote = vote === -1 ? 0 : -1;
-            const res = await fetch(`http://localhost:5001/api/comments/${comment._id}/vote`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                credentials: "include",
-                body: JSON.stringify({ value: newVote })
-            });
-
-            if (res.ok) {
-                const data = await res.json();
-                setVote(newVote);
-                setVoteCount(data.score);
-            }
-        } catch (error) {
-            console.error("Vote error:", error);
+    console.log("=== DEBUG DOWNVOTE START ===");
+    console.log("Comment ID:", comment._id);
+    console.log("Current vote:", vote);
+    console.log("Current vote count:", voteCount);
+    
+    try {
+        const newVote = vote === -1 ? 0 : -1;
+        const token = localStorage.getItem('token');
+        
+        console.log("New vote value:", newVote);
+        console.log("Token exists:", !!token);
+        
+        if (!token) {
+            alert("You need to be logged in to vote!");
+            return;
         }
-    };
+        
+        console.log("Sending request to:", `/api/comments/${comment._id}/vote`);
+        console.log("Request body:", { value: newVote });
+        
+        const res = await fetch(`/api/comments/${comment._id}/vote`, {
+            method: "POST",
+            headers: { 
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
+            },
+            body: JSON.stringify({ value: newVote })
+        });
+
+        console.log("Downvote response status:", res.status);
+        console.log("Response OK?", res.ok);
+        
+        const responseText = await res.text();
+        console.log("Response text:", responseText);
+        
+        if (res.ok) {
+            const data = JSON.parse(responseText);
+            console.log("Downvote successful!");
+            console.log("New score from server:", data.score);
+            console.log("User vote from server:", data.userVote);
+            
+            setVote(newVote);
+            setVoteCount(data.score);
+            
+            console.log("State updated - vote:", newVote, "voteCount:", data.score);
+        } else {
+            console.error("Downvote failed - Full response:", {
+                status: res.status,
+                statusText: res.statusText,
+                body: responseText
+            });
+            
+            // Try to parse error message
+            let errorMessage = "Failed to vote";
+            try {
+                const errorData = JSON.parse(responseText);
+                errorMessage = errorData.message || errorMessage;
+            } catch (e) {
+                errorMessage = responseText || errorMessage;
+            }
+            
+            alert("Failed to vote: " + errorMessage);
+        }
+    } catch (error) {
+        console.error("Downvote catch error:", error);
+        console.error("Error name:", error.name);
+        console.error("Error message:", error.message);
+        console.error("Error stack:", error.stack);
+    }
+    console.log("=== DEBUG DOWNVOTE END ===");
+};
 
     const handleAddReply = async () => {
-        if (replyText.trim() === "") return;
+    if (replyText.trim() === "") return;
+    
+    try {
+        const token = localStorage.getItem('token');
         
-        try {
-            // Save reply to database
-            const res = await fetch("http://localhost:5001/api/comments", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                credentials: "include",
-                body: JSON.stringify({
-                    post: comment.post, // Same post as parent comment
-                    body: replyText,
-                    parent: comment._id, // This makes it a reply!
-                }),
-            });
-
-            if (!res.ok) throw new Error("Failed to save reply");
-
-            const savedReply = await res.json();
-            
-            // Add the new reply to our local state
-            const replyToAdd = {
-                ...savedReply,
-                author: {
-                    username: currentUser?.username || "You",
-                    displayName: currentUser?.displayName,
-                    avatarUrl: currentUser?.avatarUrl
-                },
-                userVote: 0,
-                score: 0,
-                replies: []
-            };
-            
-            setReplies(prevReplies => [...prevReplies, replyToAdd]);
-            setReplyText("");
-            setShowReplyInput(false);
-            setExpanded(true); // Auto-expand when new reply is added
-            
-            // Notify parent to refresh comments if needed
-            if (onReplyAdded) onReplyAdded();
-            
-        } catch (error) {
-            console.error("Error saving reply:", error);
-            alert("Failed to post reply");
+        if (!token) {
+            alert("You need to be logged in to reply!");
+            return;
         }
-    };
+        
+        // Save reply to database
+        const res = await fetch("/api/comments", {
+            method: "POST",
+            headers: { 
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
+            },
+            body: JSON.stringify({
+                post: comment.post,
+                body: replyText,
+                parent: comment._id,
+            }),
+        });
 
+        if (!res.ok) {
+            const errorText = await res.text();
+            throw new Error(`Failed to save reply: ${errorText}`);
+        }
+
+        const savedReply = await res.json();
+        
+        // Get user info from localStorage or currentUser state
+        const username = localStorage.getItem('username') || "You";
+        const avatarUrl = localStorage.getItem('userAvatar') || "/default-avatar.png";
+        
+        // Add the new reply to our local state with proper author info
+        const replyToAdd = {
+            ...savedReply,
+            author: {
+                _id: savedReply.author, // This is the user ID from backend
+                username: username,
+                avatarUrl: avatarUrl
+            },
+            userVote: 0,
+            score: 0,
+            replies: []
+        };
+        
+        setReplies(prevReplies => [...prevReplies, replyToAdd]);
+        setReplyText("");
+        setShowReplyInput(false);
+        setExpanded(true);
+        
+        if (onReplyAdded) onReplyAdded();
+        
+    } catch (error) {
+        console.error("Error saving reply:", error);
+        alert("Failed to post reply: " + error.message);
+    }
+};
     // Calculate time difference for display
     const getTimeAgo = (timestamp) => {
         if (!timestamp) return "just now";

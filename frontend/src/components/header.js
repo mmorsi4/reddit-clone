@@ -52,54 +52,48 @@ function Header() {
   }, []);
 
   useEffect(() => {
-    const fetchCurrentUser = async () => {
-      try {
-        const res = await fetch("/api/users/me", {
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-        });
-        if (res.ok) {
-          const data = await res.json();
-          setCurrentUser(data);
-          console.log(data)
+  const fetchCurrentUser = async () => {
+    try {
+      const res = await fetch("/api/users/me", {
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setCurrentUser(data);
+        console.log(data)
 
-          if (data.avatarUrl && data.avatarUrl.startsWith('data:image')) {
-            setCustomAvatar(data.avatarUrl);
-          } else {
-            const savedAvatar = localStorage.getItem("userAvatar");
-            if (savedAvatar) {
-              setCustomAvatar(savedAvatar);
-            }
+        // FIX: Always set customAvatar if avatarUrl exists in response
+        if (data.avatarUrl) {
+          setCustomAvatar(data.avatarUrl);
+        } else {
+          // Only fallback if API doesn't provide avatarUrl
+          const savedAvatar = localStorage.getItem("userAvatar");
+          if (savedAvatar) {
+            setCustomAvatar(savedAvatar);
           }
         }
-      } catch (err) {
-        console.error("Failed to fetch current user", err);
       }
-    };
+    } catch (err) {
+      console.error("Failed to fetch current user", err);
+    }
+  };
 
-    fetchCurrentUser();
+  fetchCurrentUser();
 
-    const handleAvatarUpdate = () => {
-      const savedAvatar = localStorage.getItem("userAvatar");
-      if (savedAvatar) {
-        setCustomAvatar(savedAvatar);
-      }
-    };
+  const handleAvatarUpdate = () => {
+    const savedAvatar = localStorage.getItem("userAvatar");
+    if (savedAvatar) {
+      setCustomAvatar(savedAvatar);
+    }
+  };
 
-    window.addEventListener('avatarUpdated', handleAvatarUpdate);
+  window.addEventListener('avatarUpdated', handleAvatarUpdate);
 
-    const interval = setInterval(() => {
-      const savedAvatar = localStorage.getItem("userAvatar");
-      if (savedAvatar && savedAvatar !== customAvatar) {
-        setCustomAvatar(savedAvatar);
-      }
-    }, 1000);
-
-    return () => {
-      window.removeEventListener('avatarUpdated', handleAvatarUpdate);
-      clearInterval(interval);
-    };
-  }, []);
+  return () => {
+    window.removeEventListener('avatarUpdated', handleAvatarUpdate);
+  };
+}, []);
 
   const toggleChat = (event) => {
     event.preventDefault();

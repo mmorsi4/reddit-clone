@@ -3,7 +3,9 @@ import { useParams } from "react-router-dom";
 import { Link } from "react-router-dom";
 import Sidebar from "../components/sidebar";
 import Header from "../components/header";
-import Post from "../components/post"
+import Post from "../components/post";
+import ProfileSidebar from "../components/ProfileSidebar"; // Import the new component
+import "../styles/ProfileSidebar.css"; // Import the CSS
 
 function ViewProfile() {
   const [activeTab, setActiveTab] = useState("overview");
@@ -12,6 +14,7 @@ function ViewProfile() {
   const [userPosts, setUserPosts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [joinedCommunityIds, setJoinedCommunityIds] = useState([]); 
+  const [isOwnProfile, setIsOwnProfile] = useState(false);
   const { username } = useParams(); // get username from url
 
   useEffect(() => {
@@ -19,7 +22,6 @@ function ViewProfile() {
       const res = await fetch(`/api/users/${username}`, {
         method: "GET",
         headers: { "Content-Type": "application/json" }
-        // REMOVED: credentials: "include"
       });
 
       if (res.status === 404) {
@@ -32,6 +34,10 @@ function ViewProfile() {
       const data = await res.json();
       const userData = data;
       setUser(userData);
+      
+      // Check if this is the current user's own profile
+      const currentUsername = localStorage.getItem('username');
+      setIsOwnProfile(currentUsername === username);
     }
 
     fetchProfile();
@@ -63,10 +69,9 @@ function ViewProfile() {
   const fetchUserComments = async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/comments/my", { // REMOVED: localhost:5001
+      const res = await fetch("/api/comments/my", {
         method: "GET",
         headers: { "Content-Type": "application/json" }
-        // REMOVED: credentials: "include"
       });
 
       if (res.ok) {
@@ -87,10 +92,9 @@ function ViewProfile() {
   const fetchUserPosts = async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/posts/my/posts", { // REMOVED: localhost:5001
+      const res = await fetch("/api/posts/my/posts", {
         method: "GET",
         headers: { "Content-Type": "application/json" }
-        // REMOVED: credentials: "include"
       });
       if (res.ok) {
         const posts = await res.json();
@@ -181,7 +185,7 @@ function ViewProfile() {
                 initialComments={post.commentCount || 0}
                 community={post.community?.name || "unknown"}
                 isAllFeed={true}
-                communityAvatarUrl={post.community?.avatar} // ✨ FIXED: Only pass the custom URL
+                communityAvatarUrl={post.community?.avatar}
                 isJoined={isUserJoined}
                 onToggleJoin={null}
                 viewType="normal"
@@ -237,7 +241,7 @@ function ViewProfile() {
                 initialComments={post.commentCount || 0}
                 community={post.community?.name || "unknown"}
                 isAllFeed={true} 
-                communityAvatarUrl={post.community?.avatar} // ✨ FIXED: Only pass the custom URL
+                communityAvatarUrl={post.community?.avatar}
                 isJoined={isUserJoined}
                 onToggleJoin={null}
                 viewType="normal"
@@ -296,80 +300,102 @@ function ViewProfile() {
     <>
       <Header />
       <Sidebar/>
-      <div className="main">
-        <div className="profile-header">
-          <img
-            id="profile-avatar"
-            src={user.avatarUrl ? user.avatarUrl : "/images/avatar.png"} // Fixed to root-relative path
-            alt="Avatar"
-            className="profile-avatar"
-          />
-          <div className="profile-info">
-            <h2 id="profile-name" className="profile-name">
-              {user.username}
-            </h2>
-            <p id="profile-username" className="profile-username">
-              u/{user.username}
-            </p>
+      <div className="profile-page-container">
+        <div className="profile-page-content">
+          {/* Main Content Column */}
+          <div className="profile-main-column">
+            <div className="profile-header-main">
+              <div className="profile-header-avatar-info">
+                <img
+                  id="profile-avatar"
+                  src={user.avatarUrl ? user.avatarUrl : "/images/avatar.png"}
+                  alt="Avatar"
+                  className="profile-avatar-main"
+                />
+                <div className="profile-info-main">
+                  <h2 id="profile-name" className="profile-name-main">
+                    {user.username}
+                  </h2>
+                  <p id="profile-username" className="profile-username-main">
+                    u/{user.username}
+                  </p>
+                </div>
+              </div>
+              
+              {isOwnProfile && (
+                <Link to="/edit-avatar" className="profile-edit-btn">
+                  Edit Profile
+                </Link>
+              )}
+            </div>
+
+            <div className="profile-tabs-main">
+              <button 
+                className={`profile-tab ${activeTab === "overview" ? "profile-tab-active" : ""}`}
+                onClick={() => handleTabClick("overview")}
+              >
+                Overview
+              </button>
+              <button 
+                className={`profile-tab ${activeTab === "posts" ? "profile-tab-active" : ""}`}
+                onClick={() => handleTabClick("posts")}
+              >
+                Posts
+              </button>
+              <button 
+                className={`profile-tab ${activeTab === "comments" ? "profile-tab-active" : ""}`}
+                onClick={() => handleTabClick("comments")}
+              >
+                Comments
+              </button>
+              <button 
+                className={`profile-tab ${activeTab === "hidden" ? "profile-tab-active" : ""}`}
+                onClick={() => handleTabClick("hidden")}
+              >
+                Hidden
+              </button>
+              <button 
+                className={`profile-tab ${activeTab === "upvoted" ? "profile-tab-active" : ""}`}
+                onClick={() => handleTabClick("upvoted")}
+              >
+                Upvoted
+              </button>
+              <button 
+                className={`profile-tab ${activeTab === "downvoted" ? "profile-tab-active" : ""}`}
+                onClick={() => handleTabClick("downvoted")}
+              >
+                Downvoted
+              </button>
+            </div>
+
+            <div className="profile-content-main">
+              <div className="profile-content-header">
+                <div className="showing-content-main">
+                  <span>Showing {activeTab === "overview" ? "all" : activeTab} content</span>
+                </div>
+
+                {isOwnProfile && (
+                  <div className="profile-create-post">
+                    <Link to="/create_post">
+                      <button className="profile-create-post-btn">+ Create Post</button>
+                    </Link>
+                    <select className="profile-sort-select">
+                      <option>New</option>
+                      <option>Top</option>
+                      <option>Hot</option>
+                    </select>
+                  </div>
+                )}
+              </div>
+
+              {renderTabContent()}
+            </div>
           </div>
-        </div>
 
-        <div className="profile-tabs">
-          <button 
-            className={`tab ${activeTab === "overview" ? "active" : ""}`}
-            onClick={() => handleTabClick("overview")}
-          >
-            Overview
-          </button>
-          <button 
-            className={`tab ${activeTab === "posts" ? "active" : ""}`}
-            onClick={() => handleTabClick("posts")}
-          >
-            Posts
-          </button>
-          <button 
-            className={`tab ${activeTab === "comments" ? "active" : ""}`}
-            onClick={() => handleTabClick("comments")}
-          >
-            Comments
-          </button>
-          <button 
-            className={`tab ${activeTab === "hidden" ? "active" : ""}`}
-            onClick={() => handleTabClick("hidden")}
-          >
-            Hidden
-          </button>
-          <button 
-            className={`tab ${activeTab === "upvoted" ? "active" : ""}`}
-            onClick={() => handleTabClick("upvoted")}
-          >
-            Upvoted
-          </button>
-          <button 
-            className={`tab ${activeTab === "downvoted" ? "active" : ""}`}
-            onClick={() => handleTabClick("downvoted")}
-          >
-            Downvoted
-          </button>
-        </div>
-
-        <div className="profile-content">
-          <div className="showing-content">
-            <span>Showing {activeTab === "overview" ? "all" : activeTab} content</span>
+          {/* Sidebar Column */}
+          <div className="profile-sidebar-column">
+            <ProfileSidebar user={user} isOwnProfile={isOwnProfile} />
           </div>
-
-          <div className="create-post">
-            <Link to="/create_post">
-              <button className="create-post-btn">+ Create Post</button>
-            </Link>
-            <select className="sort-select">
-              <option>New</option>
-              <option>Top</option>
-              <option>Hot</option>
-            </select>
-          </div>
-
-          {renderTabContent()}
         </div>
       </div>
     </>
