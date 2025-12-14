@@ -10,6 +10,7 @@ function Header() {
   const [customAvatar, setCustomAvatar] = useState(null);
   const [users, setUsers] = useState([]);
   const [darkMode, setDarkMode] = useState(false);
+  const navigate = useNavigate();
 
   // Initialize dark mode from localStorage or system preference
   useEffect(() => {
@@ -107,6 +108,40 @@ function Header() {
 
   const getAvatarUrl = () => {
     return customAvatar || "../images/avatar.png";
+  };
+
+  const handleLogout = async () => {
+    try {
+      const response = await fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'include'
+      });
+
+      if (response.ok) {
+        // Clear local storage
+        localStorage.removeItem("userAvatar");
+        localStorage.removeItem("theme");
+
+        // Clear state
+        setCurrentUser(null);
+        setCustomAvatar(null);
+
+        // Navigate to login page
+        navigate('/login');
+
+        // Close profile menu
+        const checkbox = document.getElementById('profile-menu-visibility-checkbox');
+        if (checkbox) checkbox.checked = false;
+      } else {
+        console.error('Logout failed:', response.statusText);
+      }
+    } catch (error) {
+      console.error('Logout error:', error);
+      // Even if server fails, clear local state and redirect
+      localStorage.removeItem("userAvatar");
+      localStorage.removeItem("theme");
+      navigate('/login');
+    }
   };
 
   const profileLink = currentUser ? `/profile/${currentUser.username}` : "#";
@@ -212,14 +247,14 @@ function Header() {
               </li>
 
               <li className="profile-menu-item">
-                <Link to="/" className="profile-menu-link">
+                <button onClick={handleLogout} className="profile-menu-link logout-button">
                   <div className="profile-menu-item-icon">
                     <img src="../images/logout.svg" alt="Logout icon" />
                   </div>
                   <div className="profile-menu-item-info">
                     <div className="profile-menu-item-title">Log Out</div>
                   </div>
-                </Link>
+                </button>
               </li>
 
             </ul>

@@ -31,3 +31,46 @@ export async function login(req,res){
 
   res.json({user:{id:user._id,username:user.username,email:user.email}, token});
 }
+
+
+export const checkAuth = async (req, res) => {
+  try {
+    res.status(200).json({
+      authenticated: true,
+      user: {
+        id: req.user._id,
+        username: req.user.username,
+        email: req.user.email,
+        avatar: req.user.avatar
+      }
+    });
+  } catch (error) {
+    res.status(200).json({ authenticated: false });
+  }
+};
+
+export const logout = async (req, res) => {
+  try {
+    // Clear the cookie
+    res.clearCookie('token', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      path: '/'
+    });
+    
+    // Also clear Authorization header if client stores it there
+    res.set('Authorization', '');
+    
+    res.status(200).json({ 
+      success: true, 
+      message: 'Logged out successfully' 
+    });
+  } catch (error) {
+    console.error('Logout error:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Server error during logout' 
+    });
+  }
+};

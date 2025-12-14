@@ -1,6 +1,6 @@
 :root {
   /* Light theme variables for community sidebar */
-  --sidebar-bg: #f8f9fa;
+  --sidebar-bg-2: #f8f9fa;
   --sidebar-border: #edeff1;
   --sidebar-section-bg: white;
   --sidebar-text: #1c1c1c;
@@ -26,7 +26,7 @@
 
 [data-theme="dark"] {
   /* Dark theme variables for community sidebar */
-  --sidebar-bg: #252525;
+  --sidebar-bg-2: #252525;
   --sidebar-border: #333;
   --sidebar-section-bg: #1a1a1a;
   --sidebar-text: #f5f5f5;
@@ -61,7 +61,7 @@
 
 /* For POST page */
 .community-sidebar-container.post-page {
-  background: var(--sidebar-bg);
+  background: var(--sidebar-bg-2);
   top: 60px;
   max-height: calc(100vh - 80px);
 }
@@ -75,7 +75,7 @@
 
 /* Community Sidebar Content */
 .community-sidebar {
-  background: var(--sidebar-bg);
+  background: var(--sidebar-bg-2);
   border-radius: 4px;
   border: 1px solid var(--sidebar-border);
   overflow: hidden;
@@ -86,7 +86,7 @@
 /* Header Section */
 .sidebar-header {
   padding: 12px;
-  background: var(--sidebar-bg);
+  background: var(--sidebar-bg-2);
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
