@@ -1,3 +1,69 @@
+/* Light theme variables for auth */
+:root {
+  --auth-header-bg: #ffffff;
+  --auth-header-border: rgba(0, 0, 0, 0.1);
+  --auth-container-bg: url('../../public/images/login-background.svg') no-repeat center center fixed;
+  --auth-box-bg: #ffffff;
+  --auth-box-shadow: rgba(0, 0, 0, 0.1);
+  --auth-tab-inactive: #666;
+  --auth-tab-active: #ff4500;
+  --auth-tab-border: #e0e0e0;
+  --auth-title: #1a1a1b;
+  --auth-text: #7c7c7c;
+  --auth-link: #1a6bc4; /* Brighter blue */
+  --auth-link-hover: #0056b3; /* Darker blue for hover */
+  --auth-input-bg: #edf0f3; /* Lighter grey for input */
+  --auth-input-text: #1a1a1b;
+  --auth-input-border: transparent;
+  --auth-input-focus-border: #1a1a1b;
+  --auth-input-warning: #ff4500;
+  --auth-warning-text: #ff4500;
+  --auth-success: #46d160;
+  --auth-button-disabled-bg: #eaedef;
+  --auth-button-disabled-text: #a3a3a3;
+  --auth-button-primary-bg: #ff4500;
+  --auth-button-primary-text: #ffffff;
+  --auth-button-primary-hover: #ff5714;
+  --auth-switch-text: #7c7c7c;
+  --auth-switch-link: #1a6bc4; /* Brighter blue */
+  --auth-switch-link-hover: #0056b3; /* Darker blue for hover */
+  --auth-password-toggle-opacity: 0.5;
+  --auth-font-size-base: 1.05em; /* Slightly larger base font size */
+}
+
+[data-theme="dark"] {
+  /* Dark theme variables for auth */
+  --auth-header-bg: #181c1f;
+  --auth-header-border: rgba(255, 255, 255, 0.1);
+  --auth-container-bg: url('../../public/images/login-background-dark.svg') no-repeat center center fixed;
+  --auth-box-bg: #181c1f;
+  --auth-box-shadow: rgba(0, 0, 0, 0.3);
+  --auth-tab-inactive: #888;
+  --auth-tab-active: #ff4500;
+  --auth-tab-border: #333;
+  --auth-title: #eef1f3;
+  --auth-text: #b7cad4;
+  --auth-link: #5d9cff; /* Brighter blue for dark mode */
+  --auth-link-hover: #8bb9ff; /* Even brighter for hover */
+  --auth-input-bg: #2a3236;
+  --auth-input-text: #ffffff;
+  --auth-input-border: transparent;
+  --auth-input-focus-border: #ffffff;
+  --auth-input-warning: #ff4f40;
+  --auth-warning-text: #ff4f40;
+  --auth-success: #28a745;
+  --auth-button-disabled-bg: #23272a;
+  --auth-button-disabled-text: #575a5c;
+  --auth-button-primary-bg: #ff4500;
+  --auth-button-primary-text: #ffffff;
+  --auth-button-primary-hover: #ff7b00;
+  --auth-switch-text: #9fafb8;
+  --auth-switch-link: #5d9cff; /* Brighter blue for dark mode */
+  --auth-switch-link-hover: #8bb9ff; /* Even brighter for hover */
+  --auth-password-toggle-opacity: 0.6;
+  --auth-font-size-base: 1.05em; /* Slightly larger base font size */
+}
+
 .auth-page * {
   box-sizing: border-box;
 }
@@ -7,18 +73,20 @@
     justify-content: space-between;
     align-items: center;
     padding: 0 16px;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+    border-bottom: 1px solid var(--auth-header-border);
     height: 56px;
-    background-color: #181c1f;
+    background-color: var(--auth-header-bg);
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
     z-index: 10;
+    transition: all 0.3s ease;
 }
 
 body {
   font-family: 'Inter', sans-serif;
+  font-size: var(--auth-font-size-base); /* Increased base font size */
 }
 
 /* ---------- Container ---------- */
@@ -28,14 +96,16 @@ body {
   align-items: center;
   width: 100%;
   padding: 20px;
-  background: linear-gradient(135deg, #2a09bd, #920dc7);
+  background: var(--auth-container-bg);
+  background-size: cover;
   height: 100vh;
+  transition: background 0.3s ease;
 }
 
 .login-box {
-  background: #181c1f;
+  background: var(--auth-box-bg);
   border-radius: 16px;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 6px 20px var(--auth-box-shadow);
   width: 100%;
   max-width: 500px;
   height: 100%;
@@ -44,14 +114,15 @@ body {
   padding-bottom: 0px;
   padding-top:40px;
   text-align: center;
-  transition: 0.3s ease;
+  transition: all 0.3s ease;
   margin-top: 50px;
+  font-size: 1em; /* Inherit increased font size */
 }
 
 .signup-box {
-  background: #181c1f;
+  background: var(--auth-box-bg);
   border-radius: 16px;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 6px 20px var(--auth-box-shadow);
   width: 100%;
   max-width: 500px;
   height: 100%;
@@ -60,8 +131,9 @@ body {
   padding-bottom: 0px;
   padding-top:20px;
   text-align: center;
-  transition: 0.3s ease;
+  transition: all 0.3s ease;
   margin-top: 50px;
+  font-size: 1em; /* Inherit increased font size */
 }
 
 /* ---------- Tabs ---------- */
@@ -69,7 +141,8 @@ body {
   display: flex;
   justify-content: space-between;
   margin-bottom: 20px;
-  border-bottom: 2px solid #f2f2f2;
+  border-bottom: 2px solid var(--auth-tab-border);
+  transition: border-color 0.3s ease;
 }
 
 .login-tab {
@@ -80,23 +153,21 @@ body {
   font-size: 16px;
   cursor: pointer;
   font-weight: 600;
-  color: #888;
-  transition: color 0.3s, border-bottom 0.3s;
+  color: var(--auth-tab-inactive);
+  transition: all 0.3s ease;
 }
 
 .login-tab.login-active {
-  color: #ff4500;
-  border-bottom: 3px solid #ff4500;
+  color: var(--auth-tab-active);
+  border-bottom: 3px solid var(--auth-tab-active);
 }
 
 /* ---------- Form ---------- */
-
 .login-form {
   display: flex;
   flex-direction: column;
   align-items: center;
 }
-
 
 .login-form.login-active {
   display: flex;
@@ -115,30 +186,37 @@ body {
 
 .login-form h2 {
   margin-bottom: 0px;
-  color: #eef1f3;
+  color: var(--auth-title);
+  transition: color 0.3s ease;
+  font-size: 1.3em; /* Slightly larger title */
 }
 
 .login-form p {
   margin-bottom: 10px;
-  color: #b7cad4;
+  color: var(--auth-text);
   font-size: smaller;
+  transition: color 0.3s ease;
+  line-height: 1.4; /* Better readability */
 }
 
 .login-form span{
-  color:#577ad6;
+  color: var(--auth-link);
+  transition: color 0.3s ease;
+  font-weight: 500; /* Make blue text slightly bolder */
 }
 
 .login-form span:hover{
-  color:#577ad6;
+  color: var(--auth-link-hover);
   text-decoration: underline;
   cursor: pointer;
 }
 
 .login-form a {
-  color: #577ad6;
+  color: var(--auth-link);
   cursor: pointer;
-  font-weight: 10;
+  font-weight: 500; /* Make blue links bolder */
   text-decoration: none;
+  transition: color 0.3s ease;
 }
 
 .login-form a:hover {
@@ -147,30 +225,31 @@ body {
 
 .login-form input {
   padding: 12px;
-  border: 2px solid transparent;
+  border: 2px solid var(--auth-input-border);
   border-radius: 20px;
   font-size: 15px;
-  color:white;
+  color: var(--auth-input-text);
   height: 55px;
   width: 100%;
-  background-color: #2a3236;
+  background-color: var(--auth-input-bg);
   outline: none;
-  transition: 0.05s;
+  transition: all 0.3s ease;
+  font-size: 1em; /* Increased input font size */
 }
 
 .login-form input:focus {
-  border: 2px solid white;
+  border: 2px solid var(--auth-input-focus-border);
   outline: none;
-  transition: 0.05s;
+  transition: all 0.3s ease;
 }
 
 .login-form input.warning {
-  border: 3px solid #ff4f40;
-  transition: 0.05s;
+  border: 2px solid var(--auth-input-warning);
+  transition: all 0.3s ease;
 }
 
 .login-form .warn{
-  color:#ff4f40;
+  color: var(--auth-warning-text);
   font-size: 12px;
   font-weight: 50;
   align-self: flex-start;
@@ -178,6 +257,7 @@ body {
   margin-bottom: 0px;
   margin-left: 14px;
   visibility: hidden;
+  transition: color 0.3s ease;
 }
 
 .login-form .warn.show {
@@ -185,28 +265,29 @@ body {
   opacity: 1;
 }
 
-
 /* ------- Button case1------- */
 .login-form .login-button{
-  background-color: #23272a;
-  color: #575a5c;
+  background-color: var(--auth-button-disabled-bg);
+  color: var(--auth-button-disabled-text);
   border: none;
   border-radius: 30px;
   padding: 12px;
   margin-top: 10px;
   font-size: 14px;
   font-weight: 600;
-  transition: 0.3s;
+  transition: all 0.3s ease;
   height: 100%;
   max-height: 80px;
   width: 100%;
+  cursor: not-allowed;
+  font-size: 1em; /* Increased button font size */
 }
 
 
 /* ---------- Button ---------- */
 .login-btn {
-  background-color: #ff4500;
-  color: white;
+  background-color: var(--auth-button-primary-bg);
+  color: var(--auth-button-primary-text);
   border: none;
   border-radius: 30px;
   padding: 12px;
@@ -214,12 +295,13 @@ body {
   font-size: 16px;
   font-weight: 600;
   cursor: pointer;
-  transition: 0.3s;
+  transition: all 0.3s ease;
   width: 100%;
+  font-size: 1em; /* Increased button font size */
 }
 
 .login-btn:hover {
-  background-color: #ff7b00;
+  background-color: var(--auth-button-primary-hover);
   transform: translateY(-2px);
 }
 
@@ -227,20 +309,24 @@ body {
 .login-switch-text {
   margin-top: 10px;
   font-size: 14px;
-  color: #9fafb8;
+  color: var(--auth-switch-text);
   align-self: flex-start;
   margin-top: 10px;
+  transition: color 0.3s ease;
+  font-size: 0.95em; /* Slightly larger */
+  line-height: 1.4;
 }
 
 .login-switch-text span {
-  color: #618af3;
+  color: var(--auth-switch-link);
   cursor: pointer;
-  font-weight: 10;
+  font-weight: 500; /* Make switch text bolder */
+  transition: color 0.3s ease;
 }
 
 .login-switch-text span:hover{
   text-decoration: none;
-  color: #6d96ff;
+  color: var(--auth-switch-link-hover);
 }
 
 /* ---------- Password Field ---------- */
@@ -251,8 +337,9 @@ body {
   border-radius: 20px;
   width: 100%;
   margin-bottom: 10px;
-  background-color: #2a3236;
+  background-color: var(--auth-input-bg);
   height: 100%;
+  transition: background-color 0.3s ease;
 }
 
 .login-password-field input {
@@ -260,8 +347,9 @@ body {
   height: 100%;
   padding-right: 40px;
   padding: 12px;
-  border:none;
-  background-color: #2a3236;
+  border: none;
+  background-color: transparent;
+  font-size: 1em; /* Increased password field font size */
 }
 
 .login-toggle-password {
@@ -270,8 +358,8 @@ body {
   width: 22px;
   height: 22px;
   cursor: pointer;
-  opacity: 0.6;
-  transition: opacity 0.2s;
+  opacity: var(--auth-password-toggle-opacity);
+  transition: opacity 0.3s ease;
 }
 
 .login-toggle-password:hover {
@@ -281,16 +369,27 @@ body {
 .icon-warn {
   position: absolute;
   right: 15px;
-  top: 18px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 20px;
+  height: 20px;
   pointer-events: none;
 }
 
 .icon-success {
   position: absolute;
-  right: 15px;
-  top: 18px;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 20px;
+  height: 20px;
   pointer-events: none;
-  stroke: #28a745;
+  stroke: var(--auth-success);
+  stroke-width: 2.5;
+}
+/* Adjust input padding when success icon is on left */
+.login-form .inputbox input {
+  padding-left: 45px; /* Add padding on left for the success icon */
 }
 
 /* This simply stops some unexpected styling from browser autofill feature */
@@ -298,9 +397,26 @@ input:-webkit-autofill,
 input:-webkit-autofill:hover, 
 input:-webkit-autofill:focus, 
 input:-webkit-autofill:active {
-    -webkit-box-shadow: 0 0 0 30px #2a3236 inset !important;
-    
-    -webkit-text-fill-color: white !important;
-    
+    -webkit-box-shadow: 0 0 0 30px var(--auth-input-bg) inset !important;
+    -webkit-text-fill-color: var(--auth-input-text) !important;
     border-radius: 20px !important;
+    transition: background-color 5000s ease-in-out 0s;
+}
+
+/* Smooth transitions for theme switching */
+.login-container,
+.login-box,
+.signup-box,
+.head,
+.login-form h2,
+.login-form p,
+.login-form input,
+.login-form a,
+.login-btn,
+.login-button,
+.login-switch-text,
+.icon-success,
+.login-tabs,
+.login-tab {
+  transition: all 0.3s ease;
 }
