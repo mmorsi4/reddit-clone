@@ -28,6 +28,10 @@ function PostPage() {
   const [summary, setSummary] = useState("");
   const [isSummarizing, setIsSummarizing] = useState(false);
 
+  // Save functionality states
+  const [isSaved, setIsSaved] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+
   const handleSummarize = async () => {
     if (!post) return;
     setIsSummarizing(true);
@@ -143,6 +147,9 @@ function PostPage() {
       setComments(data.comments || []);
       setSortedComments(data.comments || []);
       setFilteredComments(data.comments || []);
+      
+      // Set saved status from post data
+      setIsSaved(data.post?.isSaved || false);
     } catch (err) {
       console.error(err);
       setPost(null);
@@ -259,6 +266,77 @@ function PostPage() {
     } catch (error) {
       console.error("Vote error:", error);
     }
+  };
+
+  // Handle save/unsave post
+  const handleSavePost = async () => {
+    if (!postId || !currentUser) {
+      alert("You need to be logged in to save posts!");
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        alert("You need to be logged in to save posts!");
+        setIsSaving(false);
+        return;
+      }
+
+      const endpoint = isSaved ? `/api/posts/${postId}/unsave` : `/api/posts/${postId}/save`;
+      const method = "POST";
+
+      const res = await fetch(endpoint, {
+        method,
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        }
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setIsSaved(!isSaved);
+        
+        // Update the post object
+        setPost(prev => ({
+          ...prev,
+          isSaved: !isSaved
+        }));
+      } else {
+        const errorText = await res.text();
+        console.error("Save/unsave failed:", errorText);
+        alert("Failed to save post. Please try again.");
+      }
+    } catch (error) {
+      console.error("Save/unsave error:", error);
+      alert("An error occurred. Please try again.");
+    } finally {
+      setIsSaving(false);
+      setShowDropdown(false); // Close dropdown after action
+    }
+  };
+
+  // Handle hide post
+  const handleHidePost = async () => {
+    // TODO: Implement hide functionality
+    alert("Hide functionality coming soon!");
+    setShowDropdown(false);
+  };
+
+  // Handle report post
+  const handleReportPost = async () => {
+    // TODO: Implement report functionality
+    alert("Report functionality coming soon!");
+    setShowDropdown(false);
+  };
+
+  // Handle crosspost
+  const handleCrosspost = async () => {
+    // TODO: Implement crosspost functionality
+    alert("Crosspost functionality coming soon!");
+    setShowDropdown(false);
   };
 
   const handleAddComment = async () => {
@@ -382,7 +460,6 @@ function PostPage() {
           </div>
           <div className="search-container">
             <div className="search-input-wrapper">
-              {/* NUCLEAR FIX: Search icon container */}
               <span className="search-icon-container">
                 <svg viewBox="0 0 24 24" fill="currentColor">
                   <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
@@ -443,7 +520,6 @@ function PostPage() {
           <div className="post-main-column">
             {/* Combined Back Button and Community Info */}
             <div className="post-header-navigation">
-              {/* NUCLEAR FIX: Back button with icon container */}
               <button className="back-button" onClick={() => window.history.back()}>
                 <span className="back-button-icon">
                   <svg viewBox="0 0 24 24" fill="currentColor">
@@ -452,7 +528,6 @@ function PostPage() {
                 </span>
               </button>
               
-              {/* UPDATED: Using unique post-page class names */}
               <div className="post-page-community-info">
                 <img 
                   src={currentCommunity?.avatar?.replace('/images/', '../images/')} 
@@ -476,10 +551,9 @@ function PostPage() {
                 </div>
               </div>
 
-              {/* Options Button with Dropdown - MOVED OUTSIDE community-info div */}
+              {/* Options Button with Dropdown */}
               <div className="post-options-wrapper">
                 <div className="post-options-container">
-                  {/* NUCLEAR FIX: Options button with icon container */}
                   <button 
                     className="post-options-button"
                     onClick={() => setShowDropdown(!showDropdown)}
@@ -495,10 +569,31 @@ function PostPage() {
                   
                   {showDropdown && (
                     <div className="post-options-dropdown">
-                      <button className="dropdown-item">Save</button>
-                      <button className="dropdown-item">Hide</button>
-                      <button className="dropdown-item">Report</button>
-                      <button className="dropdown-item">Crosspost</button>
+                      <button 
+                        className="dropdown-item" 
+                        onClick={handleSavePost}
+                        disabled={isSaving}
+                      >
+                        {isSaving ? "Processing..." : (isSaved ? "Unsave" : "Save")}
+                      </button>
+                      <button 
+                        className="dropdown-item" 
+                        onClick={handleHidePost}
+                      >
+                        Hide
+                      </button>
+                      <button 
+                        className="dropdown-item" 
+                        onClick={handleReportPost}
+                      >
+                        Report
+                      </button>
+                      <button 
+                        className="dropdown-item" 
+                        onClick={handleCrosspost}
+                      >
+                        Crosspost
+                      </button>
                     </div>
                   )}
                 </div>
@@ -559,25 +654,33 @@ function PostPage() {
                   <span className="action-icon">💬</span>
                   <span>{post.commentCount || comments.length} Comments</span>
                 </button>
+                
+                {/* Save button in main actions - REMOVED SAVE COUNT */}
+                <button 
+                  className={`post-action-btn ${isSaved ? 'saved' : ''}`}
+                  onClick={handleSavePost}
+                  disabled={isSaving}
+                >
+                  <span className="action-icon">{isSaved ? '⭐' : '☆'}</span>
+                  <span>{isSaving ? '...' : (isSaved ? 'Saved' : 'Save')}</span>
+                </button>
+                
                 <button className="post-action-btn">
                   <span className="action-icon">🔄</span>
                   <span>Share</span>
                 </button>
               </div>
+              
               <button
-              className="summarize-button"
-              onClick={!summary ? handleSummarize : undefined}
-              style={{ display: "flex", alignItems: "center", gap: "6px", cursor: !summary ? "pointer" : "default" }}
-            >
-              <span className="text">
-                {isSummarizing ? "Processing..." : summary || "Summarize"}
-              </span>
-            </button>
+                className="summarize-button"
+                onClick={!summary ? handleSummarize : undefined}
+                style={{ display: "flex", alignItems: "center", gap: "6px", cursor: !summary ? "pointer" : "default" }}
+              >
+                <span className="text">
+                  {isSummarizing ? "Processing..." : summary || "Summarize"}
+                </span>
+              </button>
             </div>
-
-            
-
-
 
             {/* Comment Section */}
             <div className="comments-section">

@@ -55,7 +55,6 @@ export async function getPosts(req, res) {
   }
 }
 
-// Get a single post with comments (with proper nesting for replies)
 export async function getPost(req, res) {
   try {
     const post = await Post.findById(req.params.id)
@@ -65,16 +64,33 @@ export async function getPost(req, res) {
 
     if (!post) return res.status(404).json({ message: 'Post not found' });
 
-    // Fetch all comments for this post
+    // Check if user has saved this post
+    let isSaved = false;
+    if (req.userId && post.savedBy) {
+      isSaved = post.savedBy.some(id => id.toString() === req.userId);
+    }
+
+    // Add user vote info
+    const userVote = post.votes?.find(v => v.user && v.user.toString() === req.userId);
+    const score = post.votes?.reduce((sum, v) => sum + (v.value || 0), 0) || 0;
+
+    const postWithVotes = {
+      ...post,
+      userVote: userVote ? userVote.value : 0,
+      score,
+      commentCount: post.commentCount ?? 0,
+      isSaved,  // Add isSaved field
+      saves: post.saves || 0  // Add saves count
+    };
+
+    // ... rest of your existing code for comments ...
     const comments = await Comment.find({ post: post._id })
       .populate('author', 'username displayName avatarUrl')
       .lean();
 
-    // Build nested comment structure
     const buildCommentTree = (comments, parentId = null) => {
       return comments
         .filter(comment => {
-          // Handle both null and undefined parent values
           const commentParent = comment.parent;
           if (parentId === null) {
             return commentParent === null || commentParent === undefined;
@@ -82,7 +98,6 @@ export async function getPost(req, res) {
           return commentParent && commentParent.toString() === parentId.toString();
         })
         .map(comment => {
-          // Add vote information to each comment
           const userVote = comment.votes?.find(v => v.user && v.user.toString() === req.userId);
           const score = comment.votes?.reduce((sum, v) => sum + (v.value || 0), 0) || 0;
 
@@ -91,14 +106,14 @@ export async function getPost(req, res) {
             userVote: userVote ? userVote.value : 0,
             upvotes: score,
             score: score,
-            replies: buildCommentTree(comments, comment._id) // Recursively build replies
+            replies: buildCommentTree(comments, comment._id)
           };
         });
     };
 
     const nestedComments = buildCommentTree(comments);
 
-    res.json({ post, comments: nestedComments });
+    res.json({ post: postWithVotes, comments: nestedComments });
   } catch (err) {
     console.error("Error fetching post:", err);
     res.status(500).json({ message: "Internal server error" });
@@ -477,5 +492,135 @@ export async function getPopularPosts(req, res) {
   } catch (err) {
     console.error("Error fetching popular posts:", err);
     res.status(500).json({ message: "Internal server error" });
+  }
+}
+
+// Save a post
+// Save a post - UPDATED VERSION
+export async function savePost(req, res) {
+  try {
+    const postId = req.params.id;
+    const userId = req.userId;
+    
+    if (!postId || !mongoose.Types.ObjectId.isValid(postId)) {
+      return res.status(400).json({ message: 'Invalid post ID' });
+    }
+    
+    const post = await Post.findById(postId);
+    if (!post) {
+      return res.status(404).json({ message: 'Post not found' });
+    }
+    
+    // Convert userId to string for comparison
+    const userIdStr = userId.toString();
+    
+    // Check if already saved
+    if (post.savedBy && post.savedBy.some(id => id.toString() === userIdStr)) {
+      return res.status(400).json({ message: 'Post already saved' });
+    }
+    
+    // Initialize savedBy array if it doesn't exist
+    if (!post.savedBy) {
+      post.savedBy = [];
+    }
+    
+    // Add user to savedBy array
+    post.savedBy.push(userId);
+    post.saves = (post.saves || 0) + 1;
+    await post.save();
+    
+    res.json({ 
+      message: 'Post saved successfully',
+      saves: post.saves,
+      isSaved: true 
+    });
+  } catch (err) {
+    console.error("❌ Error saving post:", err);
+    res.status(500).json({ message: "Failed to save post", error: err.message });
+  }
+}
+// Unsave a post - FIXED VERSION
+export async function unsavePost(req, res) {
+  try {
+    const postId = req.params.id;
+    const userId = req.userId;
+    
+    const post = await Post.findById(postId);
+    if (!post) {
+      return res.status(404).json({ message: 'Post not found' });
+    }
+    
+    // Convert userId to string for comparison
+    const userIdStr = userId.toString();
+    
+    // Check if not saved
+    if (!post.savedBy || !post.savedBy.some(id => id.toString() === userIdStr)) {
+      return res.status(400).json({ message: 'Post not saved' });
+    }
+    
+    // Remove user from savedBy array
+    post.savedBy = post.savedBy.filter(id => id.toString() !== userIdStr);
+    post.saves = Math.max(0, (post.saves || 1) - 1);
+    await post.save();
+    
+    res.json({ 
+      message: 'Post unsaved successfully',
+      saves: post.saves,
+      isSaved: false 
+    });
+  } catch (err) {
+    console.error("Error unsaving post:", err);
+    res.status(500).json({ message: "Failed to unsave post", error: err.message });
+  }
+}
+// Get saved posts for current user - CORRECTED VERSION
+// Get saved posts for current user - BULLETPROOF VERSION
+// Get saved posts for current user - SIMPLE WORKING VERSION
+export async function getSavedPosts(req, res) {
+  try {
+    console.log("🔍 getSavedPosts called for user:", req.userId);
+    
+    const userId = req.userId;
+    
+    if (!userId) {
+      return res.status(401).json({ message: "Not authenticated" });
+    }
+    
+    // Simple query - MongoDB handles string/ObjectId conversion
+    const savedPosts = await Post.find({ 
+      savedBy: userId 
+    })
+    .populate('author', 'username displayName avatarUrl')
+    .populate('community', 'name title avatar _id')
+    .sort({ createdAt: -1 })
+    .lean();
+    
+    console.log(`✅ Found ${savedPosts.length} saved posts`);
+    
+    // Process posts
+    const normalized = savedPosts.map(post => {
+      const userVote = post.votes?.find(v => {
+        return v.user && v.user.toString() === userId.toString();
+      });
+      
+      const score = post.votes?.reduce((sum, v) => sum + (v.value || 0), 0) || 0;
+      
+      return {
+        ...post,
+        userVote: userVote ? userVote.value : 0,
+        score,
+        commentCount: post.commentCount || 0,
+        isSaved: true
+      };
+    });
+    
+    res.json(normalized);
+    
+  } catch (err) {
+    console.error("❌ Error in getSavedPosts:", err.message);
+    res.status(500).json({ 
+      message: "Failed to fetch saved posts",
+      error: err.message 
+    });
   }
 }

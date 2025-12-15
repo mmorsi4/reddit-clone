@@ -245,7 +245,16 @@
   border-color: var(--post-action-hover);
 }
 
-/* Comment cards for overview */
+/* ========== PROFILE COMMENT STYLES ========== */
+
+/* Profile comments container */
+.profile-comments-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Profile comment card */
 .profile-comment-card {
   background: var(--post-comment-bg);
   border: 1px solid var(--post-light-border);
@@ -257,39 +266,178 @@
 
 .profile-comment-card:hover {
   border-color: var(--post-action-border);
+  background: var(--post-vote-bg);
 }
 
+/* Community header */
 .profile-comment-header {
+  margin-bottom: 12px;
+}
+
+.profile-comment-community {
   display: flex;
-  justify-content: space-between;
-  margin-bottom: 8px;
+  align-items: center;
+  gap: 12px;
+}
+
+.profile-comment-community-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--post-action-bg);
+}
+
+.profile-comment-community-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.profile-comment-community-name {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--post-text);
+  text-decoration: none;
+}
+
+.profile-comment-community-name:hover {
+  text-decoration: underline;
 }
 
 .profile-comment-meta {
-  font-size: 13px;
-  color: var(--post-text);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.85rem;
+  margin-top: 2px;
+}
+
+.profile-comment-author {
+  color: var(--post-meta-text);
   font-weight: 500;
-  transition: color 0.3s ease;
 }
 
 .profile-comment-time {
-  font-size: 12px;
   color: var(--post-meta-text);
-  transition: color 0.3s ease;
 }
 
+/* Comment body */
 .profile-comment-body {
-  font-size: 14px;
-  color: var(--post-text);
+  font-size: 0.95rem;
   line-height: 1.5;
+  color: var(--post-text);
+  margin-bottom: 12px;
+  padding-left: 48px; /* Align with community avatar */
+}
+
+/* Post context */
+.profile-comment-post-context {
+  padding-left: 48px;
+  margin-bottom: 12px;
+}
+
+.profile-comment-post-text {
+  font-size: 0.9rem;
+  color: var(--post-meta-text);
+}
+
+.profile-comment-post-link {
+  color: var(--post-comment-submit-bg);
+  text-decoration: none;
+  font-weight: 600;
+  margin-left: 4px;
+}
+
+.profile-comment-post-link:hover {
+  text-decoration: underline;
+}
+
+.profile-comment-post-title {
+  font-weight: 600;
+  margin-left: 4px;
+}
+
+/* Comment stats (non-interactive) */
+.profile-comment-stats {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding-left: 48px;
+  border-top: 1px solid var(--post-light-border);
+  padding-top: 12px;
+  margin-top: 12px;
+}
+
+.profile-comment-stat {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--post-meta-text);
+  font-size: 0.9rem;
+}
+
+.profile-comment-stat-icon {
+  font-size: 1rem;
+  opacity: 0.7;
+}
+
+.profile-comment-stat-count {
+  font-weight: 600;
+  color: var(--post-text);
+}
+
+.profile-comment-stat-text {
+  font-weight: 500;
+}
+
+/* ========== OVERVIEW COMMENTS SECTION ========== */
+
+.profile-overview-comments-section {
+  margin-top: 24px;
+  background: var(--post-comment-bg);
+  border-radius: 8px;
+  border: 1px solid var(--post-light-border);
+  overflow: hidden;
+}
+
+.profile-overview-section-title {
   margin: 0;
-  transition: color 0.3s ease;
+  padding: 16px;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--post-text);
+  border-bottom: 1px solid var(--post-light-border);
+  background: var(--post-vote-bg);
+}
+
+.profile-view-all-btn {
+  width: 100%;
+  padding: 14px;
+  background: none;
+  border: none;
+  border-top: 1px solid var(--post-light-border);
+  color: var(--post-comment-submit-bg);
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.profile-view-all-btn:hover {
+  background-color: var(--post-vote-bg);
+}
+
+/* Overview content */
+.profile-overview-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
 /* Empty state */
 .empty-state {
   text-align: center;
-  padding: 40px 20px;
+  padding: 60px 20px;
 }
 
 .empty-img {
@@ -301,54 +449,14 @@
 }
 
 .empty-text {
-  font-size: 16px;
+  font-size: 1rem;
   color: var(--post-meta-text);
   margin: 0;
   transition: color 0.3s ease;
 }
 
-/* Comments list */
-.comments-list {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
+/* ========== RESPONSIVE DESIGN ========== */
 
-.comment-item {
-  background: var(--post-comment-bg);
-  border: 1px solid var(--post-light-border);
-  border-radius: 8px;
-  padding: 16px;
-  transition: all 0.3s ease;
-}
-
-.comment-item:hover {
-  border-color: var(--post-action-border);
-}
-
-.comment-text {
-  font-size: 14px;
-  color: var(--post-text);
-  line-height: 1.5;
-  margin: 0 0 8px 0;
-  transition: color 0.3s ease;
-}
-
-.comment-meta {
-  font-size: 12px;
-  color: var(--post-meta-text);
-  margin: 0;
-  transition: color 0.3s ease;
-}
-
-/* Overview content */
-.profile-overview-content {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-/* Responsive design */
 @media (max-width: 960px) {
   .profile-page-container {
     margin-left: 0;
@@ -393,6 +501,17 @@
   .profile-tab:nth-child(3n) {
     border-right: none;
   }
+  
+  /* Adjust comment display for mobile */
+  .profile-comment-body,
+  .profile-comment-post-context,
+  .profile-comment-stats {
+    padding-left: 0;
+  }
+  
+  .profile-comment-community {
+    margin-bottom: 8px;
+  }
 }
 
 @media (max-width: 768px) {
@@ -424,9 +543,22 @@
   .profile-tab:last-child {
     border-bottom: none;
   }
+  
+  .profile-comment-card {
+    padding: 12px;
+  }
+  
+  .profile-comment-community-avatar {
+    width: 32px;
+    height: 32px;
+  }
+  
+  .profile-comment-stats {
+    justify-content: space-between;
+  }
 }
 
-/* Smooth transitions for theme switching */
+/* ========== SMOOTH TRANSITIONS ========== */
 .profile-page-container,
 .profile-header-main,
 .profile-avatar-main,
@@ -441,17 +573,88 @@
 .profile-create-post-btn,
 .profile-sort-select,
 .profile-comment-card,
-.profile-comment-meta,
-.profile-comment-time,
-.profile-comment-body,
 .empty-state,
 .empty-img,
 .empty-text,
-.comment-item,
-.comment-text,
-.comment-meta {
+.profile-comment-community-avatar,
+.profile-comment-community-name,
+.profile-comment-author,
+.profile-comment-time,
+.profile-comment-body,
+.profile-comment-post-text,
+.profile-comment-post-link,
+.profile-comment-stat,
+.profile-comment-stat-icon,
+.profile-comment-stat-count,
+.profile-overview-comments-section,
+.profile-overview-section-title,
+.profile-view-all-btn {
   transition: background-color 0.3s ease,
               color 0.3s ease,
               border-color 0.3s ease,
               filter 0.3s ease;
+}
+
+/* ========== RESET CONFLICTING STYLES ========== */
+/* Prevent any CommentWithVotes styles from affecting the profile page */
+.profile-page-container .comment-line-container,
+.profile-page-container .comment-vertical-line,
+.profile-page-container .expand-collapse-btn,
+.profile-page-container .comment-replies,
+.profile-page-container .reply-input-area {
+  display: none !important;
+}
+
+/* Ensure our profile comments don't inherit unwanted styles */
+.profile-comment-card {
+  position: static !important;
+  margin: 0 !important;
+  border: 1px solid var(--post-light-border) !important;
+}
+
+.profile-comment-card * {
+  box-sizing: border-box;
+}
+/* ========== DISABLE ALL INTERACTION IN PROFILE COMMENTS ========== */
+
+/* Disable pointer events on all profile comment elements */
+.profile-comment-card,
+.profile-comment-card * {
+  cursor: default !important;
+  user-select: text !important;
+}
+
+/* Specifically disable interaction on stats */
+.profile-comment-stats,
+.profile-comment-stat,
+.profile-comment-stat-text {
+  pointer-events: none !important;
+  cursor: default !important;
+}
+
+/* Hide any button-like elements */
+.profile-comment-card button,
+.profile-comment-card .btn,
+.profile-comment-card .button,
+.profile-comment-card input[type="button"],
+.profile-comment-card input[type="submit"],
+.profile-comment-card [role="button"] {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+}
+
+/* Make sure links are still clickable */
+.profile-comment-community-name,
+.profile-comment-post-link {
+  pointer-events: auto !important;
+  cursor: pointer !important;
+}
+
+/* Loading state */
+.profile-comment-loading {
+  padding: 20px;
+  text-align: center;
+  color: var(--post-meta-text);
+  font-style: italic;
 }
