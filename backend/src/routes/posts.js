@@ -13,22 +13,35 @@ import {
     getHomeNewPosts,
     getHomeTopPosts,
     getPopularPosts,
-    getPostSummary
+    getPostSummary,
+    savePost,    
+    unsavePost,      
+    getSavedPosts 
 } from '../controllers/posts.js';
 
 const router = express.Router();
 
+// 🚨 IMPORTANT: Specific routes MUST come before dynamic routes!
+
+// 1. GET routes (specific to general)
 router.get('/best', authMiddleware, getHomeBestPosts);
 router.get('/new', authMiddleware, getHomeNewPosts);
 router.get('/top', authMiddleware, getHomeTopPosts);
 router.get('/all-feed', authMiddleware, getAllFeedPosts); 
 router.get('/my/posts', authMiddleware, getMyPosts);
 router.get('/popular', authMiddleware, getPopularPosts);
+router.get('/saved', authMiddleware, getSavedPosts); // ✅ MOVED UP - BEFORE /:id
 router.get('/', authMiddleware, getPosts);
+
+// 2. POST routes
 router.post('/', authMiddleware, upload.single('file'), createPost);
-router.get('/:id', authMiddleware, getPost); 
-router.get('/:id/summary', authMiddleware, getPostSummary)
-router.post('/:id/vote', authMiddleware, votePost);
 router.post('/custom-feed-posts', authMiddleware, getCustomFeedPosts);
 
-export default router;0
+// 3. Dynamic routes with :id
+router.post('/:id/save', authMiddleware, savePost);
+router.post('/:id/unsave', authMiddleware, unsavePost);
+router.post('/:id/vote', authMiddleware, votePost);
+router.get('/:id/summary', authMiddleware, getPostSummary);
+router.get('/:id', authMiddleware, getPost); // ⚠️ MUST BE LAST!
+
+export default router;

@@ -1,0 +1,175 @@
+/* ========== PROFILE COMMENT STYLES ========== */
+
+/* Profile comments container */
+.profile-comments-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Profile comment card - COMPLETELY NON-INTERACTIVE */
+.profile-comment-card {
+  background: var(--post-comment-bg);
+  border: 1px solid var(--post-light-border);
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 12px;
+  transition: all 0.3s ease;
+  cursor: default;
+  user-select: text; /* Allow text selection */
+}
+
+.profile-comment-card:hover {
+  border-color: var(--post-action-border);
+  background: var(--post-vote-bg);
+}
+
+/* Community header */
+.profile-comment-header {
+  margin-bottom: 12px;
+}
+
+.profile-comment-community {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.profile-comment-community-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--post-action-bg);
+  background-color: var(--profile-avatar-bg);
+}
+
+.profile-comment-community-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.profile-comment-community-name {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--post-text);
+  text-decoration: none;
+}
+
+.profile-comment-community-name:hover {
+  text-decoration: underline;
+}
+
+.profile-comment-meta {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.85rem;
+  margin-top: 2px;
+}
+
+.profile-comment-author {
+  color: var(--post-meta-text);
+  font-weight: 500;
+}
+
+.profile-comment-time {
+  color: var(--post-meta-text);
+}
+
+/* Comment body */
+.profile-comment-body {
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: var(--post-text);
+  margin-bottom: 12px;
+  padding-left: 48px;
+}
+
+/* Post context */
+.profile-comment-post-context {
+  padding-left: 48px;
+  margin-bottom: 12px;
+}
+
+.profile-comment-post-text {
+  font-size: 0.9rem;
+  color: var(--post-meta-text);
+}
+
+.profile-comment-post-link {
+  color: var(--post-comment-submit-bg);
+  text-decoration: none;
+  font-weight: 600;
+  margin-left: 4px;
+}
+
+.profile-comment-post-link:hover {
+  text-decoration: underline;
+}
+
+.profile-comment-post-title {
+  font-weight: 600;
+  margin-left: 4px;
+  color: var(--post-text);
+}
+
+/* Comment stats - COMPLETELY DISABLED */
+.profile-comment-stats {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding-left: 48px;
+  border-top: 1px solid var(--post-light-border);
+  padding-top: 12px;
+  margin-top: 12px;
+}
+
+.profile-comment-stat {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--post-meta-text);
+  font-size: 0.9rem;
+  opacity: 0.7;
+  cursor: default !important;
+  pointer-events: none !important;
+}
+
+.profile-comment-stat-icon {
+  font-size: 1rem;
+  user-select: none;
+  cursor: default !important;
+  pointer-events: none !important;
+}
+
+.profile-comment-stat-count {
+  font-weight: 600;
+  color: var(--post-text);
+  user-select: none;
+  cursor: default !important;
+  pointer-events: none !important;
+}
+
+/* NUCLEAR OPTION: Completely hide any interactive elements */
+.profile-comment-card button,
+.profile-comment-card .vote-button,
+.profile-comment-card .upvote-btn,
+.profile-comment-card .downvote-btn,
+.profile-comment-card .reply-btn,
+.profile-comment-card input[type="button"],
+.profile-comment-card input[type="submit"] {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* Force disable hover effects */
+.profile-comment-stat:hover,
+.profile-comment-stat-icon:hover,
+.profile-comment-stat-count:hover {
+  background-color: transparent !important;
+  color: inherit !important;
+  cursor: default !important;
+}

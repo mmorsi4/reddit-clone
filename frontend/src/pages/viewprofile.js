@@ -4,18 +4,23 @@ import { Link } from "react-router-dom";
 import Sidebar from "../components/sidebar";
 import Header from "../components/header";
 import Post from "../components/post";
-import ProfileSidebar from "../components/ProfileSidebar"; // Import the new component
-import "../styles/ProfileSidebar.css"; // Import the CSS
+import ProfileComment from "../components/ProfileComment";
+import ProfileSidebar from "../components/ProfileSidebar";
+import "../styles/ProfileSidebar.css";
 
 function ViewProfile() {
   const [activeTab, setActiveTab] = useState("overview");
   const [user, setUser] = useState(null);
   const [userComments, setUserComments] = useState([]);
   const [userPosts, setUserPosts] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [savedPosts, setSavedPosts] = useState([]);
+  const [loadingComments, setLoadingComments] = useState(false);
+  const [loadingPosts, setLoadingPosts] = useState(false);
+  const [loadingSaved, setLoadingSaved] = useState(false);
   const [joinedCommunityIds, setJoinedCommunityIds] = useState([]); 
   const [isOwnProfile, setIsOwnProfile] = useState(false);
-  const { username } = useParams(); // get username from url
+  const [allCommunities, setAllCommunities] = useState([]);
+  const { username } = useParams();
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -25,23 +30,36 @@ function ViewProfile() {
       });
 
       if (res.status === 404) {
-          setUser(null); // user not found
+          setUser(null);
           return;
       }
-
-      console.log(res)
 
       const data = await res.json();
       const userData = data;
       setUser(userData);
       
-      // Check if this is the current user's own profile
       const currentUsername = localStorage.getItem('username');
       setIsOwnProfile(currentUsername === username);
     }
 
     fetchProfile();
   }, [username]);
+
+  // Fetch ALL communities
+  useEffect(() => {
+    const fetchAllCommunities = async () => {
+      try {
+        const res = await fetch("/api/communities/");
+        if (!res.ok) throw new Error("Failed to fetch communities");
+        const data = await res.json();
+        setAllCommunities(data);
+        console.log("All communities loaded:", data.length);
+      } catch (err) {
+        console.error("Error fetching communities:", err);
+      }
+    };
+    fetchAllCommunities();
+  }, []);
 
   useEffect(() => {
     const fetchJoinedCommunities = async () => {
@@ -65,9 +83,9 @@ function ViewProfile() {
     fetchJoinedCommunities();
   }, []); 
 
-  // Fetch user's comments when Comments tab is clicked
+  // Fetch user comments
   const fetchUserComments = async () => {
-    setLoading(true);
+    setLoadingComments(true);
     try {
       const res = await fetch("/api/comments/my", {
         method: "GET",
@@ -76,7 +94,61 @@ function ViewProfile() {
 
       if (res.ok) {
         const comments = await res.json();
-        setUserComments(comments);
+        
+        // Batch fetch all posts to get community data
+        const postIds = comments
+          .map(c => c.post?._id)
+          .filter(id => id)
+          .filter((value, index, self) => self.indexOf(value) === index);
+        
+        if (postIds.length > 0) {
+          const postPromises = postIds.map(postId => 
+            fetch(`/api/posts/${postId}`)
+              .then(res => {
+                if (!res.ok) throw new Error(`Failed to fetch post ${postId}`);
+                return res.json();
+              })
+              .then(data => ({
+                postId,
+                data: data.post || data
+              }))
+              .catch(err => {
+                console.error(`Error fetching post ${postId}:`, err);
+                return { postId, data: null };
+              })
+          );
+          
+          const postsData = await Promise.all(postPromises);
+          
+          const postMap = {};
+          postsData.forEach(({ postId, data }) => {
+            if (data) {
+              postMap[postId] = data;
+            }
+          });
+          
+          const enrichedComments = comments.map(comment => {
+            const postId = comment.post?._id;
+            const fullPost = postMap[postId];
+            
+            if (fullPost) {
+              return {
+                ...comment,
+                post: {
+                  ...comment.post,
+                  community: fullPost.community,
+                  author: fullPost.author
+                }
+              };
+            }
+            
+            return comment;
+          });
+          
+          setUserComments(enrichedComments);
+        } else {
+          setUserComments(comments);
+        }
       } else {
         const errorText = await res.text();
         console.error("Error fetching comments:", errorText);
@@ -84,13 +156,12 @@ function ViewProfile() {
     } catch (error) {
       console.error("Error fetching comments:", error);
     } finally {
-      setLoading(false);
+      setLoadingComments(false);
     }
   };
 
-  // Fetch user's posts when Posts tab is clicked
   const fetchUserPosts = async () => {
-    setLoading(true);
+    setLoadingPosts(true);
     try {
       const res = await fetch("/api/posts/my/posts", {
         method: "GET",
@@ -106,14 +177,86 @@ function ViewProfile() {
     } catch (error) {
       console.error("Error details:", error.message);
     } finally {
-      setLoading(false);
+      setLoadingPosts(false);
     }
   };
 
-  // Function to render content based on active tab
+  // Fetch saved posts
+  const fetchSavedPosts = async () => {
+    setLoadingSaved(true);
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        console.error("No token found for saved posts");
+        setSavedPosts([]);
+        setLoadingSaved(false);
+        return;
+      }
+
+      const res = await fetch("/api/posts/saved", {
+        method: "GET",
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        }
+      });
+
+      if (res.ok) {
+        const posts = await res.json();
+        console.log("Saved posts fetched:", posts.length);
+        setSavedPosts(posts);
+      } else {
+        const errorText = await res.text();
+        console.error("Error fetching saved posts:", errorText);
+        setSavedPosts([]);
+      }
+    } catch (error) {
+      console.error("Error fetching saved posts:", error);
+      setSavedPosts([]);
+    } finally {
+      setLoadingSaved(false);
+    }
+  };
+
+  // Handle unsave from profile
+  const handleUnsavePost = async (postId) => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        alert("You need to be logged in to unsave posts!");
+        return;
+      }
+
+      const res = await fetch(`/api/posts/${postId}/unsave`, {
+        method: "POST",
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        }
+      });
+
+      if (res.ok) {
+        // Remove the post from saved posts
+        setSavedPosts(prev => prev.filter(post => post._id !== postId));
+        
+        // Also update userPosts if the post is there
+        setUserPosts(prev => prev.map(post => 
+          post._id === postId ? { ...post, isSaved: false } : post
+        ));
+      } else {
+        const errorText = await res.text();
+        console.error("Unsave failed:", errorText);
+        alert("Failed to unsave post. Please try again.");
+      }
+    } catch (error) {
+      console.error("Unsave error:", error);
+      alert("An error occurred. Please try again.");
+    }
+  };
+
   const renderTabContent = () => {
     if (activeTab === "comments") {
-      if (loading) {
+      if (loadingComments) {
         return (
           <div className="empty-state">
             <p className="empty-text">Loading comments...</p>
@@ -132,22 +275,21 @@ function ViewProfile() {
       }
 
       return (
-        <div className="comments-list">
-          {userComments.map((comment) => (
-            <div key={comment._id} className="comment-item">
-              <p className="comment-text">{comment.body || comment.text}</p>
-              <p className="comment-meta">
-                On post: {comment.post?.title || "Unknown post"} • 
-                {new Date(comment.createdAt).toLocaleDateString()}
-              </p>
-            </div>
+        <div className="profile-comments-container">
+          {userComments.map(comment => (
+            <ProfileComment 
+              key={comment._id} 
+              comment={comment} 
+              user={user}
+              allCommunities={allCommunities}
+            />
           ))}
         </div>
       );
     }
 
     if (activeTab === "posts") {
-      if (loading) {
+      if (loadingPosts) {
         return (
           <div className="empty-state">
             <p className="empty-text">Loading posts...</p>
@@ -190,6 +332,8 @@ function ViewProfile() {
                 onToggleJoin={null}
                 viewType="normal"
                 isCommunityPage={false}
+                isSaved={post.isSaved || false}
+                onUnsave={handleUnsavePost}
               />
             );
           })}
@@ -197,24 +341,70 @@ function ViewProfile() {
       );
     }
 
-    // For "overview" tab - show both posts and comments
-    if (activeTab === "overview") {
-      if (loading) {
+    // Saved tab content
+    if (activeTab === "saved") {
+      if (loadingSaved) {
         return (
           <div className="empty-state">
-            <p className="empty-text">Loading...</p>
+            <p className="empty-text">Loading saved posts...</p>
           </div>
         );
       }
 
-      const hasPosts = userPosts.length > 0;
-      const hasComments = userComments.length > 0;
-
-      if (!hasPosts && !hasComments) {
+      if (savedPosts.length === 0) {
         return (
           <div className="empty-state">
             <p className="empty-text">
-              {user ? `u/${user.username} hasn't posted or commented yet` : "User hasn't posted or commented yet"}
+              {user ? `u/${user.username} hasn't saved any posts yet` : "No saved posts"}
+            </p>
+          </div>
+        );
+      }
+
+      return (
+        <div>
+          {savedPosts.map((post) => {
+            const isUserJoined = joinedCommunityIds.includes(post.community?._id);
+
+            return (
+              <Post
+                key={post._id}
+                postId={post._id}
+                username={post.author?.username || user?.username}
+                time={post.createdAt}
+                title={post.title}
+                preview={post.mediaUrl}
+                textPreview={post.body}
+                avatar={post.author?.avatarUrl || user?.avatarUrl || "/images/avatar.png"}
+                initialVotes={post.score || 0}
+                initialVote={post.userVote || 0}
+                initialComments={post.commentCount || 0}
+                community={post.community?.name || "unknown"}
+                isAllFeed={true}
+                communityAvatarUrl={post.community?.avatar}
+                isJoined={isUserJoined}
+                onToggleJoin={null}
+                viewType="normal"
+                isCommunityPage={false}
+                isSaved={true}
+                onUnsave={handleUnsavePost}
+              />
+            );
+          })}
+        </div>
+      );
+    }
+
+    if (activeTab === "overview") {
+      const hasPosts = userPosts.length > 0;
+      const hasComments = userComments.length > 0;
+      const hasSaved = savedPosts.length > 0;
+
+      if (!hasPosts && !hasComments && !hasSaved) {
+        return (
+          <div className="empty-state">
+            <p className="empty-text">
+              {user ? `u/${user.username} hasn't posted, commented, or saved anything yet` : "User has no content"}
             </p>
           </div>
         );
@@ -222,7 +412,6 @@ function ViewProfile() {
 
       return (
         <div className="profile-overview-content">
-          {/* Show posts */}
           {hasPosts && userPosts.map((post) => {
             const isUserJoined = joinedCommunityIds.includes(post.community?._id);
 
@@ -246,33 +435,95 @@ function ViewProfile() {
                 onToggleJoin={null}
                 viewType="normal"
                 isCommunityPage={false}
+                isSaved={post.isSaved || false}
+                onUnsave={handleUnsavePost}
               />
             );
           })}
           
-          {/* Show comments as simple cards */}
-          {hasComments && userComments.map((comment) => (
-            <div key={`comment-${comment._id}`} className="profile-comment-card">
-              <div className="profile-comment-header">
-                <span className="profile-comment-meta">
-                  Commented on "{comment.post?.title || "a post"}"
-                </span>
-                <span className="profile-comment-time">
-                  {new Date(comment.createdAt).toLocaleDateString()}
-                </span >
-              </div>
-              <p className="profile-comment-body">{comment.body || comment.text}</p>
+          {hasSaved && (
+            <div className="profile-overview-saved-section">
+              <h3 className="profile-overview-section-title">
+                Saved Posts {savedPosts.length > 3 && `(${savedPosts.length})`}
+              </h3>
+              {savedPosts.slice(0, 3).map((post) => {
+                const isUserJoined = joinedCommunityIds.includes(post.community?._id);
+                return (
+                  <Post
+                    key={`saved-${post._id}`}
+                    postId={post._id}
+                    username={post.author?.username || user?.username}
+                    time={post.createdAt}
+                    title={post.title}
+                    preview={post.mediaUrl}
+                    textPreview={post.body}
+                    avatar={post.author?.avatarUrl || user?.avatarUrl || "/images/avatar.png"}
+                    initialVotes={post.score || 0}
+                    initialVote={post.userVote || 0}
+                    initialComments={post.commentCount || 0}
+                    community={post.community?.name || "unknown"}
+                    isAllFeed={true}
+                    communityAvatarUrl={post.community?.avatar}
+                    isJoined={isUserJoined}
+                    onToggleJoin={null}
+                    viewType="normal"
+                    isCommunityPage={false}
+                    isSaved={true}
+                    onUnsave={handleUnsavePost}
+                  />
+                );
+              })}
+              
+              {savedPosts.length > 3 && (
+                <button 
+                  className="profile-view-all-btn"
+                  onClick={() => {
+                    setActiveTab("saved");
+                    fetchSavedPosts();
+                  }}
+                >
+                  View all {savedPosts.length} saved posts
+                </button>
+              )}
             </div>
-          ))}
+          )}
+          
+          {hasComments && (
+            <div className="profile-overview-comments-section">
+              <h3 className="profile-overview-section-title">
+                Recent Comments {userComments.length > 3 && `(${userComments.length})`}
+              </h3>
+              {userComments.slice(0, 3).map(comment => (
+                <ProfileComment 
+                  key={comment._id} 
+                  comment={comment} 
+                  user={user}
+                  allCommunities={allCommunities}
+                />
+              ))}
+              
+              {userComments.length > 3 && (
+                <button 
+                  className="profile-view-all-btn"
+                  onClick={() => {
+                    setActiveTab("comments");
+                    fetchUserComments();
+                  }}
+                >
+                  View all {userComments.length} comments
+                </button>
+              )}
+            </div>
+          )}
         </div>
       );
     }
 
-    // For other tabs (hidden, upvoted, downvoted)
     const messages = {
       hidden: "has no hidden content",
       upvoted: "hasn't upvoted anything yet",
-      downvoted: "hasn't downvoted anything yet"
+      downvoted: "hasn't downvoted anything yet",
+      saved: "hasn't saved anything yet"
     };
 
     return (
@@ -290,11 +541,22 @@ function ViewProfile() {
       fetchUserComments();
     } else if (tabName === "posts") {
       fetchUserPosts();
+    } else if (tabName === "saved") {
+      fetchSavedPosts();
     }
   };
 
-  if (user === undefined) return <p></p>; // loading
-  if (user === null) return <p>User not found</p>; // user not found
+  // Load initial data for overview when profile loads and it's own profile
+  useEffect(() => {
+    if (user && isOwnProfile) {
+      fetchUserPosts();
+      fetchUserComments();
+      fetchSavedPosts();
+    }
+  }, [user, isOwnProfile]);
+
+  if (user === undefined) return <p>Loading...</p>;
+  if (user === null) return <p>User not found</p>;
 
   return (
     <>
@@ -302,7 +564,6 @@ function ViewProfile() {
       <Sidebar/>
       <div className="profile-page-container">
         <div className="profile-page-content">
-          {/* Main Content Column */}
           <div className="profile-main-column">
             <div className="profile-header-main">
               <div className="profile-header-avatar-info">
@@ -349,6 +610,12 @@ function ViewProfile() {
                 Comments
               </button>
               <button 
+                className={`profile-tab ${activeTab === "saved" ? "profile-tab-active" : ""}`}
+                onClick={() => handleTabClick("saved")}
+              >
+                Saved
+              </button>
+              <button 
                 className={`profile-tab ${activeTab === "hidden" ? "profile-tab-active" : ""}`}
                 onClick={() => handleTabClick("hidden")}
               >
@@ -392,7 +659,6 @@ function ViewProfile() {
             </div>
           </div>
 
-          {/* Sidebar Column */}
           <div className="profile-sidebar-column">
             <ProfileSidebar user={user} isOwnProfile={isOwnProfile} />
           </div>

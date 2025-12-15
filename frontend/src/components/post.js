@@ -20,11 +20,21 @@ function Post({
   onToggleJoin,
   viewType,
   isCommunityPage,
+  isSaved = false, // NEW: Add isSaved prop
+  onUnsave,        // NEW: Add onUnsave callback
+  onSave           // NEW: Add onSave callback (optional)
 }) {
   const [voteCount, setVoteCount] = useState(initialVotes || 0);
   const [vote, setVote] = useState(initialVote || 0);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [saved, setSaved] = useState(isSaved); // NEW: Local saved state
+  const [isSaving, setIsSaving] = useState(false); // NEW: Saving state
   const menuRef = useRef(null);
+
+  // Update saved state when prop changes
+  useEffect(() => {
+    setSaved(isSaved);
+  }, [isSaved]);
 
   // Close menu when clicking outside
   useEffect(() => {
@@ -84,6 +94,58 @@ function Post({
     }
   };
 
+  // NEW: Handle save/unsave
+  const handleSave = async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (isSaving) return;
+    
+    setIsSaving(true);
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        alert("You need to be logged in to save posts!");
+        setIsSaving(false);
+        return;
+      }
+
+      const endpoint = saved ? `/api/posts/${postId}/unsave` : `/api/posts/${postId}/save`;
+      
+      const res = await fetch(endpoint, {
+        method: "POST",
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        }
+      });
+
+      if (res.ok) {
+        const newSavedState = !saved;
+        setSaved(newSavedState);
+        
+        // Call the appropriate callback
+        if (newSavedState === false && onUnsave) {
+          onUnsave(postId);
+        }
+        
+        if (newSavedState === true && onSave) {
+          onSave(postId);
+        }
+      } else {
+        const errorText = await res.text();
+        console.error("Save/unsave failed:", errorText);
+        alert("Failed to save post. Please try again.");
+      }
+    } catch (error) {
+      console.error("Save/unsave error:", error);
+      alert("An error occurred. Please try again.");
+    } finally {
+      setIsSaving(false);
+      setMenuOpen(false);
+    }
+  };
+
   const toggleMenu = (e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -97,7 +159,26 @@ function Post({
   const handleMenuAction = (action, e) => {
     e.preventDefault();
     e.stopPropagation();
-    console.log(`${action} clicked for post ${postId}`);
+    
+    if (action === 'save') {
+      handleSave(e);
+    } else {
+      console.log(`${action} clicked for post ${postId}`);
+    }
+    closeMenu();
+  };
+
+  const handleHide = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    console.log("Hide post:", postId);
+    closeMenu();
+  };
+
+  const handleReport = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    console.log("Report post:", postId);
     closeMenu();
   };
 
@@ -171,7 +252,7 @@ function Post({
               </button>
             )}
             
-            {/* THREE DOTS MENU - ALWAYS VISIBLE BUT CONDITIONAL POSITION */}
+            {/* THREE DOTS MENU */}
             <div className="post-dots-wrapper" ref={menuRef}>
               <button
                 className="post-meta-dots-button"
@@ -190,18 +271,25 @@ function Post({
                   <button 
                     className="post-dots-item"
                     onClick={(e) => handleMenuAction('save', e)}
+                    disabled={isSaving}
                   >
-                    <img src="../images/save.svg" alt="Save" />
-                    <span>Save</span>
+                    <img src={saved ? "../images/save-active.svg" : "../images/save.svg"} alt="Save" />
+                    <span>{isSaving ? "..." : (saved ? "Unsave" : "Save")}</span>
                   </button>
                   <button 
                     className="post-dots-item"
-                    onClick={(e) => handleMenuAction('hide', e)}
+                    onClick={handleHide}
                   >
                     <img src="../images/hide.svg" alt="Hide" />
                     <span>Hide</span>
                   </button>
-                    
+                  <button 
+                    className="post-dots-item"
+                    onClick={handleReport}
+                  >
+                    <img src="../images/report.svg" alt="Report" />
+                    <span>Report</span>
+                  </button>
                 </div>
               )}
             </div>
@@ -233,7 +321,7 @@ function Post({
           )}
         </Link>
 
-        {/* POST ACTIVITIES (VOTES, COMMENTS) */}
+        {/* POST ACTIVITIES (VOTES, COMMENTS, SAVE) */}
         <div className="post-activity-wrapper">
           <div className="post-activity">
             {/* VOTING */}
@@ -270,6 +358,19 @@ function Post({
               <img src="../images/comment.svg" alt="comment" />
               <span className="post-comment-amount">{initialComments}</span>
             </Link>
+
+            {/* SAVE BUTTON - NEW */}
+            <button 
+              className="post-save post-activity-button post-activity-container"
+              onClick={handleSave}
+              disabled={isSaving}
+            >
+              <img 
+                src={saved ? "../images/save-active.svg" : "../images/save.svg"} 
+                alt="Save" 
+              />
+              <span>{isSaving ? "..." : (saved ? "Saved" : "Save")}</span>
+            </button>
           </div>
         </div>
       </div>

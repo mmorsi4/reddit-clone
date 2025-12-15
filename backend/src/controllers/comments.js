@@ -43,16 +43,103 @@ export async function deleteComment(req, res) {
   }
 }
 
-// Fetch user's comments
+// Fetch user's comments with community info - FIXED VERSION
 export async function getMyComments(req, res) {
   try {
+    // FIRST: Get comments with post populated
     const comments = await Comment.find({ author: req.userId })
-      .populate('post', 'title')
-      .sort({ createdAt: -1 });
+      .populate({
+        path: 'post',
+        select: 'title community author', // Make sure community is selected
+      })
+      .populate('author', 'username avatarUrl')
+      .sort({ createdAt: -1 })
+      .lean(); // Use .lean() for better performance
 
-    res.json(comments);
+    console.log("DEBUG - Raw comments from DB:", comments.length);
+    if (comments.length > 0) {
+      console.log("First comment's post field:", comments[0].post);
+    }
+
+    // SECOND: We need to populate communities separately because
+    // the post's community might just be an ObjectId
+    const formattedComments = await Promise.all(
+      comments.map(async (comment) => {
+        // Calculate score from votes
+        const score = comment.votes?.reduce((sum, vote) => {
+          return sum + (vote.value || 0);
+        }, 0) || 0;
+
+        // Get user's vote
+        const userVote = comment.votes?.find(vote => 
+          vote.user && vote.user.toString() === req.userId
+        )?.value || 0;
+
+        // Try to get community info
+        let community = null;
+        
+        // If post exists and has community field
+        if (comment.post && comment.post.community) {
+          // If community is an ObjectId string, fetch it
+          if (typeof comment.post.community === 'string') {
+            try {
+              const communityDoc = await mongoose.model('Community').findById(
+                comment.post.community
+              ).select('name avatar').lean();
+              
+              if (communityDoc) {
+                community = {
+                  _id: communityDoc._id,
+                  name: communityDoc.name,
+                  avatar: communityDoc.avatar || ''
+                };
+              }
+            } catch (err) {
+              console.error("Error fetching community:", err);
+            }
+          } 
+          // If community is already populated (shouldn't happen with current code)
+          else if (comment.post.community.name) {
+            community = {
+              _id: comment.post.community._id,
+              name: comment.post.community.name,
+              avatar: comment.post.community.avatar || ''
+            };
+          }
+        }
+
+        // Return formatted comment
+        return {
+          _id: comment._id,
+          body: comment.body,
+          createdAt: comment.createdAt,
+          votes: comment.votes || [],
+          score: score,
+          userVote: userVote,
+          author: comment.author,
+          post: {
+            _id: comment.post?._id,
+            title: comment.post?.title,
+            community: community // Now this will have data!
+          }
+        };
+      })
+    );
+
+    // Debug: Check what we're sending
+    console.log("DEBUG - Formatted comments ready to send:", {
+      count: formattedComments.length,
+      firstComment: formattedComments.length > 0 ? {
+        hasPost: !!formattedComments[0].post,
+        hasCommunity: !!formattedComments[0].post?.community,
+        communityName: formattedComments[0].post?.community?.name,
+        score: formattedComments[0].score
+      } : null
+    });
+
+    res.json(formattedComments);
   } catch (err) {
-    console.error(err);
+    console.error("Error in getMyComments:", err);
     res.status(500).json({ message: 'Failed to fetch comments' });
   }
 }
