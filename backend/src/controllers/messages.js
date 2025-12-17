@@ -26,3 +26,26 @@ export async function getMessages(req, res) {
     res.status(500).json({ message: 'Server error while fetching messages' });
   }
 }
+
+export async function sendFeedMessage(req, res) {
+  try {
+    const sender = req.user._id;
+    const { receiverId, text } = req.body;
+
+    const message = await Message.create({
+      sender,
+      receiver: receiverId,
+      text,
+      time: new Date()
+    });
+
+    const populated = await message.populate("sender", "username avatar");
+
+    req.io.to(receiverId.toString()).emit("receive_message", populated);
+
+    res.status(201).json(message);
+  } catch (err) {
+    console.error("Share feed message error:", err);
+    res.status(500).json({ message: "Failed to send feed link" });
+  }
+}

@@ -53,46 +53,40 @@ function Post({
     };
   }, [menuOpen]);
 
-  const handleUpvote = async (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    
-    let newVoteValue;
-    if (vote === 1) newVoteValue = 0;
-    else newVoteValue = 1;
+const handleUpvote = async (e) => {
+  e.preventDefault();
+  e.stopPropagation();
+  const newVoteValue = vote === 1 ? 0 : 1;
+  setVote(newVoteValue);
+  await updateVote(newVoteValue);
+};
 
-    await updateVote(newVoteValue);
-  };
+const handleDownvote = async (e) => {
+  e.preventDefault();
+  e.stopPropagation();
+  const newVoteValue = vote === -1 ? 0 : -1;
+  setVote(newVoteValue);
+  await updateVote(newVoteValue);
+};
 
-  const handleDownvote = async (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    
-    let newVoteValue;
-    if (vote === -1) newVoteValue = 0;
-    else newVoteValue = -1;
+const updateVote = async (newVoteValue) => {
+  try {
+    const res = await fetch(`/api/posts/${postId}/vote`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ value: newVoteValue }),
+    });
 
-    await updateVote(newVoteValue);
-  };
+    if (!res.ok) throw new Error("Vote failed");
 
-  const updateVote = async (newVoteValue) => {
-    try {
-      const res = await fetch(`/api/posts/${postId}/vote`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ value: newVoteValue }),
-      });
-
-      if (!res.ok) throw new Error("Vote failed");
-
-      const data = await res.json();
-      setVote(newVoteValue);
-      setVoteCount(data.score);
-    } catch (err) {
-      console.error(err);
-    }
-  };
+    const data = await res.json();
+    setVote(data.userVote ?? newVoteValue);
+    setVoteCount(data.score);
+  } catch (err) {
+    console.error(err);
+  }
+};
 
   // NEW: Handle save/unsave
   const handleSave = async (e) => {

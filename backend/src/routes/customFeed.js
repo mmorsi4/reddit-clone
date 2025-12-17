@@ -8,7 +8,8 @@ import {
     updateCustomFeedCommunitiesList,
     updateCustomFeedCommunities,
     deleteCustomFeed,
-    copyCustomFeed
+    copyCustomFeed,
+    toggleFollowCustomFeed
 } from '../controllers/customFeed.js';
 
 const router = express.Router();
@@ -21,5 +22,7 @@ router.put('/name/:feedId', authMiddleware, updateCustomFeedMetadata);
 router.put('/name/:feedId/communities', authMiddleware, updateCustomFeedCommunitiesList);
 router.delete('/:feedId', authMiddleware, deleteCustomFeed);
 router.post('/copy/:feedId', authMiddleware, copyCustomFeed);
+router.post('/:feedId/follow', authMiddleware, toggleFollowCustomFeed);
+
 
 export default router;

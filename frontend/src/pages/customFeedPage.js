@@ -4,6 +4,7 @@ import Header from '../components/header';
 import Sidebar from '../components/sidebar';
 import AddCommunitiesModal from '../pages/addcommunitiesPopup';
 import CustomFeedPopup from './CustomFeedPopup';
+import ShareFeedPopup from '../components/ShareFeedPopup';
 import Post from '../components/post';
 
 function CustomFeedPage() {
@@ -18,6 +19,14 @@ function CustomFeedPage() {
   const [isEditFeedModalOpen, setIsEditFeedModalOpen] = useState(false);
   const [joinedCommunities, setJoinedCommunities] = useState([]);
   const [isOptionsMenuOpen, setIsOptionsMenuOpen] = useState(false);
+  const [isShareOpen, setIsShareOpen] = useState(false);
+  const [users, setUsers] = useState([]);
+  const [loadingUsers, setLoadingUsers] = useState(false);
+  const [isCreator, setIsCreator] = useState(false);
+  const [isFollowing, setIsFollowing] = useState(false);
+  const [followersCount, setFollowersCount] = useState(0);
+
+
 
 
   const fetchJoinedCommunities = useCallback(async () => {
@@ -33,6 +42,32 @@ function CustomFeedPage() {
       console.error("Error fetching joined communities:", err);
     }
   }, []);
+
+  const fetchUsers = useCallback(async () => {
+    setLoadingUsers(true);
+    try {
+      const res = await fetch("/api/users", {
+        credentials: "include"
+      });
+
+      if (!res.ok) throw new Error("Failed to fetch users");
+
+      const data = await res.json();
+      setUsers(data);
+    } catch (err) {
+      console.error("Error fetching users:", err);
+    } finally {
+      setLoadingUsers(false);
+    }
+  }, []);
+
+  useEffect(() => {
+  if (feed) {
+    setIsCreator(feed.isCreator);
+    setIsFollowing(feed.isFollowing);
+    setFollowersCount(feed.followersCount);
+  }
+}, [feed]);
 
   const handleToggleJoin = useCallback(async (communityName, communityId) => {
     const isCurrentlyJoined = joinedCommunities.includes(communityId);
@@ -222,7 +257,7 @@ function CustomFeedPage() {
       if (!res.ok) {
         throw new Error('Failed to delete feed.');
       }
-      navigate('/Home'); 
+      navigate('/Home');
 
     } catch (err) {
       console.error("Error deleting feed:", err);
@@ -255,6 +290,39 @@ function CustomFeedPage() {
     }
   };
 
+  const handleShareFeed = async (users) => {
+    const feedLink = `${window.location.origin}/f/${feed._id}`;
+
+    for (const user of users) {
+      await fetch("/api/messages/share-feed", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          receiverId: user._id,
+          text: `📌 Shared a custom feed with you:\n${feed.name}\n${feedLink}`
+        })
+      });
+    }
+  };
+
+  const handleFollowToggle = async () => {
+  try {
+    const res = await fetch(`/api/customfeeds/${feedId}/follow`, {
+      method: 'POST',
+      credentials: 'include'
+    });
+    if (!res.ok) throw new Error('Failed to update follow status');
+
+    const data = await res.json();
+    setIsFollowing(data.isFollowing);
+    setFollowersCount(data.followersCount);
+  } catch (err) {
+    console.error(err);
+    alert('Failed to update follow status');
+  }
+};
+
 
   if (loading) {
     return (
@@ -273,7 +341,6 @@ function CustomFeedPage() {
   }
 
   const communityCount = feed.communities ? feed.communities.length : 0;
-  const isCreator = true;
 
   return (
     <>
@@ -366,9 +433,25 @@ function CustomFeedPage() {
             <div className="custom-feed-sidebar-actions-wrapper">
 
               <div className="custom-feed-sidebar-actions">
-                <button className="icon-button sidebar-action-button">
+                <button
+                  className="icon-button sidebar-action-button"
+                  onClick={() => {
+                    setIsShareOpen(true);
+                    fetchUsers();
+                  }}
+                >
                   <img src="../images/share.svg" alt="Share Feed" />
                 </button>
+
+                {!isCreator && (
+                  <button
+                    className={`icon-button sidebar-action-button follow ${isFollowing ? 'following' : ''}`}
+                    onClick={handleFollowToggle}
+                  >
+                    {isFollowing ? 'Following' : 'Follow'}
+                  </button>
+                )}
+
                 <button
                   className="icon-button sidebar-action-button"
                   onClick={handleToggleOptionsMenu}
@@ -379,6 +462,7 @@ function CustomFeedPage() {
 
               {isOptionsMenuOpen && (
                 <div className="custom-feed-options-menu">
+                  {isCreator && (
                   <button
                     className="options-menu-item"
                     onClick={() => {
@@ -386,23 +470,30 @@ function CustomFeedPage() {
                       setIsOptionsMenuOpen(false);
                     }}
                   >
+                    
                     <img src="../images/edit.svg" alt="Edit" />
                     Edit details
+                    
                   </button>
+                  )}
+                  
+                    
                   <button
                     className="options-menu-item"
-                    onClick={handleCopyFeed} 
+                    onClick={handleCopyFeed}
                   >
                     <img src="../images/copy.svg" alt="Copy" />
                     Copy custom feed
                   </button>
+                  {isCreator &&(
                   <button
                     className="options-menu-item delete"
-                    onClick={handleDeleteFeed} 
+                    onClick={handleDeleteFeed}
                   >
                     <img src="../images/delete.svg" alt="Delete" />
                     Delete
                   </button>
+                  )}
                 </div>
               )}
             </div>
@@ -410,14 +501,14 @@ function CustomFeedPage() {
               <div className="feed-info-section">
                 <div className="sidebar-card-header">
                   <h3>{feed.name}</h3>
-                  {isCreator &&
+                  {isCreator && (
                     <button
                       className="edit-button-icon"
                       onClick={handleOpenEditFeedModal}
                     >
                       <img src="../images/edit.svg" alt="Edit Feed Details" />
                     </button>
-                  }
+                  )}
                 </div>
                 {feed.description && (
                   <p className="feed-description-text">
@@ -432,7 +523,7 @@ function CustomFeedPage() {
 
               <div className="feed-stats-row">
                 <div className="feed-stat">
-                  <span className="stat-number">0</span>
+                  <span className="stat-number">{followersCount}</span>
                   <span className="stat-label">Followers</span>
                 </div>
                 <div className="feed-stat">
@@ -496,6 +587,17 @@ function CustomFeedPage() {
           onSubmit={handleEditFeedSubmit}
         />
       )}
+
+      {isShareOpen && (
+        <ShareFeedPopup
+          feed={feed}
+          users={users}
+          onSend={handleShareFeed}
+          onClose={() => setIsShareOpen(false)}
+        />
+      )}
+
+
     </>
 
   );

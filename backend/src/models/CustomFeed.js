@@ -23,6 +23,10 @@ const CustomFeedSchema = new Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Community'
   }],
+  followers: [{ 
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  }],
   isPrivate: {
     type: Boolean,
     default: false,

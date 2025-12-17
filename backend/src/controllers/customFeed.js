@@ -55,10 +55,12 @@ export async function getMyCustomFeeds(req, res) {
 export async function getCustomFeedById(req, res) {
   try {
     const { feedId } = req.params;
+    const userId = req.userId; 
 
     const feed = await CustomFeed.findById(feedId)
       .populate('author', 'username avatarUrl')
-      .populate('communities', 'name avatar');
+      .populate('communities', 'name avatar')
+      .populate('followers', '_id'); 
 
     if (!feed) return res.status(404).json({ message: "Custom feed not found." });
 
@@ -66,7 +68,15 @@ export async function getCustomFeedById(req, res) {
       return res.status(403).json({ message: "Access denied. This feed is private." });
     }
 
-    res.json(feed);
+    const isCreator = feed.author._id.toString() === userId;
+    const isFollowing = feed.followers.some(f => f._id.toString() === userId);
+
+    res.json({
+      ...feed.toObject(),
+      isCreator,
+      isFollowing,
+      followersCount: feed.followers.length
+    });
   } catch (err) {
     console.error("Error fetching custom feed by ID:", err);
     res.status(500).json({ message: "Internal server error" });
@@ -232,5 +242,41 @@ export async function copyCustomFeed(req, res) {
   } catch (err) {
     console.error("Error copying custom feed:", err);
     res.status(500).json({ message: "Internal server error during copy." });
+  }
+}
+
+export async function toggleFollowCustomFeed(req, res) {
+  try {
+    const { feedId } = req.params;
+    const userId = req.userId;
+
+    const feed = await CustomFeed.findById(feedId);
+
+    if (!feed) return res.status(404).json({ message: "Custom feed not found." });
+
+    if (feed.author.toString() === userId) {
+      return res.status(400).json({ message: "Creator cannot follow their own feed." });
+    }
+
+    const isFollowing = feed.followers.includes(userId);
+
+    if (isFollowing) {
+      // Unfollow
+      feed.followers = feed.followers.filter(f => f.toString() !== userId);
+    } else {
+      // Follow
+      feed.followers.push(userId);
+    }
+
+    await feed.save();
+
+    res.json({ 
+      followersCount: feed.followers.length, 
+      isFollowing: !isFollowing 
+    });
+
+  } catch (err) {
+    console.error("Error toggling follow:", err);
+    res.status(500).json({ message: "Internal server error" });
   }
 }
