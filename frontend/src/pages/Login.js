@@ -16,12 +16,13 @@ function Login() {
   const [EmailFocused, setEmailFocused] = useState(false);
   const [valid, setValid] = useState(true);
 
+
   const WarningIcon = () => (
-    <svg 
-      width="20" 
-      height="20" 
-      viewBox="0 0 24 24" 
-      fill="none" 
+    <svg
+      width="20"
+      height="20"
+      viewBox="0 0 24 24"
+      fill="none"
       className="icon-warn"
       xmlns="http://www.w3.org/2000/svg"
     >
@@ -32,19 +33,59 @@ function Login() {
   );
 
   const SuccessIcon = () => (
-    <svg 
-      width="20" 
-      height="20" 
-      viewBox="0 0 24 24" 
-      fill="none" 
+    <svg
+      width="20"
+      height="20"
+      viewBox="0 0 24 24"
+      fill="none"
       className="icon-success"
       xmlns="http://www.w3.org/2000/svg"
     >
-      <path d="M5 13L9 17L19 7" stroke="#28a745" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/> 
+      <path d="M5 13L9 17L19 7" stroke="#28a745" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 
-  
+  const handleResetPassword = async (e) => {
+    e.preventDefault();
+
+    const usernameOrEmail = e.target.elements["reset-username-email"].value.trim();
+    const newPassword = e.target.elements["reset-password"].value.trim();
+
+    setIsSubmitted(true);
+
+    if (!usernameOrEmail || !newPassword) return;
+
+    if (newPassword.length < 6) {
+      alert("Password must be at least 6 characters long.");
+      return;
+    }
+
+    try {
+      const res = await fetch("/api/auth/reset-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ usernameOrEmail, newPassword })
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        alert("Password reset successfully. You can now log in.");
+        setActiveForm("login");
+        setIsSubmitted(false);
+        setName("");
+        setPass("");
+      } else {
+        alert(data.message || "Reset failed.");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Error connecting to server.");
+    }
+  };
+
+
   // Toggle password visibility
   const togglePassword = () => setShowPassword((prev) => !prev);
 
@@ -54,7 +95,7 @@ function Login() {
     const usernameOrEmail = e.target.elements["login-username-email"].value.trim();
     const password = e.target.elements["login-password"].value.trim();
     setIsSubmitted(true);
-    
+
     // Validation
     if (usernameOrEmail === "" || password === "") {
       return;
@@ -71,7 +112,7 @@ function Login() {
       if (res.ok) {
         // HANDLE SUCCESSFUL LOGIN
         navigate("/home");
-      } 
+      }
       else {
         setValid(false);
         alert(res.status || "Invalid credentials.");
@@ -140,7 +181,7 @@ function Login() {
         {/* AUTH BOX */}
         <div className="login-container">
           <div className={activeForm === "login" ? "login-box" : "signup-box"}>
-            
+
             {/* Login Form */}
             {activeForm === "login" && (
               <form className="login-form login-active" id="login-form" onSubmit={handleLogin}>
@@ -162,7 +203,7 @@ function Login() {
                   {name && !NameFocused && <SuccessIcon />}
                   <p className={`warn ${isSubmitted && !name && !NameFocused ? "show" : ""}`}>Please fill out this field.</p>
                 </div>
-                
+
                 <div className="inputbox">
                   <input
                     id="login-password"
@@ -171,7 +212,7 @@ function Login() {
                     onFocus={() => setPassFocused(true)}
                     onBlur={() => setPassFocused(false)}
                     placeholder="Password"
-                    onChange={(e) => {setPass(e.target.value); setValid(true)}}
+                    onChange={(e) => { setPass(e.target.value); setValid(true) }}
                   />
                   {isSubmitted && !pass && !PassFocused && <WarningIcon />}
                   {pass && !PassFocused && <SuccessIcon />}
@@ -181,11 +222,19 @@ function Login() {
                 </div>
 
                 <p className="login-switch-text">
-                  <span>Forgot Password?</span>
+                  <span onClick={() => {
+                    setActiveForm("reset");
+                    setIsSubmitted(false);
+                    setName("");
+                    setPass("");
+                  }}>
+                    Forgot Password?
+                  </span>
                 </p>
+
                 <p className="login-switch-text">
                   New to Reddit?{" "}
-                  <span onClick={() => {setActiveForm("signup"); setIsSubmitted(false) }}>Sign up</span>
+                  <span onClick={() => { setActiveForm("signup"); setIsSubmitted(false) }}>Sign up</span>
                 </p>
                 <button type="submit" className={(!pass || !name) ? "login-button" : "login-btn"}>Log In</button>
               </form>
@@ -197,9 +246,9 @@ function Login() {
                 <h2>Sign Up</h2>
                 <p>By continuing, you agree to our <a href="https://redditinc.com/policies/user-agreement">User Agreement</a> and
                   acknowledge that you understand the <a href="https://www.reddit.com/policies/privacy-policy">Privacy Policy</a>.</p>
-                
+
                 <div className="inputbox">
-                  <input 
+                  <input
                     id="signup-username"
                     type="text"
                     className={isSubmitted && !name && !NameFocused ? "warning" : ""}
@@ -211,7 +260,7 @@ function Login() {
                   {isSubmitted && !name && !NameFocused && <WarningIcon />}
                   <p className={`warn ${isSubmitted && !name && !NameFocused ? "show" : ""}`}>Please fill out this field.</p>
                 </div>
-                
+
                 <div className="inputbox">
                   <input
                     id="signup-email"
@@ -242,11 +291,76 @@ function Login() {
 
                 <p className="login-switch-text">
                   Already a redditor?{" "}
-                  <span onClick={() => {setActiveForm("login"); setIsSubmitted(false); setName(""); setPass("")}}>Log In</span>
+                  <span onClick={() => { setActiveForm("login"); setIsSubmitted(false); setName(""); setPass("") }}>Log In</span>
                 </p>
                 <button type="submit" className={(!pass || !name || !email) ? "login-button" : "login-btn"}>Sign Up</button>
               </form>
             )}
+
+            {activeForm === "reset" && (
+              <form className="login-form login-active" onSubmit={handleResetPassword}>
+                <h2>Reset your password</h2>
+
+                <p>
+                  Enter your email address or username and we’ll send you a link to reset your password.
+                </p>
+
+                <div className="inputbox">
+                  <input
+                    id="reset-username-email"
+                    type="text"
+                    className={isSubmitted && !name && !NameFocused ? "warning" : ""}
+                    onFocus={() => setNameFocused(true)}
+                    onBlur={() => setNameFocused(false)}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="Email or username"
+                  />
+                  {isSubmitted && !name && !NameFocused && <WarningIcon />}
+                  <p className={`warn ${isSubmitted && !name && !NameFocused ? "show" : ""}`}>
+                    Please fill out this field.
+                  </p>
+                </div>
+
+                <div className="inputbox">
+                  <input
+                    id="reset-password"
+                    type={showPassword ? "text" : "password"}
+                    className={isSubmitted && !pass && !PassFocused ? "warning" : ""}
+                    onFocus={() => setPassFocused(true)}
+                    onBlur={() => setPassFocused(false)}
+                    onChange={(e) => setPass(e.target.value)}
+                    placeholder="New password"
+                  />
+                  {isSubmitted && !pass && !PassFocused && <WarningIcon />}
+                  <p className={`warn ${isSubmitted && !pass && !PassFocused ? "show" : ""}`}>
+                    Please fill out this field.
+                  </p>
+                </div>
+
+                <p className="login-switch-text">
+                  <a href="https://support.reddithelp.com/hc/en-us/sections/360008917491-Account-Security">Need help?</a>
+                </p>
+
+                <p className="login-switch-text">
+                  <span onClick={() => {
+                    setActiveForm("login");
+                    setIsSubmitted(false);
+                    setName("");
+                    setPass("");
+                  }}>
+                    Back to Log In
+                  </span>
+                </p>
+
+                <button
+                  type="submit"
+                  className={(!name || !pass) ? "login-button" : "login-btn"}
+                >
+                  Reset password
+                </button>
+              </form>
+            )}
+
           </div>
         </div>
       </div>

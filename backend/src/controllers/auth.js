@@ -32,6 +32,30 @@ export async function login(req,res){
   res.json({user:{id:user._id,username:user.username,email:user.email}, token});
 }
 
+export async function resetPassword(req, res) {
+  try {
+    const { usernameOrEmail, newPassword } = req.body;
+
+    const user = await User.findOne({
+      $or: [{ email: usernameOrEmail }, { username: usernameOrEmail }]
+    });
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const passwordHash = await bcrypt.hash(newPassword, 10);
+    user.passwordHash = passwordHash;
+    await user.save();
+
+    res.status(200).json({ message: 'Password reset successful' });
+  } catch (error) {
+    console.error('Reset password error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+}
+
+
 
 export const checkAuth = async (req, res) => {
   try {

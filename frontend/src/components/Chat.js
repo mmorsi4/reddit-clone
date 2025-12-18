@@ -312,22 +312,13 @@ const Chat = ({ currentUserId, onClose, users }) => {
               {currentView === 'new_chat' ? 'New Chat' : 'Chats'}
             </span>
             <div className="chat-header__action-icons">
-              <img src="../images/envelope.svg" alt="Messages" className="chat-header__icon" />
               <span className="chat-header__icon-wrapper" onClick={handleStartNewChat}>
                 <img src="../images/chat-1.svg" alt="New Chat" className="chat-header__icon" />
               </span>
-              <span className="chat-header__menu-wrapper">
-                <span className="chat-header__icon-wrapper">
-                  <img src="../images/setting.svg" alt="Settings" className="chat-header__icon" />
-                </span>
-                <span className="chat-header__icon-wrapper">
-                  <img src="../images/down.svg" alt="Menu" className="chat-header__icon chat-header__icon--rotated" />
-                </span>
-              </span>
+              
             </div>
           </div>
           <div className="chat-header__controls">
-            <img src="../images/expand.svg" alt="Expand" className="chat-header__control-icon" />
             <img
               src="../images/down.svg"
               alt="Minimize"
