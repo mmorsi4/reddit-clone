@@ -32,6 +32,10 @@ function PostPage() {
   const [isSaved, setIsSaved] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
+  // Hide functionality states
+  const [isHidden, setIsHidden] = useState(false);
+  const [isHiding, setIsHiding] = useState(false);
+
   const handleSummarize = async () => {
     if (!post) return;
     setIsSummarizing(true);
@@ -148,8 +152,9 @@ function PostPage() {
       setSortedComments(data.comments || []);
       setFilteredComments(data.comments || []);
       
-      // Set saved status from post data
+      // Set saved and hidden status from post data
       setIsSaved(data.post?.isSaved || false);
+      setIsHidden(data.post?.isHidden || false);
     } catch (err) {
       console.error(err);
       setPost(null);
@@ -314,15 +319,101 @@ function PostPage() {
       alert("An error occurred. Please try again.");
     } finally {
       setIsSaving(false);
-      setShowDropdown(false); // Close dropdown after action
+      setShowDropdown(false);
     }
   };
 
   // Handle hide post
   const handleHidePost = async () => {
-    // TODO: Implement hide functionality
-    alert("Hide functionality coming soon!");
-    setShowDropdown(false);
+    if (!postId || !currentUser) {
+      alert("You need to be logged in to hide posts!");
+      setShowDropdown(false);
+      return;
+    }
+
+    if (isHidden) {
+      // If already hidden, unhide it
+      await handleUnhidePost();
+      setShowDropdown(false);
+      return;
+    }
+
+    setIsHiding(true);
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        alert("You need to be logged in to hide posts!");
+        setIsHiding(false);
+        setShowDropdown(false);
+        return;
+      }
+
+      const endpoint = `/api/posts/${postId}/hide`;
+      
+      const res = await fetch(endpoint, {
+        method: "POST",
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        }
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setIsHidden(true);
+        
+        // Update the post object
+        setPost(prev => ({
+          ...prev,
+          isHidden: true
+        }));
+        
+        alert("Post hidden! It won't appear in your feeds anymore.");
+      } else {
+        const errorText = await res.text();
+        console.error("Hide failed:", errorText);
+        alert("Failed to hide post. Please try again.");
+      }
+    } catch (error) {
+      console.error("Hide error:", error);
+      alert("An error occurred. Please try again.");
+    } finally {
+      setIsHiding(false);
+      setShowDropdown(false);
+    }
+  };
+
+  // Handle unhide post (for the banner undo button)
+  const handleUnhidePost = async () => {
+    if (!postId || !currentUser) return;
+
+    try {
+      const token = localStorage.getItem('token');
+      const endpoint = `/api/posts/${postId}/unhide`;
+      
+      const res = await fetch(endpoint, {
+        method: "POST",
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        }
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setIsHidden(false);
+        
+        // Update the post object
+        setPost(prev => ({
+          ...prev,
+          isHidden: false
+        }));
+      } else {
+        console.error("Unhide failed");
+      }
+    } catch (error) {
+      console.error("Unhide error:", error);
+    }
   };
 
   // Handle report post
@@ -518,6 +609,23 @@ function PostPage() {
         <div className="post-page-content">
           {/* Main Content Column */}
           <div className="post-main-column">
+            {/* Hidden Post Banner */}
+            {isHidden && (
+              <div className="hidden-post-banner">
+                <div className="hidden-banner-content">
+                  <span className="hidden-banner-text">
+                    📭 This post is hidden. You won't see it in your feeds.
+                  </span>
+                  <button 
+                    className="unhide-button"
+                    onClick={handleUnhidePost}
+                  >
+                    Undo
+                  </button>
+                </div>
+              </div>
+            )}
+
             {/* Combined Back Button and Community Info */}
             <div className="post-header-navigation">
               <button className="back-button" onClick={() => window.history.back()}>
@@ -579,8 +687,9 @@ function PostPage() {
                       <button 
                         className="dropdown-item" 
                         onClick={handleHidePost}
+                        disabled={isHiding}
                       >
-                        Hide
+                        {isHiding ? "Processing..." : (isHidden ? "Unhide" : "Hide")}
                       </button>
                       <button 
                         className="dropdown-item" 
@@ -655,7 +764,7 @@ function PostPage() {
                   <span>{post.commentCount || comments.length} Comments</span>
                 </button>
                 
-                {/* Save button in main actions - REMOVED SAVE COUNT */}
+                {/* Save button in main actions */}
                 <button 
                   className={`post-action-btn ${isSaved ? 'saved' : ''}`}
                   onClick={handleSavePost}
@@ -663,6 +772,16 @@ function PostPage() {
                 >
                   <span className="action-icon">{isSaved ? '⭐' : '☆'}</span>
                   <span>{isSaving ? '...' : (isSaved ? 'Saved' : 'Save')}</span>
+                </button>
+                
+                {/* Hide button in main actions */}
+                <button 
+                  className={`post-action-btn ${isHidden ? 'hidden' : ''}`}
+                  onClick={handleHidePost}
+                  disabled={isHiding}
+                >
+                  <span className="action-icon">{isHidden ? '👁️' : '👁️‍🗨️'}</span>
+                  <span>{isHiding ? '...' : (isHidden ? 'Hidden' : 'Hide')}</span>
                 </button>
                 
                 <button className="post-action-btn">

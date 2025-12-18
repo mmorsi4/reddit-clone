@@ -16,10 +16,7 @@
   --comment-border: #e5e7eb;
   --comment-input-border: #ccc;
   --compact-border: #e5e7eb;
-<<<<<<< HEAD
-=======
   --sidebar-hover: #f5f5f5;
->>>>>>> aca04ce2fe68b221fef66e8c0d214b526abb00d5
 }
 
 [data-theme="dark"] {
@@ -40,10 +37,7 @@
   --comment-border: #444;
   --comment-input-border: #555;
   --compact-border: #444;
-<<<<<<< HEAD
-=======
   --sidebar-hover: #2a2a2a;
->>>>>>> aca04ce2fe68b221fef66e8c0d214b526abb00d5
 }
 
 .main-posts-container {
@@ -152,13 +146,10 @@
 .post-activity-button {
     display: flex;
     align-items: center;
-<<<<<<< HEAD
-=======
     background: none;
     border: none;
     cursor: pointer;
     padding: 0;
->>>>>>> aca04ce2fe68b221fef66e8c0d214b526abb00d5
 }
 
 .post-activity-button img {
@@ -321,10 +312,6 @@
   display: flex;
   align-items: center;
   justify-content: center;
-<<<<<<< HEAD
-}
-
-=======
   width: 32px;
   height: 32px;
   border-radius: 4px;
@@ -334,7 +321,6 @@
 .post-meta-dots-button:hover {
   background-color: var(--post-activity-hover);
 }
->>>>>>> aca04ce2fe68b221fef66e8c0d214b526abb00d5
 
 .post-user-info {
     display: flex;
@@ -359,11 +345,7 @@
   width: 20px;
   height: 20px;
   opacity: 0.6;
-<<<<<<< HEAD
-  transition: opacity 0.2s;
-=======
   transition: opacity 0.2s, filter 0.3s ease;
->>>>>>> aca04ce2fe68b221fef66e8c0d214b526abb00d5
 }
 
 .post-meta-dots-button:hover .post-meta-dots {
@@ -372,16 +354,12 @@
 
 /* Dark mode fix for dots icon */
 [data-theme="dark"] .post-meta-dots {
-<<<<<<< HEAD
-    filter: invert(1) brightness(1.5);
-=======
   filter: brightness(0) invert(1);
   opacity: 0.8;
 }
 
 [data-theme="dark"] .post-meta-dots-button:hover .post-meta-dots {
   opacity: 1;
->>>>>>> aca04ce2fe68b221fef66e8c0d214b526abb00d5
 }
 
 .post-join-button {
@@ -566,13 +544,7 @@
                 filter 0.3s ease;
 }
 
-<<<<<<< HEAD
-
-
-
-=======
 /* THREE DOTS MENU STYLES */
->>>>>>> aca04ce2fe68b221fef66e8c0d214b526abb00d5
 .post-dots-menu {
   position: absolute;
   top: 28px;
@@ -583,15 +555,12 @@
   width: 140px;
   box-shadow: 0 8px 24px rgba(0,0,0,0.2);
   z-index: 999; 
-<<<<<<< HEAD
-=======
   overflow: hidden;
   transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
 [data-theme="dark"] .post-dots-menu {
   box-shadow: 0 8px 24px rgba(0,0,0,0.4);
->>>>>>> aca04ce2fe68b221fef66e8c0d214b526abb00d5
 }
 
 .post-dots-item {
@@ -605,10 +574,7 @@
   cursor: pointer;
   font-size: 14px;
   color: var(--post-text);
-<<<<<<< HEAD
-=======
   transition: background-color 0.2s ease, color 0.3s ease;
->>>>>>> aca04ce2fe68b221fef66e8c0d214b526abb00d5
 }
 
 .post-dots-item:hover {
@@ -618,23 +584,6 @@
 .post-dots-item img {
   width: 18px;
   height: 18px;
-<<<<<<< HEAD
-}
-
-[data-theme="dark"] .post-dots-item img,
-[data-theme="dark"] .post-meta-dots {
-  filter: brightness(0) invert(1);
-}
-
-
-.post-meta-dots-btn {
-  background: none;
-  border: none;
-  padding: 0;
-  cursor: pointer;
-  z-index: 10;
-}
-=======
   transition: filter 0.3s ease;
 }
 
@@ -679,4 +628,3 @@
 [data-theme="dark"] .post-vote .post-activity-button:active {
   background-color: #444;
 }
->>>>>>> aca04ce2fe68b221fef66e8c0d214b526abb00d5

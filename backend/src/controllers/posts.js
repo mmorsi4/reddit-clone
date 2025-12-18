@@ -7,10 +7,7 @@ import ModelClient, { isUnexpected } from "@azure-rest/ai-inference";
 import { AzureKeyCredential } from "@azure/core-auth";
 import path from 'path'
 import fs from 'fs'
-<<<<<<< HEAD
-=======
 import groq from '../../utils/groq.js';
->>>>>>> aca04ce2fe68b221fef66e8c0d214b526abb00d5
 
 export async function createPost(req, res) {
   const { title, body, url, community } = req.body;
@@ -30,6 +27,11 @@ export async function getPosts(req, res) {
       query.community = comm._id;
     }
 
+    // NEW: Exclude posts hidden by the current user
+    if (req.userId) {
+      query['hiddenBy'] = { $ne: req.userId };
+    }
+
     const skip = (Number(page) - 1) * Number(limit);
 
     const posts = await Post.find(query)
@@ -43,12 +45,27 @@ export async function getPosts(req, res) {
     const normalized = posts.map(post => {
       const userVote = post.votes?.find(v => v.user.toString() === req.userId);
       const score = post.votes?.reduce((sum, v) => sum + v.value, 0) || 0;
-      console.log(post.commentCount)
+      
+      // Check if user has hidden this post
+      let isHidden = false;
+      if (req.userId && post.hiddenBy) {
+        isHidden = post.hiddenBy.some(id => id.toString() === req.userId);
+      }
+      
+      // Check if user has saved this post
+      let isSaved = false;
+      if (req.userId && post.savedBy) {
+        isSaved = post.savedBy.some(id => id.toString() === req.userId);
+      }
+      
+      console.log(post.commentCount);
       return {
         ...post,
         userVote: userVote ? userVote.value : 0,
         score,
-        commentCount: post.commentCount
+        commentCount: post.commentCount,
+        isHidden,
+        isSaved
       };
     });
 
@@ -74,6 +91,12 @@ export async function getPost(req, res) {
       isSaved = post.savedBy.some(id => id.toString() === req.userId);
     }
 
+    // Check if user has hidden this post
+    let isHidden = false;
+    if (req.userId && post.hiddenBy) {
+      isHidden = post.hiddenBy.some(id => id.toString() === req.userId);
+    }
+
     // Add user vote info
     const userVote = post.votes?.find(v => v.user && v.user.toString() === req.userId);
     const score = post.votes?.reduce((sum, v) => sum + (v.value || 0), 0) || 0;
@@ -83,11 +106,11 @@ export async function getPost(req, res) {
       userVote: userVote ? userVote.value : 0,
       score,
       commentCount: post.commentCount ?? 0,
-      isSaved,  // Add isSaved field
-      saves: post.saves || 0  // Add saves count
+      isSaved,
+      isHidden,
+      saves: post.saves || 0
     };
 
-    // ... rest of your existing code for comments ...
     const comments = await Comment.find({ post: post._id })
       .populate('author', 'username displayName avatarUrl')
       .lean();
@@ -137,23 +160,12 @@ export async function getPostSummary(req, res) {
           "If the post is text-only, summarize the text clearly. " +
           "If an image exists, describe its content and combine it with the text. " +
           "If a video exists, do NOT attempt to analyze the actual video file, but acknowledge it is a video and summarize based on any textual context. " +
-<<<<<<< HEAD
-          "Be concise and factual." +
-          "Do not mention that you are guessing or inferring." +
-=======
           "Be concise and factual. " +
           "Do not mention that you are guessing or inferring. " +
->>>>>>> aca04ce2fe68b221fef66e8c0d214b526abb00d5
           "Refuse to summarize any explicit content."
       }
     ];
 
-<<<<<<< HEAD
-    const userContent = [{ type: "text", text: `Title:\n${post.title}` }];
-
-    if (post.body) {
-      userContent.push({ type: "text", text: `Body:\n${post.body}` });
-=======
     const userContent = [
       { type: "text", text: `Title:\n${post.title}` }
     ];
@@ -163,20 +175,10 @@ export async function getPostSummary(req, res) {
         type: "text",
         text: `Body:\n${post.body}`
       });
->>>>>>> aca04ce2fe68b221fef66e8c0d214b526abb00d5
     }
 
     if (post.mediaUrl) {
       const ext = path.extname(post.mediaUrl).toLowerCase();
-<<<<<<< HEAD
-      const mimeMap = { ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".png": "image/png", ".webp": "image/webp" };
-
-      if ([".jpg", ".jpeg", ".png", ".webp"].includes(ext)) {
-        const imagePath = path.join(process.cwd(), post.mediaUrl);
-        const imageBase64 = fs.readFileSync(imagePath, { encoding: "base64" });
-        const mime = mimeMap[ext] || "image/jpeg";
-        userContent.push({ type: "image_url", image_url: { url: `data:${mime};base64,${imageBase64}` } });
-=======
       const mimeMap = {
         ".jpg": "image/jpeg",
         ".jpeg": "image/jpeg",
@@ -195,7 +197,6 @@ export async function getPostSummary(req, res) {
             url: `data:${mime};base64,${imageBase64}`
           }
         });
->>>>>>> aca04ce2fe68b221fef66e8c0d214b526abb00d5
       } else if ([".mp4", ".webm"].includes(ext)) {
         userContent.push({
           type: "text",
@@ -204,22 +205,6 @@ export async function getPostSummary(req, res) {
       }
     }
 
-<<<<<<< HEAD
-    messages.push({ role: "user", content: userContent });
-
-    const client = ModelClient(
-      "https://models.github.ai/inference",
-      new AzureKeyCredential(process.env.GITHUB_MODELS_TOKEN)
-    );
-
-    const response = await client.path("/chat/completions").post({
-      body: { model: "openai/gpt-4.1", messages, max_tokens: 120, temperature: 0.4 }
-    });
-
-    if (isUnexpected(response)) throw response.body.error;
-
-    res.json({ summary: response.body.choices[0].message.content });
-=======
     messages.push({
       role: "user",
       content: userContent
@@ -236,7 +221,6 @@ export async function getPostSummary(req, res) {
       summary: completion.choices[0].message.content
     });
 
->>>>>>> aca04ce2fe68b221fef66e8c0d214b526abb00d5
   } catch (err) {
     console.error("Summary error:", err);
     res.status(500).json({ message: "Failed to generate summary" });
@@ -266,23 +250,30 @@ export async function votePost(req, res) {
   }
 }
 
-// Add this function to your posts controller
 export async function getMyPosts(req, res) {
   try {
     const posts = await Post.find({ author: req.userId })
       .populate('author', 'username displayName avatarUrl')
-      .populate('community', 'name title avatar _id') // ✨ FIXED: Added 'avatar' and '_id'
+      .populate('community', 'name title avatar _id')
       .sort({ createdAt: -1 })
       .lean();
 
     const normalized = posts.map(post => {
       const userVote = post.votes?.find(v => v.user.toString() === req.userId);
       const score = post.votes?.reduce((sum, v) => sum + v.value, 0) || 0;
+      
+      // Check if user has hidden this post (user can't hide their own posts, but we check anyway)
+      let isHidden = false;
+      if (req.userId && post.hiddenBy) {
+        isHidden = post.hiddenBy.some(id => id.toString() === req.userId);
+      }
+      
       return {
         ...post,
         userVote: userVote ? userVote.value : 0,
         score,
-        commentCount: post.commentCount ?? 0
+        commentCount: post.commentCount ?? 0,
+        isHidden
       };
     });
 
@@ -300,6 +291,11 @@ export async function getAllFeedPosts(req, res) {
 
     const query = { community: { $exists: true, $ne: null } };
 
+    // NEW: Exclude posts hidden by the current user
+    if (req.userId) {
+      query['hiddenBy'] = { $ne: req.userId };
+    }
+
     const posts = await Post.find(query)
       .populate('author', 'username displayName avatarUrl')
       .populate('community', 'name title avatar _id')
@@ -311,11 +307,19 @@ export async function getAllFeedPosts(req, res) {
     const normalized = posts.map(post => {
       const userVote = post.votes?.find(v => v.user.toString() === req.userId);
       const score = post.votes?.reduce((sum, v) => sum + v.value, 0) || 0;
+      
+      // Check if user has saved this post
+      let isSaved = false;
+      if (req.userId && post.savedBy) {
+        isSaved = post.savedBy.some(id => id.toString() === req.userId);
+      }
+      
       return {
         ...post,
         userVote: userVote ? userVote.value : 0,
         score,
-        commentCount: post.commentCount ?? 0
+        commentCount: post.commentCount ?? 0,
+        isSaved
       };
     });
 
@@ -325,7 +329,6 @@ export async function getAllFeedPosts(req, res) {
     res.status(500).json({ message: "Internal server error" });
   }
 }
-
 
 export async function getCustomFeedPosts(req, res) {
   try {
@@ -353,6 +356,11 @@ export async function getCustomFeedPosts(req, res) {
 
     const query = { community: { $in: objectCommunityIds } };
 
+    // NEW: Exclude posts hidden by the current user
+    if (req.userId) {
+      query['hiddenBy'] = { $ne: req.userId };
+    }
+
     const posts = await Post.find(query)
       .populate('author', 'username displayName avatarUrl')
       .populate('community', 'name title avatar _id')
@@ -364,11 +372,19 @@ export async function getCustomFeedPosts(req, res) {
     const normalized = posts.map(post => {
       const userVote = post.votes?.find(v => v.user.toString() === req.userId);
       const score = post.votes?.reduce((sum, v) => sum + v.value, 0) || 0;
+      
+      // Check if user has saved this post
+      let isSaved = false;
+      if (req.userId && post.savedBy) {
+        isSaved = post.savedBy.some(id => id.toString() === req.userId);
+      }
+      
       return {
         ...post,
         userVote: userVote ? userVote.value : 0,
         score,
-        commentCount: post.commentCount ?? 0
+        commentCount: post.commentCount ?? 0,
+        isSaved
       };
     });
 
@@ -392,21 +408,34 @@ export async function getHomeBestPosts(req, res) {
       query.community = { $in: joinedCommunityIds };
     }
 
+    // NEW: Exclude posts hidden by the current user
+    if (req.userId) {
+      query['hiddenBy'] = { $ne: req.userId };
+    }
+
     const posts = await Post.find(query)
       .populate('author', 'username displayName avatarUrl')
       .populate('community', 'name title avatar _id')
-      .sort({ score: -1, createdAt: -1 }) // Sort by score field (already calculated in pre-save)
+      .sort({ score: -1, createdAt: -1 })
       .skip(skip)
       .limit(Number(limit))
       .lean();
 
     const normalized = posts.map(post => {
       const userVote = post.votes?.find(v => v.user && v.user.toString() === req.userId);
+      
+      // Check if user has saved this post
+      let isSaved = false;
+      if (req.userId && post.savedBy) {
+        isSaved = post.savedBy.some(id => id.toString() === req.userId);
+      }
+      
       return {
         ...post,
         userVote: userVote ? userVote.value : 0,
         score: post.score || 0,
-        commentCount: post.commentCount ?? 0
+        commentCount: post.commentCount ?? 0,
+        isSaved
       };
     });
 
@@ -430,6 +459,11 @@ export async function getHomeNewPosts(req, res) {
       query.community = { $in: joinedCommunityIds };
     }
 
+    // NEW: Exclude posts hidden by the current user
+    if (req.userId) {
+      query['hiddenBy'] = { $ne: req.userId };
+    }
+
     const posts = await Post.find(query)
       .populate('author', 'username displayName avatarUrl')
       .populate('community', 'name title avatar _id')
@@ -440,11 +474,19 @@ export async function getHomeNewPosts(req, res) {
 
     const normalized = posts.map(post => {
       const userVote = post.votes?.find(v => v.user && v.user.toString() === req.userId);
+      
+      // Check if user has saved this post
+      let isSaved = false;
+      if (req.userId && post.savedBy) {
+        isSaved = post.savedBy.some(id => id.toString() === req.userId);
+      }
+      
       return {
         ...post,
         userVote: userVote ? userVote.value : 0,
         score: post.score || 0,
-        commentCount: post.commentCount ?? 0
+        commentCount: post.commentCount ?? 0,
+        isSaved
       };
     });
 
@@ -468,12 +510,17 @@ export async function getHomeTopPosts(req, res) {
       query.community = { $in: joinedCommunityIds };
     }
 
+    // NEW: Exclude posts hidden by the current user
+    if (req.userId) {
+      query['hiddenBy'] = { $ne: req.userId };
+    }
+
     // Use aggregation pipeline for better performance with vote count
     const posts = await Post.aggregate([
       { $match: query },
       {
         $addFields: {
-          voteCount: { $size: { $ifNull: ["$votes", []] } } // Calculate number of votes
+          voteCount: { $size: { $ifNull: ["$votes", []] } }
         }
       },
       { $sort: { voteCount: -1, createdAt: -1 } },
@@ -505,14 +552,22 @@ export async function getHomeTopPosts(req, res) {
       { $unwind: { path: '$community', preserveNullAndEmptyArrays: true } }
     ]);
 
-    // Add user vote information
+    // Add user vote information and saved status
     const normalized = posts.map(post => {
       const userVote = post.votes?.find(v => v.user && v.user.toString() === req.userId);
+      
+      // Check if user has saved this post
+      let isSaved = false;
+      if (req.userId && post.savedBy) {
+        isSaved = post.savedBy.some(id => id.toString() === req.userId);
+      }
+      
       return {
         ...post,
         userVote: userVote ? userVote.value : 0,
         score: post.score || 0,
-        commentCount: post.commentCount ?? 0
+        commentCount: post.commentCount ?? 0,
+        isSaved
       };
     });
 
@@ -523,7 +578,6 @@ export async function getHomeTopPosts(req, res) {
   }
 }
 
-
 export async function getPopularPosts(req, res) {
   try {
     const { limit = 20, page = 1 } = req.query;
@@ -531,7 +585,14 @@ export async function getPopularPosts(req, res) {
 
     const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
 
-    const posts = await Post.find({ community: { $exists: true, $ne: null } })
+    let query = { community: { $exists: true, $ne: null } };
+
+    // NEW: Exclude posts hidden by the current user
+    if (req.userId) {
+      query['hiddenBy'] = { $ne: req.userId };
+    }
+
+    const posts = await Post.find(query)
       .populate('author', 'username displayName avatarUrl')
       .populate('community', 'name title avatar _id')
       .lean();
@@ -540,7 +601,18 @@ export async function getPopularPosts(req, res) {
     const postsWithRecentScore = posts.map(post => {
       const recentVotes = post.votes?.filter(v => v.createdAt >= twentyFourHoursAgo) || [];
       const recentScore = recentVotes.reduce((sum, v) => sum + (v.value || 0), 0);
-      return { ...post, recentScore };
+      
+      // Check if user has saved this post
+      let isSaved = false;
+      if (req.userId && post.savedBy) {
+        isSaved = post.savedBy.some(id => id.toString() === req.userId);
+      }
+      
+      return { 
+        ...post, 
+        recentScore,
+        isSaved 
+      };
     });
 
     // Sort by recentScore descending
@@ -557,7 +629,6 @@ export async function getPopularPosts(req, res) {
 }
 
 // Save a post
-// Save a post - UPDATED VERSION
 export async function savePost(req, res) {
   try {
     const postId = req.params.id;
@@ -600,7 +671,8 @@ export async function savePost(req, res) {
     res.status(500).json({ message: "Failed to save post", error: err.message });
   }
 }
-// Unsave a post - FIXED VERSION
+
+// Unsave a post
 export async function unsavePost(req, res) {
   try {
     const postId = req.params.id;
@@ -634,9 +706,8 @@ export async function unsavePost(req, res) {
     res.status(500).json({ message: "Failed to unsave post", error: err.message });
   }
 }
-// Get saved posts for current user - CORRECTED VERSION
-// Get saved posts for current user - BULLETPROOF VERSION
-// Get saved posts for current user - SIMPLE WORKING VERSION
+
+// Get saved posts for current user
 export async function getSavedPosts(req, res) {
   try {
     console.log("🔍 getSavedPosts called for user:", req.userId);
@@ -647,7 +718,6 @@ export async function getSavedPosts(req, res) {
       return res.status(401).json({ message: "Not authenticated" });
     }
     
-    // Simple query - MongoDB handles string/ObjectId conversion
     const savedPosts = await Post.find({ 
       savedBy: userId 
     })
@@ -666,12 +736,19 @@ export async function getSavedPosts(req, res) {
       
       const score = post.votes?.reduce((sum, v) => sum + (v.value || 0), 0) || 0;
       
+      // Check if user has hidden this post
+      let isHidden = false;
+      if (userId && post.hiddenBy) {
+        isHidden = post.hiddenBy.some(id => id.toString() === userId.toString());
+      }
+      
       return {
         ...post,
         userVote: userVote ? userVote.value : 0,
         score,
         commentCount: post.commentCount || 0,
-        isSaved: true
+        isSaved: true,
+        isHidden
       };
     });
     
@@ -681,6 +758,132 @@ export async function getSavedPosts(req, res) {
     console.error("❌ Error in getSavedPosts:", err.message);
     res.status(500).json({ 
       message: "Failed to fetch saved posts",
+      error: err.message 
+    });
+  }
+}
+
+// Hide a post
+export async function hidePost(req, res) {
+  try {
+    const postId = req.params.id;
+    const userId = req.userId;
+    
+    if (!postId || !mongoose.Types.ObjectId.isValid(postId)) {
+      return res.status(400).json({ message: 'Invalid post ID' });
+    }
+    
+    const post = await Post.findById(postId);
+    if (!post) {
+      return res.status(404).json({ message: 'Post not found' });
+    }
+    
+    // Convert userId to string for comparison
+    const userIdStr = userId.toString();
+    
+    // Check if already hidden
+    if (post.hiddenBy && post.hiddenBy.some(id => id.toString() === userIdStr)) {
+      return res.status(400).json({ message: 'Post already hidden' });
+    }
+    
+    // Initialize hiddenBy array if it doesn't exist
+    if (!post.hiddenBy) {
+      post.hiddenBy = [];
+    }
+    
+    // Add user to hiddenBy array
+    post.hiddenBy.push(userId);
+    await post.save();
+    
+    res.json({ 
+      message: 'Post hidden successfully',
+      isHidden: true 
+    });
+  } catch (err) {
+    console.error("❌ Error hiding post:", err);
+    res.status(500).json({ message: "Failed to hide post", error: err.message });
+  }
+}
+
+// Unhide a post
+export async function unhidePost(req, res) {
+  try {
+    const postId = req.params.id;
+    const userId = req.userId;
+    
+    const post = await Post.findById(postId);
+    if (!post) {
+      return res.status(404).json({ message: 'Post not found' });
+    }
+    
+    // Convert userId to string for comparison
+    const userIdStr = userId.toString();
+    
+    // Check if not hidden
+    if (!post.hiddenBy || !post.hiddenBy.some(id => id.toString() === userIdStr)) {
+      return res.status(400).json({ message: 'Post not hidden' });
+    }
+    
+    // Remove user from hiddenBy array
+    post.hiddenBy = post.hiddenBy.filter(id => id.toString() !== userIdStr);
+    await post.save();
+    
+    res.json({ 
+      message: 'Post unhidden successfully',
+      isHidden: false 
+    });
+  } catch (err) {
+    console.error("Error unhiding post:", err);
+    res.status(500).json({ message: "Failed to unhide post", error: err.message });
+  }
+}
+
+// Get hidden posts for current user
+export async function getHiddenPosts(req, res) {
+  try {
+    const userId = req.userId;
+    
+    if (!userId) {
+      return res.status(401).json({ message: "Not authenticated" });
+    }
+    
+    const hiddenPosts = await Post.find({ 
+      hiddenBy: userId 
+    })
+    .populate('author', 'username displayName avatarUrl')
+    .populate('community', 'name title avatar _id')
+    .sort({ createdAt: -1 })
+    .lean();
+    
+    // Process posts
+    const normalized = hiddenPosts.map(post => {
+      const userVote = post.votes?.find(v => {
+        return v.user && v.user.toString() === userId.toString();
+      });
+      
+      const score = post.votes?.reduce((sum, v) => sum + (v.value || 0), 0) || 0;
+      
+      // Check if user has saved this post
+      let isSaved = false;
+      if (userId && post.savedBy) {
+        isSaved = post.savedBy.some(id => id.toString() === userId.toString());
+      }
+      
+      return {
+        ...post,
+        userVote: userVote ? userVote.value : 0,
+        score,
+        commentCount: post.commentCount || 0,
+        isHidden: true,
+        isSaved
+      };
+    });
+    
+    res.json(normalized);
+  } catch (err) {
+    console.error("❌ Error in getHiddenPosts:", err.message);
+    res.status(500).json({ 
+      message: "Failed to fetch hidden posts",
       error: err.message 
     });
   }

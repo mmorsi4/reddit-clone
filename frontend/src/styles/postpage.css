@@ -1342,3 +1342,60 @@
   fill: white;
   transform: scale(1.2);
 } 
+/* Hidden Post Banner */
+.hidden-post-banner {
+  background-color: #fff3cd;
+  border: 1px solid #ffeaa7;
+  border-radius: 4px;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  transition: all 0.3s ease;
+}
+
+[data-theme="dark"] .hidden-post-banner {
+  background-color: #332701;
+  border-color: #665600;
+}
+
+.hidden-banner-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.hidden-banner-text {
+  color: #856404;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+[data-theme="dark"] .hidden-banner-text {
+  color: #ffd351;
+}
+
+.unhide-button {
+  background: #28a745;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.unhide-button:hover {
+  background: #218838;
+}
+
+/* Hide button in post actions */
+.post-action-btn.hidden {
+  background-color: #e2e3e5;
+  border-color: #d6d8db;
+}
+
+[data-theme="dark"] .post-action-btn.hidden {
+  background-color: #343a40;
+  border-color: #495057;
+}

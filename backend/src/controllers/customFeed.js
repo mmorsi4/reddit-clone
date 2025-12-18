@@ -55,19 +55,12 @@ export async function getMyCustomFeeds(req, res) {
 export async function getCustomFeedById(req, res) {
   try {
     const { feedId } = req.params;
-<<<<<<< HEAD
-
-    const feed = await CustomFeed.findById(feedId)
-      .populate('author', 'username avatarUrl')
-      .populate('communities', 'name avatar');
-=======
     const userId = req.userId; 
 
     const feed = await CustomFeed.findById(feedId)
       .populate('author', 'username avatarUrl')
       .populate('communities', 'name avatar')
       .populate('followers', '_id'); 
->>>>>>> aca04ce2fe68b221fef66e8c0d214b526abb00d5
 
     if (!feed) return res.status(404).json({ message: "Custom feed not found." });
 
@@ -75,9 +68,6 @@ export async function getCustomFeedById(req, res) {
       return res.status(403).json({ message: "Access denied. This feed is private." });
     }
 
-<<<<<<< HEAD
-    res.json(feed);
-=======
     const isCreator = feed.author._id.toString() === userId;
     const isFollowing = feed.followers.some(f => f._id.toString() === userId);
 
@@ -87,7 +77,6 @@ export async function getCustomFeedById(req, res) {
       isFollowing,
       followersCount: feed.followers.length
     });
->>>>>>> aca04ce2fe68b221fef66e8c0d214b526abb00d5
   } catch (err) {
     console.error("Error fetching custom feed by ID:", err);
     res.status(500).json({ message: "Internal server error" });
@@ -254,8 +243,6 @@ export async function copyCustomFeed(req, res) {
     console.error("Error copying custom feed:", err);
     res.status(500).json({ message: "Internal server error during copy." });
   }
-<<<<<<< HEAD
-=======
 }
 
 export async function toggleFollowCustomFeed(req, res) {
@@ -292,5 +279,4 @@ export async function toggleFollowCustomFeed(req, res) {
     console.error("Error toggling follow:", err);
     res.status(500).json({ message: "Internal server error" });
   }
->>>>>>> aca04ce2fe68b221fef66e8c0d214b526abb00d5
 }

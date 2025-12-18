@@ -21,6 +21,11 @@ const PostSchema = new Schema({
     ref: 'User'
   }],
 
+  hiddenBy: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  }],
+
   saves: { type: Number, default: 0 },
   votes: [VoteSchema],
   score: { type: Number, default: 0 },

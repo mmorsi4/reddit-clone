@@ -16,7 +16,10 @@ import {
     getPostSummary,
     savePost,    
     unsavePost,      
-    getSavedPosts 
+    getSavedPosts,
+    hidePost,
+    unhidePost,
+    getHiddenPosts 
 } from '../controllers/posts.js';
 
 const router = express.Router();
@@ -30,7 +33,8 @@ router.get('/top', authMiddleware, getHomeTopPosts);
 router.get('/all-feed', authMiddleware, getAllFeedPosts); 
 router.get('/my/posts', authMiddleware, getMyPosts);
 router.get('/popular', authMiddleware, getPopularPosts);
-router.get('/saved', authMiddleware, getSavedPosts); // ✅ MOVED UP - BEFORE /:id
+router.get('/saved', authMiddleware, getSavedPosts);
+router.get('/hidden', authMiddleware, getHiddenPosts); // ✅ Only one /hidden route
 router.get('/', authMiddleware, getPosts);
 
 // 2. POST routes
@@ -40,6 +44,8 @@ router.post('/custom-feed-posts', authMiddleware, getCustomFeedPosts);
 // 3. Dynamic routes with :id
 router.post('/:id/save', authMiddleware, savePost);
 router.post('/:id/unsave', authMiddleware, unsavePost);
+router.post('/:id/hide', authMiddleware, hidePost);
+router.post('/:id/unhide', authMiddleware, unhidePost);
 router.post('/:id/vote', authMiddleware, votePost);
 router.get('/:id/summary', authMiddleware, getPostSummary);
 router.get('/:id', authMiddleware, getPost); // ⚠️ MUST BE LAST!

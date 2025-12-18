@@ -25,9 +25,6 @@ export async function getMessages(req, res) {
     console.error('Error fetching messages:', err);
     res.status(500).json({ message: 'Server error while fetching messages' });
   }
-<<<<<<< HEAD
-}
-=======
 }
 
 export async function sendFeedMessage(req, res) {
@@ -52,4 +49,3 @@ export async function sendFeedMessage(req, res) {
     res.status(500).json({ message: "Failed to send feed link" });
   }
 }
->>>>>>> aca04ce2fe68b221fef66e8c0d214b526abb00d5

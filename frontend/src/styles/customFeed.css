@@ -539,8 +539,6 @@
     transition: filter 0.3s ease;
 }
 
-<<<<<<< HEAD
-=======
 
 /* FOLLOW button specific style */
 .icon-button.sidebar-action-button.follow {
@@ -564,7 +562,6 @@
 }
 
 
->>>>>>> aca04ce2fe68b221fef66e8c0d214b526abb00d5
 /* Dark mode icon fix */
 [data-theme="dark"] .options-menu-item img {
     filter: invert(1) brightness(1.5);

@@ -14,9 +14,11 @@ function ViewProfile() {
   const [userComments, setUserComments] = useState([]);
   const [userPosts, setUserPosts] = useState([]);
   const [savedPosts, setSavedPosts] = useState([]);
+  const [hiddenPosts, setHiddenPosts] = useState([]); // NEW: Hidden posts state
   const [loadingComments, setLoadingComments] = useState(false);
   const [loadingPosts, setLoadingPosts] = useState(false);
   const [loadingSaved, setLoadingSaved] = useState(false);
+  const [loadingHidden, setLoadingHidden] = useState(false); // NEW: Loading state for hidden posts
   const [joinedCommunityIds, setJoinedCommunityIds] = useState([]); 
   const [isOwnProfile, setIsOwnProfile] = useState(false);
   const [allCommunities, setAllCommunities] = useState([]);
@@ -218,6 +220,43 @@ function ViewProfile() {
     }
   };
 
+  // NEW: Fetch hidden posts
+  const fetchHiddenPosts = async () => {
+    setLoadingHidden(true);
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        console.error("No token found for hidden posts");
+        setHiddenPosts([]);
+        setLoadingHidden(false);
+        return;
+      }
+
+      const res = await fetch("/api/posts/hidden", {
+        method: "GET",
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        }
+      });
+
+      if (res.ok) {
+        const posts = await res.json();
+        console.log("Hidden posts fetched:", posts.length);
+        setHiddenPosts(posts);
+      } else {
+        const errorText = await res.text();
+        console.error("Error fetching hidden posts:", errorText);
+        setHiddenPosts([]);
+      }
+    } catch (error) {
+      console.error("Error fetching hidden posts:", error);
+      setHiddenPosts([]);
+    } finally {
+      setLoadingHidden(false);
+    }
+  };
+
   // Handle unsave from profile
   const handleUnsavePost = async (postId) => {
     try {
@@ -250,6 +289,40 @@ function ViewProfile() {
       }
     } catch (error) {
       console.error("Unsave error:", error);
+      alert("An error occurred. Please try again.");
+    }
+  };
+
+  // NEW: Handle unhide from profile
+  const handleUnhidePost = async (postId) => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        alert("You need to be logged in to unhide posts!");
+        return;
+      }
+
+      const res = await fetch(`/api/posts/${postId}/unhide`, {
+        method: "POST",
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        }
+      });
+
+      if (res.ok) {
+        // Remove the post from hidden posts
+        setHiddenPosts(prev => prev.filter(post => post._id !== postId));
+        
+        // Show success message
+        alert("Post unhidden successfully!");
+      } else {
+        const errorText = await res.text();
+        console.error("Unhide failed:", errorText);
+        alert("Failed to unhide post. Please try again.");
+      }
+    } catch (error) {
+      console.error("Unhide error:", error);
       alert("An error occurred. Please try again.");
     }
   };
@@ -395,12 +468,67 @@ function ViewProfile() {
       );
     }
 
+    // NEW: Hidden tab content
+    if (activeTab === "hidden") {
+      if (loadingHidden) {
+        return (
+          <div className="empty-state">
+            <p className="empty-text">Loading hidden posts...</p>
+          </div>
+        );
+      }
+
+      if (hiddenPosts.length === 0) {
+        return (
+          <div className="empty-state">
+            <p className="empty-text">
+              {user ? `u/${user.username} hasn't hidden any posts yet` : "No hidden posts"}
+            </p>
+          </div>
+        );
+      }
+
+      return (
+        <div>
+          {hiddenPosts.map((post) => {
+            const isUserJoined = joinedCommunityIds.includes(post.community?._id);
+
+            return (
+              <Post
+                key={post._id}
+                postId={post._id}
+                username={post.author?.username || user?.username}
+                time={post.createdAt}
+                title={post.title}
+                preview={post.mediaUrl}
+                textPreview={post.body}
+                avatar={post.author?.avatarUrl || user?.avatarUrl || "/images/avatar.png"}
+                initialVotes={post.score || 0}
+                initialVote={post.userVote || 0}
+                initialComments={post.commentCount || 0}
+                community={post.community?.name || "unknown"}
+                isAllFeed={true}
+                communityAvatarUrl={post.community?.avatar}
+                isJoined={isUserJoined}
+                onToggleJoin={null}
+                viewType="normal"
+                isCommunityPage={false}
+                isHidden={true}
+                onUnhide={handleUnhidePost} // Pass the unhide handler
+              />
+            );
+          })}
+        </div>
+      );
+    }
+
     if (activeTab === "overview") {
       const hasPosts = userPosts.length > 0;
       const hasComments = userComments.length > 0;
       const hasSaved = savedPosts.length > 0;
+      const hasHidden = hiddenPosts.length > 0 && isOwnProfile; // Only show hidden in overview if it's own profile
 
-      if (!hasPosts && !hasComments && !hasSaved) {
+      if (!hasPosts && !hasComments && !hasSaved && !hasHidden) {
         return (
           <div className="empty-state">
             <p className="empty-text">
@@ -488,6 +616,54 @@ function ViewProfile() {
             </div>
           )}
           
+          {/* NEW: Hidden posts section in overview (only for own profile) */}
+          {hasHidden && isOwnProfile && (
+            <div className="profile-overview-hidden-section">
+              <h3 className="profile-overview-section-title">
+                Hidden Posts {hiddenPosts.length > 3 && `(${hiddenPosts.length})`}
+              </h3>
+              {hiddenPosts.slice(0, 3).map((post) => {
+                const isUserJoined = joinedCommunityIds.includes(post.community?._id);
+                return (
+                  <Post
+                    key={`hidden-${post._id}`}
+                    postId={post._id}
+                    username={post.author?.username || user?.username}
+                    time={post.createdAt}
+                    title={post.title}
+                    preview={post.mediaUrl}
+                    textPreview={post.body}
+                    avatar={post.author?.avatarUrl || user?.avatarUrl || "/images/avatar.png"}
+                    initialVotes={post.score || 0}
+                    initialVote={post.userVote || 0}
+                    initialComments={post.commentCount || 0}
+                    community={post.community?.name || "unknown"}
+                    isAllFeed={true}
+                    communityAvatarUrl={post.community?.avatar}
+                    isJoined={isUserJoined}
+                    onToggleJoin={null}
+                    viewType="normal"
+                    isCommunityPage={false}
+                    isHidden={true}
+                    onUnhide={handleUnhidePost}
+                  />
+                );
+              })}
+              
+              {hiddenPosts.length > 3 && (
+                <button 
+                  className="profile-view-all-btn"
+                  onClick={() => {
+                    setActiveTab("hidden");
+                    fetchHiddenPosts();
+                  }}
+                >
+                  View all {hiddenPosts.length} hidden posts
+                </button>
+              )}
+            </div>
+          )}
+          
           {hasComments && (
             <div className="profile-overview-comments-section">
               <h3 className="profile-overview-section-title">
@@ -543,6 +719,8 @@ function ViewProfile() {
       fetchUserPosts();
     } else if (tabName === "saved") {
       fetchSavedPosts();
+    } else if (tabName === "hidden") { // NEW: Fetch hidden posts
+      fetchHiddenPosts();
     }
   };
 
@@ -552,6 +730,7 @@ function ViewProfile() {
       fetchUserPosts();
       fetchUserComments();
       fetchSavedPosts();
+      fetchHiddenPosts(); // NEW: Also fetch hidden posts for own profile
     }
   }, [user, isOwnProfile]);
 
