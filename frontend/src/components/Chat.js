@@ -110,7 +110,21 @@ const ChatWindow = ({ user, messages, onSend }) => {
                 <span className="chat-message-username">{msg.sender.username}</span>
                 <span className="chat-message-time">{new Date(msg.time).toLocaleTimeString()}</span>
               </div>
+<<<<<<< HEAD
               <div className="chat-message-text">{msg.text}</div>
+=======
+              <div className="chat-message-text">
+                {msg.text.split("\n").map((line, i) =>
+                  line.startsWith("http") ? (
+                    <a key={i} href={line} target="_blank" rel="noopener noreferrer">
+                      {line}
+                    </a>
+                  ) : (
+                    <div key={i}>{line}</div>
+                  )
+                )}
+              </div>
+>>>>>>> aca04ce2fe68b221fef66e8c0d214b526abb00d5
             </div>
           </div>
         ))}
@@ -119,8 +133,13 @@ const ChatWindow = ({ user, messages, onSend }) => {
 
       <div className="chat-window-input">
         <input
+<<<<<<< HEAD
           type="text" 
           placeholder="Message" 
+=======
+          type="text"
+          placeholder="Message"
+>>>>>>> aca04ce2fe68b221fef66e8c0d214b526abb00d5
           value={newMessage}
           onChange={e => setNewMessage(e.target.value)}
           onKeyDown={e => e.key === 'Enter' && handleSend()}
@@ -135,7 +154,11 @@ const ChatWindow = ({ user, messages, onSend }) => {
 
 // --- Main Chat Pop-up Component ---
 const Chat = ({ currentUserId, onClose, users }) => {
+<<<<<<< HEAD
   const [currentView, setCurrentView] = useState('default'); 
+=======
+  const [currentView, setCurrentView] = useState('default');
+>>>>>>> aca04ce2fe68b221fef66e8c0d214b526abb00d5
   const [isMinimized, setIsMinimized] = useState(false);
   const [selectedUsers, setSelectedUsers] = useState([]);
 
@@ -143,9 +166,15 @@ const Chat = ({ currentUserId, onClose, users }) => {
   const [messages, setMessages] = useState({});
 
   useEffect(() => {
+<<<<<<< HEAD
   if (!activeChatUser?._id) return;
 
   const fetchMessages = async () => {
+=======
+    if (!activeChatUser?._id) return;
+
+    const fetchMessages = async () => {
+>>>>>>> aca04ce2fe68b221fef66e8c0d214b526abb00d5
       try {
         const res = await fetch(`/api/messages?receiver=${activeChatUser._id}`, { credentials: 'include' });
         if (!res.ok) throw new Error("Failed to fetch messages");
@@ -229,7 +258,11 @@ const Chat = ({ currentUserId, onClose, users }) => {
     if (!selectedUsers.some(u => u._id === user._id)) {
       setSelectedUsers(prev => [...prev, user]); // add user to sidebar
     }
+<<<<<<< HEAD
     
+=======
+
+>>>>>>> aca04ce2fe68b221fef66e8c0d214b526abb00d5
     setActiveChatUser(user); // open chat window
     setCurrentView('default');
   };
@@ -237,10 +270,17 @@ const Chat = ({ currentUserId, onClose, users }) => {
   // Content for the default welcome screen
   const MainContent = (
     <div className="chat-main">
+<<<<<<< HEAD
       <img 
         src="../images/chat-image.png" 
         alt="Welcome to chat illustration" 
         className="chat-main__illustration" 
+=======
+      <img
+        src="../images/chat-image.png"
+        alt="Welcome to chat illustration"
+        className="chat-main__illustration"
+>>>>>>> aca04ce2fe68b221fef66e8c0d214b526abb00d5
       />
       <h2 className="chat-main__title">Welcome to chat!</h2>
       <p className="chat-main__subtitle">
@@ -259,18 +299,30 @@ const Chat = ({ currentUserId, onClose, users }) => {
   let MainAreaToRender;
   if (activeChatUser) {
     MainAreaToRender = (
+<<<<<<< HEAD
       <ChatWindow 
         user={activeChatUser} 
+=======
+      <ChatWindow
+        user={activeChatUser}
+>>>>>>> aca04ce2fe68b221fef66e8c0d214b526abb00d5
         messages={activeMessages}
         onSend={handleSend}
       />
     );
   } else if (currentView === 'new_chat') {
     MainAreaToRender = (
+<<<<<<< HEAD
       <NewChatForm 
         onBack={handleBackToDefault} 
         users={users} 
         onStartChat={handleStartChatWithUser} 
+=======
+      <NewChatForm
+        onBack={handleBackToDefault}
+        users={users}
+        onStartChat={handleStartChatWithUser}
+>>>>>>> aca04ce2fe68b221fef66e8c0d214b526abb00d5
         currentUserId={currentUserId}
       />
     );
@@ -284,6 +336,7 @@ const Chat = ({ currentUserId, onClose, users }) => {
       {isMinimized && (
         <div className="chat-minimized" onClick={handleMinimizeToggle}>
           <span>Chat</span>
+<<<<<<< HEAD
           <img 
             src="../images/close.svg" 
             alt="Close" 
@@ -292,6 +345,16 @@ const Chat = ({ currentUserId, onClose, users }) => {
               e.stopPropagation(); 
               onClose();
             }} 
+=======
+          <img
+            src="../images/close.svg"
+            alt="Close"
+            className="chat-minimized__close-icon"
+            onClick={(e) => {
+              e.stopPropagation();
+              onClose();
+            }}
+>>>>>>> aca04ce2fe68b221fef66e8c0d214b526abb00d5
           />
         </div>
       )}
@@ -300,7 +363,11 @@ const Chat = ({ currentUserId, onClose, users }) => {
           <div className="chat-header__title-group">
             <img src="../images/reddit-logo.svg" alt="Reddit Logo" className="chat-header__logo" />
             <span className="chat-header__title">
+<<<<<<< HEAD
               {currentView === 'new_chat' ? 'New Chat' : 'Chats'} 
+=======
+              {currentView === 'new_chat' ? 'New Chat' : 'Chats'}
+>>>>>>> aca04ce2fe68b221fef66e8c0d214b526abb00d5
             </span>
             <div className="chat-header__action-icons">
               <img src="../images/envelope.svg" alt="Messages" className="chat-header__icon" />
@@ -318,6 +385,7 @@ const Chat = ({ currentUserId, onClose, users }) => {
             </div>
           </div>
           <div className="chat-header__controls">
+<<<<<<< HEAD
             <img src="../images/expand.svg" alt="Expand" className="chat-header__control-icon" /> 
             <img 
               src="../images/down.svg" 
@@ -342,6 +410,32 @@ const Chat = ({ currentUserId, onClose, users }) => {
                   src="../images/arrow-left.svg" 
                   alt="Back" 
                   className="chat-sidebar__icon-back" 
+=======
+            <img src="../images/expand.svg" alt="Expand" className="chat-header__control-icon" />
+            <img
+              src="../images/down.svg"
+              alt="Minimize"
+              className="chat-header__control-icon"
+              onClick={handleMinimizeToggle}
+            />
+            <img
+              src="../images/close.svg"
+              alt="Close"
+              className="chat-header__control-icon"
+              onClick={onClose}
+            />
+          </div>
+        </div>
+
+        <div className="chat-content-area">
+          <div className="chat-sidebar">
+            <div className="chat-sidebar__threads-header">
+              <div className="chat-sidebar__threads-group">
+                <img
+                  src="../images/arrow-left.svg"
+                  alt="Back"
+                  className="chat-sidebar__icon-back"
+>>>>>>> aca04ce2fe68b221fef66e8c0d214b526abb00d5
                   onClick={currentView === 'new_chat' ? handleBackToDefault : null}
                   style={{ cursor: currentView === 'new_chat' ? 'pointer' : 'default' }}
                 />
@@ -368,7 +462,11 @@ const Chat = ({ currentUserId, onClose, users }) => {
               )}
             </div>
           </div>
+<<<<<<< HEAD
           
+=======
+
+>>>>>>> aca04ce2fe68b221fef66e8c0d214b526abb00d5
           {MainAreaToRender}
         </div>
       </div>

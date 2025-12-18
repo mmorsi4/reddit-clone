@@ -539,6 +539,32 @@
     transition: filter 0.3s ease;
 }
 
+<<<<<<< HEAD
+=======
+
+/* FOLLOW button specific style */
+.icon-button.sidebar-action-button.follow {
+  background: #0168b6; /* Reddit blue */
+  color: white;
+  width: 80px;
+  border-radius: 20px;
+  font-weight: 500;
+  padding: 6px 14px;
+}
+
+.icon-button.sidebar-action-button.follow.following {
+  background: #2e5a9d;
+  color: #333;
+  border: 1px solid #ccc;
+}
+
+.icon-button.sidebar-action-button.follow:hover {
+  background: #1484ff; /* slightly brighter on hover */
+  transform: translateY(-1px);
+}
+
+
+>>>>>>> aca04ce2fe68b221fef66e8c0d214b526abb00d5
 /* Dark mode icon fix */
 [data-theme="dark"] .options-menu-item img {
     filter: invert(1) brightness(1.5);

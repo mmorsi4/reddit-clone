@@ -4,6 +4,10 @@ import Header from '../components/header';
 import Sidebar from '../components/sidebar';
 import AddCommunitiesModal from '../pages/addcommunitiesPopup';
 import CustomFeedPopup from './CustomFeedPopup';
+<<<<<<< HEAD
+=======
+import ShareFeedPopup from '../components/ShareFeedPopup';
+>>>>>>> aca04ce2fe68b221fef66e8c0d214b526abb00d5
 import Post from '../components/post';
 
 function CustomFeedPage() {
@@ -18,6 +22,17 @@ function CustomFeedPage() {
   const [isEditFeedModalOpen, setIsEditFeedModalOpen] = useState(false);
   const [joinedCommunities, setJoinedCommunities] = useState([]);
   const [isOptionsMenuOpen, setIsOptionsMenuOpen] = useState(false);
+<<<<<<< HEAD
+=======
+  const [isShareOpen, setIsShareOpen] = useState(false);
+  const [users, setUsers] = useState([]);
+  const [loadingUsers, setLoadingUsers] = useState(false);
+  const [isCreator, setIsCreator] = useState(false);
+  const [isFollowing, setIsFollowing] = useState(false);
+  const [followersCount, setFollowersCount] = useState(0);
+
+
+>>>>>>> aca04ce2fe68b221fef66e8c0d214b526abb00d5
 
 
   const fetchJoinedCommunities = useCallback(async () => {
@@ -34,6 +49,35 @@ function CustomFeedPage() {
     }
   }, []);
 
+<<<<<<< HEAD
+=======
+  const fetchUsers = useCallback(async () => {
+    setLoadingUsers(true);
+    try {
+      const res = await fetch("/api/users", {
+        credentials: "include"
+      });
+
+      if (!res.ok) throw new Error("Failed to fetch users");
+
+      const data = await res.json();
+      setUsers(data);
+    } catch (err) {
+      console.error("Error fetching users:", err);
+    } finally {
+      setLoadingUsers(false);
+    }
+  }, []);
+
+  useEffect(() => {
+  if (feed) {
+    setIsCreator(feed.isCreator);
+    setIsFollowing(feed.isFollowing);
+    setFollowersCount(feed.followersCount);
+  }
+}, [feed]);
+
+>>>>>>> aca04ce2fe68b221fef66e8c0d214b526abb00d5
   const handleToggleJoin = useCallback(async (communityName, communityId) => {
     const isCurrentlyJoined = joinedCommunities.includes(communityId);
     const method = isCurrentlyJoined ? 'DELETE' : 'POST';
@@ -222,7 +266,11 @@ function CustomFeedPage() {
       if (!res.ok) {
         throw new Error('Failed to delete feed.');
       }
+<<<<<<< HEAD
       navigate('/Home'); 
+=======
+      navigate('/Home');
+>>>>>>> aca04ce2fe68b221fef66e8c0d214b526abb00d5
 
     } catch (err) {
       console.error("Error deleting feed:", err);
@@ -255,6 +303,42 @@ function CustomFeedPage() {
     }
   };
 
+<<<<<<< HEAD
+=======
+  const handleShareFeed = async (users) => {
+    const feedLink = `${window.location.origin}/f/${feed._id}`;
+
+    for (const user of users) {
+      await fetch("/api/messages/share-feed", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          receiverId: user._id,
+          text: `📌 Shared a custom feed with you:\n${feed.name}\n${feedLink}`
+        })
+      });
+    }
+  };
+
+  const handleFollowToggle = async () => {
+  try {
+    const res = await fetch(`/api/customfeeds/${feedId}/follow`, {
+      method: 'POST',
+      credentials: 'include'
+    });
+    if (!res.ok) throw new Error('Failed to update follow status');
+
+    const data = await res.json();
+    setIsFollowing(data.isFollowing);
+    setFollowersCount(data.followersCount);
+  } catch (err) {
+    console.error(err);
+    alert('Failed to update follow status');
+  }
+};
+
+>>>>>>> aca04ce2fe68b221fef66e8c0d214b526abb00d5
 
   if (loading) {
     return (
@@ -273,7 +357,10 @@ function CustomFeedPage() {
   }
 
   const communityCount = feed.communities ? feed.communities.length : 0;
+<<<<<<< HEAD
   const isCreator = true;
+=======
+>>>>>>> aca04ce2fe68b221fef66e8c0d214b526abb00d5
 
   return (
     <>
@@ -366,9 +453,31 @@ function CustomFeedPage() {
             <div className="custom-feed-sidebar-actions-wrapper">
 
               <div className="custom-feed-sidebar-actions">
+<<<<<<< HEAD
                 <button className="icon-button sidebar-action-button">
                   <img src="../images/share.svg" alt="Share Feed" />
                 </button>
+=======
+                <button
+                  className="icon-button sidebar-action-button"
+                  onClick={() => {
+                    setIsShareOpen(true);
+                    fetchUsers();
+                  }}
+                >
+                  <img src="../images/share.svg" alt="Share Feed" />
+                </button>
+
+                {!isCreator && (
+                  <button
+                    className={`icon-button sidebar-action-button follow ${isFollowing ? 'following' : ''}`}
+                    onClick={handleFollowToggle}
+                  >
+                    {isFollowing ? 'Following' : 'Follow'}
+                  </button>
+                )}
+
+>>>>>>> aca04ce2fe68b221fef66e8c0d214b526abb00d5
                 <button
                   className="icon-button sidebar-action-button"
                   onClick={handleToggleOptionsMenu}
@@ -379,6 +488,10 @@ function CustomFeedPage() {
 
               {isOptionsMenuOpen && (
                 <div className="custom-feed-options-menu">
+<<<<<<< HEAD
+=======
+                  {isCreator && (
+>>>>>>> aca04ce2fe68b221fef66e8c0d214b526abb00d5
                   <button
                     className="options-menu-item"
                     onClick={() => {
@@ -386,23 +499,48 @@ function CustomFeedPage() {
                       setIsOptionsMenuOpen(false);
                     }}
                   >
+<<<<<<< HEAD
                     <img src="../images/edit.svg" alt="Edit" />
                     Edit details
                   </button>
                   <button
                     className="options-menu-item"
                     onClick={handleCopyFeed} 
+=======
+                    
+                    <img src="../images/edit.svg" alt="Edit" />
+                    Edit details
+                    
+                  </button>
+                  )}
+                  
+                    
+                  <button
+                    className="options-menu-item"
+                    onClick={handleCopyFeed}
+>>>>>>> aca04ce2fe68b221fef66e8c0d214b526abb00d5
                   >
                     <img src="../images/copy.svg" alt="Copy" />
                     Copy custom feed
                   </button>
+<<<<<<< HEAD
                   <button
                     className="options-menu-item delete"
                     onClick={handleDeleteFeed} 
+=======
+                  {isCreator &&(
+                  <button
+                    className="options-menu-item delete"
+                    onClick={handleDeleteFeed}
+>>>>>>> aca04ce2fe68b221fef66e8c0d214b526abb00d5
                   >
                     <img src="../images/delete.svg" alt="Delete" />
                     Delete
                   </button>
+<<<<<<< HEAD
+=======
+                  )}
+>>>>>>> aca04ce2fe68b221fef66e8c0d214b526abb00d5
                 </div>
               )}
             </div>
@@ -410,14 +548,22 @@ function CustomFeedPage() {
               <div className="feed-info-section">
                 <div className="sidebar-card-header">
                   <h3>{feed.name}</h3>
+<<<<<<< HEAD
                   {isCreator &&
+=======
+                  {isCreator && (
+>>>>>>> aca04ce2fe68b221fef66e8c0d214b526abb00d5
                     <button
                       className="edit-button-icon"
                       onClick={handleOpenEditFeedModal}
                     >
                       <img src="../images/edit.svg" alt="Edit Feed Details" />
                     </button>
+<<<<<<< HEAD
                   }
+=======
+                  )}
+>>>>>>> aca04ce2fe68b221fef66e8c0d214b526abb00d5
                 </div>
                 {feed.description && (
                   <p className="feed-description-text">
@@ -432,7 +578,11 @@ function CustomFeedPage() {
 
               <div className="feed-stats-row">
                 <div className="feed-stat">
+<<<<<<< HEAD
                   <span className="stat-number">0</span>
+=======
+                  <span className="stat-number">{followersCount}</span>
+>>>>>>> aca04ce2fe68b221fef66e8c0d214b526abb00d5
                   <span className="stat-label">Followers</span>
                 </div>
                 <div className="feed-stat">
@@ -496,6 +646,20 @@ function CustomFeedPage() {
           onSubmit={handleEditFeedSubmit}
         />
       )}
+<<<<<<< HEAD
+=======
+
+      {isShareOpen && (
+        <ShareFeedPopup
+          feed={feed}
+          users={users}
+          onSend={handleShareFeed}
+          onClose={() => setIsShareOpen(false)}
+        />
+      )}
+
+
+>>>>>>> aca04ce2fe68b221fef66e8c0d214b526abb00d5
     </>
 
   );

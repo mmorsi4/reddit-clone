@@ -53,6 +53,7 @@ function Post({
     };
   }, [menuOpen]);
 
+<<<<<<< HEAD
   const handleUpvote = async (e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -93,6 +94,42 @@ function Post({
       console.error(err);
     }
   };
+=======
+const handleUpvote = async (e) => {
+  e.preventDefault();
+  e.stopPropagation();
+  const newVoteValue = vote === 1 ? 0 : 1;
+  setVote(newVoteValue);
+  await updateVote(newVoteValue);
+};
+
+const handleDownvote = async (e) => {
+  e.preventDefault();
+  e.stopPropagation();
+  const newVoteValue = vote === -1 ? 0 : -1;
+  setVote(newVoteValue);
+  await updateVote(newVoteValue);
+};
+
+const updateVote = async (newVoteValue) => {
+  try {
+    const res = await fetch(`/api/posts/${postId}/vote`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ value: newVoteValue }),
+    });
+
+    if (!res.ok) throw new Error("Vote failed");
+
+    const data = await res.json();
+    setVote(data.userVote ?? newVoteValue);
+    setVoteCount(data.score);
+  } catch (err) {
+    console.error(err);
+  }
+};
+>>>>>>> aca04ce2fe68b221fef66e8c0d214b526abb00d5
 
   // NEW: Handle save/unsave
   const handleSave = async (e) => {

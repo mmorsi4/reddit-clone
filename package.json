@@ -3,6 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@azure-rest/ai-inference": "latest",
+    "@azure/core-auth": "latest",
+    "@azure/core-sse": "latest",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.0",
@@ -11,6 +14,10 @@
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
+<<<<<<< HEAD
+=======
+    "groq-sdk": "^0.37.0",
+>>>>>>> aca04ce2fe68b221fef66e8c0d214b526abb00d5
     "jsonwebtoken": "^9.0.2",
     "mongodb": "^6.20.0",
     "mongoose": "^8.19.2",
@@ -21,17 +28,24 @@
     "react-scripts": "5.0.1",
     "socket.io": "^4.8.1",
     "socket.io-client": "^4.8.1",
+<<<<<<< HEAD
     "web-vitals": "^2.1.4",
     "@azure-rest/ai-inference": "latest",
     "@azure/core-auth": "latest",
     "@azure/core-sse": "latest"
+=======
+    "web-vitals": "^2.1.4"
+>>>>>>> aca04ce2fe68b221fef66e8c0d214b526abb00d5
   },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
+<<<<<<< HEAD
 
+=======
+>>>>>>> aca04ce2fe68b221fef66e8c0d214b526abb00d5
     "dev": "concurrently \"cd backend && npm start\" \"cd frontend && npm start\""
   },
   "eslintConfig": {

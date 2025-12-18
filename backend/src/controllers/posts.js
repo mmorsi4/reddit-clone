@@ -7,6 +7,10 @@ import ModelClient, { isUnexpected } from "@azure-rest/ai-inference";
 import { AzureKeyCredential } from "@azure/core-auth";
 import path from 'path'
 import fs from 'fs'
+<<<<<<< HEAD
+=======
+import groq from '../../utils/groq.js';
+>>>>>>> aca04ce2fe68b221fef66e8c0d214b526abb00d5
 
 export async function createPost(req, res) {
   const { title, body, url, community } = req.body;
@@ -133,20 +137,38 @@ export async function getPostSummary(req, res) {
           "If the post is text-only, summarize the text clearly. " +
           "If an image exists, describe its content and combine it with the text. " +
           "If a video exists, do NOT attempt to analyze the actual video file, but acknowledge it is a video and summarize based on any textual context. " +
+<<<<<<< HEAD
           "Be concise and factual." +
           "Do not mention that you are guessing or inferring." +
+=======
+          "Be concise and factual. " +
+          "Do not mention that you are guessing or inferring. " +
+>>>>>>> aca04ce2fe68b221fef66e8c0d214b526abb00d5
           "Refuse to summarize any explicit content."
       }
     ];
 
+<<<<<<< HEAD
     const userContent = [{ type: "text", text: `Title:\n${post.title}` }];
 
     if (post.body) {
       userContent.push({ type: "text", text: `Body:\n${post.body}` });
+=======
+    const userContent = [
+      { type: "text", text: `Title:\n${post.title}` }
+    ];
+
+    if (post.body) {
+      userContent.push({
+        type: "text",
+        text: `Body:\n${post.body}`
+      });
+>>>>>>> aca04ce2fe68b221fef66e8c0d214b526abb00d5
     }
 
     if (post.mediaUrl) {
       const ext = path.extname(post.mediaUrl).toLowerCase();
+<<<<<<< HEAD
       const mimeMap = { ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".png": "image/png", ".webp": "image/webp" };
 
       if ([".jpg", ".jpeg", ".png", ".webp"].includes(ext)) {
@@ -154,6 +176,26 @@ export async function getPostSummary(req, res) {
         const imageBase64 = fs.readFileSync(imagePath, { encoding: "base64" });
         const mime = mimeMap[ext] || "image/jpeg";
         userContent.push({ type: "image_url", image_url: { url: `data:${mime};base64,${imageBase64}` } });
+=======
+      const mimeMap = {
+        ".jpg": "image/jpeg",
+        ".jpeg": "image/jpeg",
+        ".png": "image/png",
+        ".webp": "image/webp"
+      };
+
+      if ([".jpg", ".jpeg", ".png", ".webp"].includes(ext)) {
+        const imagePath = path.join(process.cwd(), post.mediaUrl);
+        const imageBase64 = fs.readFileSync(imagePath, "base64");
+        const mime = mimeMap[ext] || "image/jpeg";
+
+        userContent.push({
+          type: "image_url",
+          image_url: {
+            url: `data:${mime};base64,${imageBase64}`
+          }
+        });
+>>>>>>> aca04ce2fe68b221fef66e8c0d214b526abb00d5
       } else if ([".mp4", ".webm"].includes(ext)) {
         userContent.push({
           type: "text",
@@ -162,6 +204,7 @@ export async function getPostSummary(req, res) {
       }
     }
 
+<<<<<<< HEAD
     messages.push({ role: "user", content: userContent });
 
     const client = ModelClient(
@@ -176,6 +219,24 @@ export async function getPostSummary(req, res) {
     if (isUnexpected(response)) throw response.body.error;
 
     res.json({ summary: response.body.choices[0].message.content });
+=======
+    messages.push({
+      role: "user",
+      content: userContent
+    });
+
+    const completion = await groq.chat.completions.create({
+      model: "llama-3.1-8b-instant",
+      messages,
+      max_tokens: 120,
+      temperature: 0.4
+    });
+
+    res.json({
+      summary: completion.choices[0].message.content
+    });
+
+>>>>>>> aca04ce2fe68b221fef66e8c0d214b526abb00d5
   } catch (err) {
     console.error("Summary error:", err);
     res.status(500).json({ message: "Failed to generate summary" });
