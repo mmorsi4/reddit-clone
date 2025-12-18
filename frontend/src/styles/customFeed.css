@@ -539,10 +539,45 @@
     transition: filter 0.3s ease;
 }
 
+.posts-loading-wrapper {
+  position: relative;       /* container for absolute pulse */
+  width: 120px;             /* enough space for logo + pulse */
+  height: 120px;
+  margin: 40px auto;        /* center horizontally */
+}
 
-/* FOLLOW button specific style */
+.posts-loading-logo {
+  width: 70px;
+  height: 70px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 2;            
+}
+
+.posts-loading-circle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 70px;           
+  height: 70px;
+  background-color: orange;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1;
+  animation: pulse 1s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0% { transform: translate(-50%, -50%) scale(1); opacity: 0.7; }
+  50% { transform: translate(-50%, -50%) scale(1.5); opacity: 1; }
+  100% { transform: translate(-50%, -50%) scale(1); opacity: 0.7; }
+}
+
+
 .icon-button.sidebar-action-button.follow {
-  background: #0168b6; /* Reddit blue */
+  background: #0168b6;
   color: white;
   width: 80px;
   border-radius: 20px;

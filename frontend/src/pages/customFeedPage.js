@@ -27,8 +27,6 @@ function CustomFeedPage() {
   const [followersCount, setFollowersCount] = useState(0);
 
 
-
-
   const fetchJoinedCommunities = useCallback(async () => {
     try {
       const res = await fetch('/api/memberships/joined', {
@@ -62,12 +60,12 @@ function CustomFeedPage() {
   }, []);
 
   useEffect(() => {
-  if (feed) {
-    setIsCreator(feed.isCreator);
-    setIsFollowing(feed.isFollowing);
-    setFollowersCount(feed.followersCount);
-  }
-}, [feed]);
+    if (feed) {
+      setIsCreator(feed.isCreator);
+      setIsFollowing(feed.isFollowing);
+      setFollowersCount(feed.followersCount);
+    }
+  }, [feed]);
 
   const handleToggleJoin = useCallback(async (communityName, communityId) => {
     const isCurrentlyJoined = joinedCommunities.includes(communityId);
@@ -165,34 +163,41 @@ function CustomFeedPage() {
   const handleOpenEditFeedModal = () => setIsEditFeedModalOpen(true);
   const handleCloseEditFeedModal = () => setIsEditFeedModalOpen(false);
 
-  const handleEditFeedSubmit = async (updatedFeedData) => {
-    try {
+const handleEditFeedSubmit = async (updatedFeedData) => {
+  try {
+    const res = await fetch(`/api/customfeeds/name/${feedId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: updatedFeedData.name,
+        description: updatedFeedData.description,
+        image: updatedFeedData.image,
+        isPrivate: updatedFeedData.isPrivate,
+        showOnProfile: updatedFeedData.showOnProfile
+      }),
+      credentials: "include"
+    });
 
-      const res = await fetch(`/api/customfeeds/name/${feedId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: updatedFeedData.name,
-          description: updatedFeedData.description,
-          image: updatedFeedData.image,
-          isPrivate: updatedFeedData.isPrivate,
-          showOnProfile: updatedFeedData.showOnProfile
-        }),
-        credentials: "include"
-      });
+    if (!res.ok) throw new Error('Failed to update feed metadata.');
 
+    const updatedFeedFromServer = await res.json();
 
-      if (!res.ok) throw new Error('Failed to update feed metadata.');
+    // Merge existing creator/follow info
+    setFeed(prevFeed => ({
+      ...prevFeed,
+      ...updatedFeedFromServer,    // new metadata
+      isCreator: prevFeed.isCreator,
+      isFollowing: prevFeed.isFollowing,
+      followersCount: prevFeed.followersCount,
+    }));
 
-      const newFeed = await res.json();
-      setFeed(newFeed);
-      handleCloseEditFeedModal();
+    handleCloseEditFeedModal();
 
-    } catch (err) {
-      console.error("Error updating feed:", err);
-      alert('Failed to save changes: ' + err.message);
-    }
-  };
+  } catch (err) {
+    console.error("Error updating feed:", err);
+    alert('Failed to save changes: ' + err.message);
+  }
+};
 
   useEffect(() => {
     fetchFeedDetails();
@@ -209,33 +214,23 @@ function CustomFeedPage() {
   };
 
   const handleCommunityAdded = useCallback(async (updatedFeedFromServer) => {
-    const communityIds = updatedFeedFromServer.communities.map(c => c._id);
+    if (!feed) return;
 
-    try {
-      const url = `/api/customfeeds/${feedId}/communities`;
+    const updatedCommunities = Array.isArray(updatedFeedFromServer.communities)
+      ? updatedFeedFromServer.communities
+      : [];
 
-      const res = await fetch(url, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ communities: communityIds }),
-        credentials: "include",
-      });
+    setFeed(prevFeed => ({
+      ...prevFeed,
+      communities: updatedCommunities
+    }));
 
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.message || 'Failed to update communities.');
-      }
+    fetchPosts({ ...feed, communities: updatedCommunities });
 
-      const newFeed = await res.json();
-      setFeed(newFeed);
-      fetchPosts(newFeed);
-      handleCloseModal();
+    handleCloseModal();
+  }, [feed, fetchPosts, handleCloseModal]);
 
-    } catch (err) {
-      console.error("Error updating communities:", err);
-      alert("Error updating communities: " + err.message);
-    }
-  }, [fetchPosts, handleCloseModal]);
+
 
   const handleToggleOptionsMenu = () => {
     setIsOptionsMenuOpen(prev => !prev);
@@ -307,21 +302,21 @@ function CustomFeedPage() {
   };
 
   const handleFollowToggle = async () => {
-  try {
-    const res = await fetch(`/api/customfeeds/${feedId}/follow`, {
-      method: 'POST',
-      credentials: 'include'
-    });
-    if (!res.ok) throw new Error('Failed to update follow status');
+    try {
+      const res = await fetch(`/api/customfeeds/${feedId}/follow`, {
+        method: 'POST',
+        credentials: 'include'
+      });
+      if (!res.ok) throw new Error('Failed to update follow status');
 
-    const data = await res.json();
-    setIsFollowing(data.isFollowing);
-    setFollowersCount(data.followersCount);
-  } catch (err) {
-    console.error(err);
-    alert('Failed to update follow status');
-  }
-};
+      const data = await res.json();
+      setIsFollowing(data.isFollowing);
+      setFollowersCount(data.followersCount);
+    } catch (err) {
+      console.error(err);
+      alert('Failed to update follow status');
+    }
+  };
 
 
   if (loading) {
@@ -359,14 +354,7 @@ function CustomFeedPage() {
               </p>
             </div>
           </div>
-          <div className="custom-feed-header-actions">
-            <button className="icon-button"><img src="../images/three-dots.svg" alt="More" /></button>
-            {isCreator && (
-              <button className="icon-button" onClick={handleOpenEditFeedModal}>
-                <img src="../images/edit.svg" alt="Edit Metadata" />
-              </button>
-            )}
-          </div>
+          
         </div>
 
         <div className="custom-feed-header-divider">
@@ -390,7 +378,10 @@ function CustomFeedPage() {
             ) : (
               <div className="posts-container">
                 {loadingPosts ? (
-                  <p style={{ textAlign: "center" }}>Loading posts...</p>
+                  <div className="posts-loading-wrapper">
+                    <img src="../images/reddit-logo.svg" alt="Loading posts..." className="posts-loading-logo" />
+                      <div className="posts-loading-circle"></div>
+                 </div>
                 ) : posts.length === 0 ? (
                   <p style={{ textAlign: "center" }}>No posts found in these communities.</p>
                 ) : (
@@ -424,6 +415,7 @@ function CustomFeedPage() {
                   })
                 )}
               </div>
+
 
             )}
           </div>
@@ -463,21 +455,21 @@ function CustomFeedPage() {
               {isOptionsMenuOpen && (
                 <div className="custom-feed-options-menu">
                   {isCreator && (
-                  <button
-                    className="options-menu-item"
-                    onClick={() => {
-                      handleOpenEditFeedModal();
-                      setIsOptionsMenuOpen(false);
-                    }}
-                  >
-                    
-                    <img src="../images/edit.svg" alt="Edit" />
-                    Edit details
-                    
-                  </button>
+                    <button
+                      className="options-menu-item"
+                      onClick={() => {
+                        handleOpenEditFeedModal();
+                        setIsOptionsMenuOpen(false);
+                      }}
+                    >
+
+                      <img src="../images/edit.svg" alt="Edit" />
+                      Edit details
+
+                    </button>
                   )}
-                  
-                    
+
+
                   <button
                     className="options-menu-item"
                     onClick={handleCopyFeed}
@@ -485,14 +477,14 @@ function CustomFeedPage() {
                     <img src="../images/copy.svg" alt="Copy" />
                     Copy custom feed
                   </button>
-                  {isCreator &&(
-                  <button
-                    className="options-menu-item delete"
-                    onClick={handleDeleteFeed}
-                  >
-                    <img src="../images/delete.svg" alt="Delete" />
-                    Delete
-                  </button>
+                  {isCreator && (
+                    <button
+                      className="options-menu-item delete"
+                      onClick={handleDeleteFeed}
+                    >
+                      <img src="../images/delete.svg" alt="Delete" />
+                      Delete
+                    </button>
                   )}
                 </div>
               )}
