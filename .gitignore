@@ -8,11 +8,7 @@
 .pnp.js
 
 # env
-<<<<<<< HEAD
-# /src/backend/.env
-=======
-/src/backend/.env
->>>>>>> aca04ce2fe68b221fef66e8c0d214b526abb00d5
+/backend/.env
 
 # testing
 /coverage
