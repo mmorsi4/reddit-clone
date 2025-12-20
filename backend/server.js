@@ -21,6 +21,10 @@ import { Server } from 'socket.io'
 import http from 'http'
 import Message from './src/models/Message.js';
 
+// serve react
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 dotenv.config();
 const PORT = process.env.PORT || 5001;
 
@@ -122,8 +126,6 @@ app.use('/api/customfeeds', customFeedRoutes);
 app.use('/api/messages', messagesRoutes);
 
 // media
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // health
