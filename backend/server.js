@@ -120,6 +120,21 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
+// ============================
+// Serve React (PRODUCTION)
+// ============================
+const frontendPath = path.join(__dirname, '../frontend/build');
+
+app.use(express.static(frontendPath));
+
+// React Router fallback
+app.get('*', (req, res) => {
+  res.sendFile(path.join(frontendPath, 'index.html'));
+});
+
+// ============================
+// Serve React (PRODUCTION)
+// ============================
 
 // health
 app.get('/', (req,res)=> res.send({ok:true, now: new Date().toISOString()}));
