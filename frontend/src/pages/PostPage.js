@@ -1562,18 +1562,7 @@ function PostPage() {
                       >
                         {isHiding ? "Processing..." : (isHidden ? "Unhide" : "Hide")}
                       </button>
-                      <button
-                        className="dropdown-item"
-                        onClick={handleReportPost}
-                      >
-                        Report
-                      </button>
-                      <button
-                        className="dropdown-item"
-                        onClick={handleCrosspost}
-                      >
-                        Crosspost
-                      </button>
+                      
                     </div>
                   )}
                 </div>
