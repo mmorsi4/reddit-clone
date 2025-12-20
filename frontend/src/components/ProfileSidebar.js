@@ -2,12 +2,11 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 
 function ProfileSidebar({ user, isOwnProfile = false, }) {
-  const [followersCount, setFollowersCount] = useState(13); // Default from image
-  const [karma, setKarma] = useState(661); // From image
-  const [contributions, setContributions] = useState(208); // From image
+ const [followersCount, setFollowersCount] = useState(0);
+  const [karma, setKarma] = useState(0);
+  const [contributions, setContributions] = useState(0);
   const [isFollowing, setIsFollowing] = useState(false);
   const [customFeeds, setCustomFeeds] = useState([]);
-  const [loadingFeeds, setLoadingFeeds] = useState(false);
 
   console.log("isOwnProfile =", isOwnProfile);
 
@@ -15,6 +14,33 @@ function ProfileSidebar({ user, isOwnProfile = false, }) {
   const formatKarmaWithCommas = (num) => {
     return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   };
+
+useEffect(() => {
+    if (!user?._id) return;
+
+    const fetchUserStats = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const res = await fetch(`/api/users/${user._id}/stats`, {
+          headers: token
+            ? { Authorization: `Bearer ${token}` }
+            : undefined,
+        });
+
+        if (!res.ok) throw new Error("Failed to fetch user stats");
+        const data = await res.json();
+
+        setFollowersCount(data.followersCount || 0);
+        setKarma(data.karma || 0);
+        setContributions(data.contributions || 0);
+        setIsFollowing(data.isFollowing || false); // whether the logged-in user follows this profile
+      } catch (error) {
+        console.error("Error fetching user stats:", error);
+      }
+    };
+
+    fetchUserStats();
+  }, [user?._id]);
 
 
   // Fetch profile data
@@ -135,7 +161,9 @@ function ProfileSidebar({ user, isOwnProfile = false, }) {
         {/* Followers Count - Fixed font and color - LEFT ALIGNED - NO DIVIDER */}
         <div className="profile-sidebar-followers-section">
           <div className="profile-sidebar-followers-stat">
-            <span className="profile-sidebar-followers-count">{followersCount}</span>
+            <span className="profile-sidebar-followers-count">
+              {followersCount}
+            </span>
             <span className="profile-sidebar-followers-label">Followers</span>
           </div>
         </div>
@@ -182,10 +210,12 @@ function ProfileSidebar({ user, isOwnProfile = false, }) {
         {!isOwnProfile && (
           <div className="profile-sidebar-follow-section">
             <button
-              className={`profile-sidebar-follow-btn ${isFollowing ? 'profile-sidebar-following' : ''}`}
+              className={`profile-sidebar-follow-btn ${
+                isFollowing ? "profile-sidebar-following" : ""
+              }`}
               onClick={handleFollowToggle}
             >
-              {isFollowing ? 'Following' : 'Follow'}
+              {isFollowing ? "Following" : "Follow"}
             </button>
           </div>
         )}

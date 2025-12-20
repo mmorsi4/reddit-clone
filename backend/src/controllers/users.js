@@ -168,3 +168,46 @@ export async function addSelectedChat(req, res) {
     res.status(500).json({ message: "Server error while saving chat" });
   }
 }
+
+// Toggle follow/unfollow a user
+export async function toggleFollowUser(req, res) {
+  try {
+    const { id: targetUserId } = req.params;
+    const userId = req.userId;
+
+    if (userId === targetUserId) {
+      return res.status(400).json({ message: "You cannot follow yourself." });
+    }
+
+    const user = await User.findById(userId);
+    const targetUser = await User.findById(targetUserId);
+
+    if (!user || !targetUser) {
+      return res.status(404).json({ message: "User not found." });
+    }
+
+    const isFollowing = user.following.includes(targetUserId);
+
+    if (isFollowing) {
+      // Unfollow
+      user.following = user.following.filter(f => f.toString() !== targetUserId);
+      targetUser.followers = targetUser.followers.filter(f => f.toString() !== userId);
+    } else {
+      // Follow
+      user.following.push(targetUserId);
+      targetUser.followers.push(userId);
+    }
+
+    await user.save();
+    await targetUser.save();
+
+    res.json({
+      isFollowing: !isFollowing,
+      followersCount: targetUser.followers.length
+    });
+
+  } catch (err) {
+    console.error("Error toggling follow user:", err);
+    res.status(500).json({ message: "Internal server error." });
+  }
+}

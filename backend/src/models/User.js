@@ -11,7 +11,10 @@ const UserSchema = new Schema({
   karma: { type: Number, default: 0 },
   createdAt: { type: Date, default: Date.now },
   recentCommunityIds: [{ type: Schema.Types.ObjectId, ref: 'Community' }],
-  selectedChatUsers: [{ type: Schema.Types.ObjectId, ref: 'User' }]
+  selectedChatUsers: [{ type: Schema.Types.ObjectId, ref: 'User' }],
+  followers: [{ type: Schema.Types.ObjectId, ref: 'User' }],
+  following: [{ type: Schema.Types.ObjectId, ref: 'User' }]
 });
+
 
 export default model('User', UserSchema);
