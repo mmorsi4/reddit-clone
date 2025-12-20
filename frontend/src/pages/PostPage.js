@@ -1631,34 +1631,14 @@ function PostPage() {
                 </div>
 
                 <button className="post-action-btn">
-                  <span className="action-icon">💬</span>
+                  <img
+                    src="../images/comment.svg"
+                    alt="Comments"
+                    className="action-icon"
+                  />
                   <span>{post.commentCount || comments.length} Comments</span>
                 </button>
 
-                {/* Save button in main actions */}
-                <button
-                  className={`post-action-btn ${isSaved ? 'saved' : ''}`}
-                  onClick={handleSavePost}
-                  disabled={isSaving}
-                >
-                  <span className="action-icon">{isSaved ? '⭐' : '☆'}</span>
-                  <span>{isSaving ? '...' : (isSaved ? 'Saved' : 'Save')}</span>
-                </button>
-
-                {/* Hide button in main actions */}
-                <button
-                  className={`post-action-btn ${isHidden ? 'hidden' : ''}`}
-                  onClick={handleHidePost}
-                  disabled={isHiding}
-                >
-                  <span className="action-icon">{isHidden ? '👁️' : '👁️‍🗨️'}</span>
-                  <span>{isHiding ? '...' : (isHidden ? 'Hidden' : 'Hide')}</span>
-                </button>
-
-                <button className="post-action-btn">
-                  <span className="action-icon">🔄</span>
-                  <span>Share</span>
-                </button>
               </div>
 
               <button
