@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "../styles/AddToCustom.css";
-import CustomFeedPopup from "../pages/CustomFeedPopup";
+import CustomFeedPopup from "../components/CustomFeedPopup";
 
 function FeedItem({ feed, communityId, communityName, onFeedUpdate, isCommunityInFeed }) {
   const [loading, setLoading] = useState(false);

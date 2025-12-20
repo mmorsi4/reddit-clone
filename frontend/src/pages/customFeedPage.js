@@ -2,8 +2,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import Header from '../components/header';
 import Sidebar from '../components/sidebar';
-import AddCommunitiesModal from '../pages/addcommunitiesPopup';
-import CustomFeedPopup from './CustomFeedPopup';
+import AddCommunitiesModal from '../components/addcommunitiesPopup';
+import CustomFeedPopup from '../components/CustomFeedPopup';
 import ShareFeedPopup from '../components/ShareFeedPopup';
 import Post from '../components/post';
 

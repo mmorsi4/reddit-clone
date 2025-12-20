@@ -19,7 +19,10 @@ import {
     getSavedPosts,
     hidePost,
     unhidePost,
-    getHiddenPosts 
+    getHiddenPosts ,
+    getSavedStatus,
+    getUpvotedPosts,
+    getDownvotedPosts
 } from '../controllers/posts.js';
 
 const router = express.Router();
@@ -48,6 +51,10 @@ router.post('/:id/hide', authMiddleware, hidePost);
 router.post('/:id/unhide', authMiddleware, unhidePost);
 router.post('/:id/vote', authMiddleware, votePost);
 router.get('/:id/summary', authMiddleware, getPostSummary);
+router.get('/:id/saved', authMiddleware, getSavedStatus);
+router.get("/upvoted", getUpvotedPosts);
+router.get("/downvoted", getDownvotedPosts);
 router.get('/:id', authMiddleware, getPost); // ⚠️ MUST BE LAST!
+
 
 export default router;

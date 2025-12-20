@@ -9,7 +9,7 @@ import Login from "./pages/Login";
 import AvatarCustomizer from "./pages/edit-avatar";
 import CreateCommunityPopup from "./components/create-community";
 import PostPage from "./pages/PostPage";
-import CustomFeedPopup from "./pages/CustomFeedPopup";
+import CustomFeedPopup from "./components/CustomFeedPopup";
 import CustomFeedPage from './pages/customFeedPage';
 import Explore from "./pages/Explore";
 import Popular from "./pages/Popular";
