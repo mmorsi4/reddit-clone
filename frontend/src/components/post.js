@@ -267,7 +267,7 @@ const handleHide = async (postId) => {
       showUndo && (
         <div className="post-undo-banner">
           <span>Post hidden</span>
-          <button onClick={handleUndoHide}>Undo</button>
+          <button onClick={() => handleUndoHide(postId)}>Undo</button>
         </div>
       )
     );
