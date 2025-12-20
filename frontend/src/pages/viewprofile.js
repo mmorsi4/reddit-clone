@@ -22,10 +22,6 @@ function ViewProfile() {
   const [joinedCommunityIds, setJoinedCommunityIds] = useState([]);
   const [isOwnProfile, setIsOwnProfile] = useState(false);
   const [allCommunities, setAllCommunities] = useState([]);
-  const [upvotedPosts, setUpvotedPosts] = useState([]);
-  const [downvotedPosts, setDownvotedPosts] = useState([]);
-  const [upvotedComments, setUpvotedComments] = useState([]);
-  const [downvotedComments, setDownvotedComments] = useState([]);
   const { username } = useParams();
 
 
@@ -90,157 +86,160 @@ function ViewProfile() {
     fetchJoinedCommunities();
   }, []);
 
-  // Fetch user comments
   const fetchUserComments = async () => {
-    setLoadingComments(true);
-    try {
-      const res = await fetch("/api/comments/my", {
-        method: "GET",
-        headers: { "Content-Type": "application/json" }
+  setLoadingComments(true);
+  try {
+    if (!user?._id) return;
+
+    const res = await fetch(`/api/comments/user/${user._id}`, {
+      method: "GET",
+      headers: { "Content-Type": "application/json" }
+    });
+
+    if (!res.ok) {
+      const errorText = await res.text();
+      console.error("Error fetching user comments:", errorText);
+      setUserComments([]);
+      return;
+    }
+
+    const comments = await res.json();
+
+    // Enrich comments with full post data (for community info)
+    const postIds = comments
+      .map(c => c.post?._id)
+      .filter(id => id)
+      .filter((value, index, self) => self.indexOf(value) === index);
+
+    let enrichedComments = comments;
+
+    if (postIds.length > 0) {
+      const postPromises = postIds.map(postId =>
+        fetch(`/api/posts/${postId}`)
+          .then(res => {
+            if (!res.ok) throw new Error(`Failed to fetch post ${postId}`);
+            return res.json();
+          })
+          .then(data => ({ postId, data: data.post || data }))
+          .catch(err => {
+            console.error(`Error fetching post ${postId}:`, err);
+            return { postId, data: null };
+          })
+      );
+
+      const postsData = await Promise.all(postPromises);
+      const postMap = {};
+      postsData.forEach(({ postId, data }) => {
+        if (data) postMap[postId] = data;
       });
 
-      if (res.ok) {
-        const comments = await res.json();
-
-        // Batch fetch all posts to get community data
-        const postIds = comments
-          .map(c => c.post?._id)
-          .filter(id => id)
-          .filter((value, index, self) => self.indexOf(value) === index);
-
-        if (postIds.length > 0) {
-          const postPromises = postIds.map(postId =>
-            fetch(`/api/posts/${postId}`)
-              .then(res => {
-                if (!res.ok) throw new Error(`Failed to fetch post ${postId}`);
-                return res.json();
-              })
-              .then(data => ({
-                postId,
-                data: data.post || data
-              }))
-              .catch(err => {
-                console.error(`Error fetching post ${postId}:`, err);
-                return { postId, data: null };
-              })
-          );
-
-          const postsData = await Promise.all(postPromises);
-
-          const postMap = {};
-          postsData.forEach(({ postId, data }) => {
-            if (data) {
-              postMap[postId] = data;
+      enrichedComments = comments.map(comment => {
+        const postId = comment.post?._id;
+        const fullPost = postMap[postId];
+        if (fullPost) {
+          return {
+            ...comment,
+            post: {
+              ...comment.post,
+              community: fullPost.community,
+              author: fullPost.author
             }
-          });
-
-          const enrichedComments = comments.map(comment => {
-            const postId = comment.post?._id;
-            const fullPost = postMap[postId];
-
-            if (fullPost) {
-              return {
-                ...comment,
-                post: {
-                  ...comment.post,
-                  community: fullPost.community,
-                  author: fullPost.author
-                }
-              };
-            }
-
-            return comment;
-          });
-
-          setUserComments(enrichedComments);
-        } else {
-          setUserComments(comments);
+          };
         }
-      } else {
-        const errorText = await res.text();
-        console.error("Error fetching comments:", errorText);
-      }
-    } catch (error) {
-      console.error("Error fetching comments:", error);
-    } finally {
-      setLoadingComments(false);
-    }
-  };
-
-  const fetchUserPosts = async () => {
-    setLoadingPosts(true);
-    try {
-      const res = await fetch("/api/posts/my/posts", {
-        method: "GET",
-        headers: { "Content-Type": "application/json" }
+        return comment;
       });
-      if (res.ok) {
-        const posts = await res.json();
-        setUserPosts(posts);
-      } else {
-        const errorText = await res.text();
-        console.error("Error fetching posts:", errorText);
-      }
-    } catch (error) {
-      console.error("Error details:", error.message);
-    } finally {
-      setLoadingPosts(false);
     }
-  };
+
+    setUserComments(enrichedComments);
+  } catch (error) {
+    console.error("Error fetching user comments:", error);
+    setUserComments([]);
+  } finally {
+    setLoadingComments(false);
+  }
+};
+
+
+const fetchUserPosts = async () => {
+  setLoadingPosts(true);
+  try {
+    if (!user?._id) return;
+
+    const res = await fetch(`/api/posts/user/${user._id}`, {
+      method: "GET",
+      headers: { "Content-Type": "application/json" }
+    });
+
+    if (!res.ok) {
+      const errorText = await res.text();
+      console.error("Error fetching user posts:", errorText);
+      setUserPosts([]);
+      return;
+    }
+
+    const posts = await res.json();
+    setUserPosts(posts);
+  } catch (error) {
+    console.error("Error fetching user posts:", error);
+    setUserPosts([]);
+  } finally {
+    setLoadingPosts(false);
+  }
+};
+
 
   const fetchSavedPosts = async () => {
-    setLoadingSaved(true);
-    try {
-      const res = await fetch("/api/posts/saved", {
-        method: "GET",
-        credentials: "include"
-      });
+  if (!user?._id) return;
 
-      if (res.ok) {
-        const posts = await res.json();
-        setSavedPosts(posts);
-      } else {
-        console.error("Error fetching saved posts:", await res.text());
-        setSavedPosts([]);
-      }
-    } catch (error) {
-      console.error("Error fetching saved posts:", error);
+  setLoadingSaved(true);
+  try {
+    const res = await fetch(`/api/posts/user/${user._id}/saved`, {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include"
+    });
+
+    if (res.ok) {
+      const posts = await res.json();
+      setSavedPosts(posts);
+    } else {
+      console.error("Error fetching saved posts:", await res.text());
       setSavedPosts([]);
-    } finally {
-      setLoadingSaved(false);
     }
-  };
-  const fetchHiddenPosts = async () => {
-    setLoadingHidden(true);
-    try {
-      const res = await fetch("/api/posts/hidden", {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          "Cache-Control": "no-cache" // ensures fresh data
-        },
-        credentials: "include" // send cookies automatically
-      });
+  } catch (error) {
+    console.error("Error fetching saved posts:", error);
+    setSavedPosts([]);
+  } finally {
+    setLoadingSaved(false);
+  }
+};
 
-      if (res.status === 200) {
-        const posts = await res.json();
-        console.log("Hidden posts fetched:", posts.length);
-        setHiddenPosts(posts);
-      } else if (res.status === 304) {
-        console.log("Hidden posts not modified, using cached data");
-        // optionally keep previous state
-      } else {
-        const errorText = await res.text();
-        console.error("Error fetching hidden posts:", errorText);
-        setHiddenPosts([]);
-      }
-    } catch (error) {
-      console.error("Error fetching hidden posts:", error);
+const fetchHiddenPosts = async () => {
+  if (!user?._id) return;
+
+  setLoadingHidden(true);
+  try {
+    const res = await fetch(`/api/posts/user/${user._id}/hidden`, {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include"
+    });
+
+    if (res.ok) {
+      const posts = await res.json();
+      setHiddenPosts(posts);
+    } else {
+      console.error("Error fetching hidden posts:", await res.text());
       setHiddenPosts([]);
-    } finally {
-      setLoadingHidden(false);
     }
-  };
+  } catch (error) {
+    console.error("Error fetching hidden posts:", error);
+    setHiddenPosts([]);
+  } finally {
+    setLoadingHidden(false);
+  }
+};
+
 
   // Handle unsave from profile
   const handleUnsavePost = async (postId) => {
@@ -288,66 +287,6 @@ function ViewProfile() {
 
   const renderTabContent = () => {
 
-    if (activeTab === "upvoted") {
-      return (
-        <div>
-          <h3>Upvoted Posts</h3>
-          {upvotedPosts.length
-            ? upvotedPosts.map(post => <Post key={post._id} {...post} />)
-            : <p>No upvoted posts</p>
-          }          <h3>Upvoted Comments</h3>
-          {upvotedComments.length ? upvotedComments.map(comment => <ProfileComment key={comment._id} comment={comment} user={user} allCommunities={allCommunities} />) : <p>No upvoted comments</p>}
-        </div>
-      );
-    }
-
-    if (activeTab === "downvoted") {
-      return (
-        <div>
-          <h3>Downvoted Posts</h3>
-          {downvotedPosts.length
-            ? downvotedPosts.map(post => <Post key={post._id} {...post} />)
-            : <p>No downvoted posts</p>
-          }
-          <h3>Downvoted Comments</h3>
-          {downvotedComments.length ? downvotedComments.map(comment => <ProfileComment key={comment._id} comment={comment} user={user} allCommunities={allCommunities} />) : <p>No downvoted comments</p>}
-        </div>
-      );
-    };
-
-    if (activeTab === "comments") {
-      if (loadingComments) {
-        return (
-          <div className="empty-state">
-            <p className="empty-text">Loading comments...</p>
-          </div>
-        );
-      }
-
-      if (userComments.length === 0) {
-        return (
-          <div className="empty-state">
-            <p className="empty-text">
-              {user ? `u/${user.username} hasn't commented yet` : "User hasn't commented yet"}
-            </p>
-          </div>
-        );
-      }
-
-      return (
-        <div className="profile-comments-container">
-          {userComments.map(comment => (
-            <ProfileComment
-              key={comment._id}
-              comment={comment}
-              user={user}
-              allCommunities={allCommunities}
-            />
-          ))}
-        </div>
-      );
-    }
-
     if (activeTab === "posts") {
       if (loadingPosts) {
         return (
@@ -356,8 +295,6 @@ function ViewProfile() {
           </div>
         );
       }
-
-
 
       if (userPosts.length === 0) {
         return (
@@ -687,8 +624,6 @@ function ViewProfile() {
 
     const messages = {
       hidden: "has no hidden content",
-      upvoted: "hasn't upvoted anything yet",
-      downvoted: "hasn't downvoted anything yet",
       saved: "hasn't saved anything yet"
     };
 
@@ -707,72 +642,21 @@ function ViewProfile() {
     else if (tabName === "posts") fetchUserPosts();
     else if (tabName === "saved") fetchSavedPosts();
     else if (tabName === "hidden") fetchHiddenPosts();
-    else if (tabName === "upvoted") {
-      fetchUpvotedPosts();
-      fetchUpvotedComments();
-    } else if (tabName === "downvoted") {
-      fetchDownvotedPosts();
-      fetchDownvotedComments();
-    }
   };
-
-  const fetchUpvotedPosts = async () => {
-    try {
-      const res = await fetch("/api/posts/upvoted", { credentials: "include" });
-      if (res.ok) {
-        const data = await res.json();
-        setUpvotedPosts(data);
-      }
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  const fetchDownvotedPosts = async () => {
-    try {
-      const res = await fetch("/api/posts/downvoted", { credentials: "include" });
-      if (res.ok) {
-        const data = await res.json();
-        setDownvotedPosts(data);
-      }
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  const fetchUpvotedComments = async () => {
-    try {
-      const res = await fetch("/api/comments/upvoted", { credentials: "include" });
-      if (res.ok) {
-        const data = await res.json();
-        setUpvotedComments(data);
-      }
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  const fetchDownvotedComments = async () => {
-    try {
-      const res = await fetch("/api/comments/downvoted", { credentials: "include" });
-      if (res.ok) {
-        const data = await res.json();
-        setDownvotedComments(data);
-      }
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  // Load initial data for overview when profile loads and it's own profile
+  
+  
   useEffect(() => {
-    if (user && isOwnProfile) {
-      fetchUserPosts();
-      fetchUserComments();
-      fetchSavedPosts();
-      fetchHiddenPosts(); // NEW: Also fetch hidden posts for own profile
-    }
-  }, [user, isOwnProfile]);
+  if (!user) return;
+
+  fetchUserPosts();
+  fetchUserComments();
+  fetchSavedPosts();
+
+  if (isOwnProfile) {
+    fetchHiddenPosts();
+  }
+}, [user, isOwnProfile]);
+
 
   if (user === undefined) return <p>Loading...</p>;
   if (user === null) return <p>User not found</p>;
@@ -839,18 +723,6 @@ function ViewProfile() {
                 onClick={() => handleTabClick("hidden")}
               >
                 Hidden
-              </button>
-              <button
-                className={`profile-tab ${activeTab === "upvoted" ? "profile-tab-active" : ""}`}
-                onClick={() => handleTabClick("upvoted")}
-              >
-                Upvoted
-              </button>
-              <button
-                className={`profile-tab ${activeTab === "downvoted" ? "profile-tab-active" : ""}`}
-                onClick={() => handleTabClick("downvoted")}
-              >
-                Downvoted
               </button>
             </div>
 

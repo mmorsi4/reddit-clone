@@ -707,11 +707,8 @@ export async function unsavePost(req, res) {
   }
 }
 
-// Get saved posts for current user
 export async function getSavedPosts(req, res) {
   try {
-    console.log("🔍 getSavedPosts called for user:", req.userId);
-    
     const userId = req.userId;
     
     if (!userId) {
@@ -725,8 +722,6 @@ export async function getSavedPosts(req, res) {
     .populate('community', 'name title avatar _id')
     .sort({ createdAt: -1 })
     .lean();
-    
-    console.log(`✅ Found ${savedPosts.length} saved posts`);
     
     // Process posts
     const normalized = savedPosts.map(post => {
@@ -955,3 +950,56 @@ export async function getDownvotedPosts(req, res) {
     res.status(500).json({ message: "Internal server error" });
   }
 }
+
+export const getPostsByUser = async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    const posts = await Post.find({ author: userId })
+                            .sort({ createdAt: -1 })
+                            .populate('community')
+                            .populate('author', 'username avatarUrl');
+    res.status(200).json(posts);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to fetch posts for this user' });
+  }
+};
+
+
+export const getSavedPostsByUser = async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    if (!userId) return res.status(400).json({ message: "User ID is required" });
+
+    const posts = await Post.find({ savedBy: userId })
+      .sort({ createdAt: -1 })
+      .populate("author", "username avatarUrl")
+      .populate("community", "name avatar")
+      .lean();
+
+    res.status(200).json(posts);
+  } catch (err) {
+    console.error("Error fetching saved posts by user:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+export const getHiddenPostsByUser = async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    if (!userId) return res.status(400).json({ message: "User ID is required" });
+
+    const posts = await Post.find({ hiddenBy: userId })
+      .sort({ createdAt: -1 })
+      .populate("author", "username avatarUrl")
+      .populate("community", "name avatar")
+      .lean();
+
+    res.status(200).json(posts);
+  } catch (err) {
+    console.error("Error fetching hidden posts by user:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+};

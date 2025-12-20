@@ -22,7 +22,10 @@ import {
     getHiddenPosts ,
     getSavedStatus,
     getUpvotedPosts,
-    getDownvotedPosts
+    getDownvotedPosts,
+    getPostsByUser,
+    getSavedPostsByUser,
+    getHiddenPostsByUser
 } from '../controllers/posts.js';
 
 const router = express.Router();
@@ -35,6 +38,7 @@ router.get('/new', authMiddleware, getHomeNewPosts);
 router.get('/top', authMiddleware, getHomeTopPosts);
 router.get('/all-feed', authMiddleware, getAllFeedPosts); 
 router.get('/my/posts', authMiddleware, getMyPosts);
+router.get('/user/:userId', authMiddleware, getPostsByUser);
 router.get('/popular', authMiddleware, getPopularPosts);
 router.get('/saved', authMiddleware, getSavedPosts);
 router.get('/hidden', authMiddleware, getHiddenPosts); // ✅ Only one /hidden route
@@ -49,6 +53,9 @@ router.post('/:id/save', authMiddleware, savePost);
 router.post('/:id/unsave', authMiddleware, unsavePost);
 router.post('/:id/hide', authMiddleware, hidePost);
 router.post('/:id/unhide', authMiddleware, unhidePost);
+router.get('/user/:userId/saved', authMiddleware, getSavedPostsByUser);
+router.get('/user/:userId/hidden', authMiddleware, getHiddenPostsByUser);
+
 router.post('/:id/vote', authMiddleware, votePost);
 router.get('/:id/summary', authMiddleware, getPostSummary);
 router.get('/:id/saved', authMiddleware, getSavedStatus);

@@ -210,3 +210,26 @@ export async function getCommentReplies(req, res) {
     res.status(500).json({ message: "Internal server error" });
   }
 }
+
+export const getUserComments = async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    if (!userId) return res.status(400).json({ message: "User ID is required" });
+
+    // Fetch comments for this user, sorted by newest first
+    const comments = await Comment.find({ author: userId })
+      .sort({ createdAt: -1 })
+      .populate({
+        path: "post",
+        select: "title body community author",
+        populate: { path: "community author", select: "name avatar username" }
+      })
+      .lean();
+
+    res.status(200).json(comments);
+  } catch (err) {
+    console.error("Error fetching user comments:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
