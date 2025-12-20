@@ -21,10 +21,6 @@ import { Server } from 'socket.io'
 import http from 'http'
 import Message from './src/models/Message.js';
 
-// serve react
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
 dotenv.config();
 const PORT = process.env.PORT || 5001;
 
@@ -109,12 +105,6 @@ io.on("connection", socket => {
 });
 
 
-// ============================
-// Serve React (PRODUCTION)
-// ============================
-const frontendPath = path.join(__dirname, '../frontend/build');
-app.use(express.static(frontendPath));
-
 // routes
 app.use('/api/auth', authRoutes);
 app.use('/api/posts', postsRoutes);
@@ -126,18 +116,14 @@ app.use('/api/customfeeds', customFeedRoutes);
 app.use('/api/messages', messagesRoutes);
 
 // media
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// health
-app.get('/health', (req,res)=> res.send({ok:true, now: new Date().toISOString()}));
 
-// ============================
-// Serve React (PRODUCTION)
-// ============================
-app.get(/^\/(?!api|uploads).*/, (req, res) => {
-  res.sendFile(path.join(frontendPath, 'index.html'));
-});
+// health
+app.get('/', (req,res)=> res.send({ok:true, now: new Date().toISOString()}));
 
 app.use(errorHandler);
 
-server.listen(PORT, '0.0.0.0', () => console.log(`Server running on port ${PORT}`));
+server.listen(PORT, ()=> console.log(`Server running on port ${PORT}`));
