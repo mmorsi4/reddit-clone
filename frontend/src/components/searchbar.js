@@ -8,7 +8,7 @@ function SearchBar({ users }) {
   const [showResults, setShowResults] = useState(false);
 
   const searchRef = useRef(null);
-  const navigate = useNavigate(); // hook to navigate programmatically
+  const navigate = useNavigate(); 
 
   // Fetch communities
   useEffect(() => {
@@ -25,20 +25,6 @@ function SearchBar({ users }) {
     loadCommunities();
   }, []);
 
-  // // Fetch users
-  // useEffect(() => {
-  //   const loadUsers = async () => {
-  //     try {
-  //       const res = await fetch("api/users");
-  //       if (!res.ok) throw new Error("Failed to load users");
-  //       const data = await res.json();
-  //       setUsers(data);
-  //     } catch (err) {
-  //       console.error(err);
-  //     }
-  //   };
-  //   loadUsers();
-  // }, []);
 
   useEffect(() => {
     if (!searchTerm.trim()) {

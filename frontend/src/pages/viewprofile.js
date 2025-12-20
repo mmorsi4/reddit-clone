@@ -19,10 +19,15 @@ function ViewProfile() {
   const [loadingPosts, setLoadingPosts] = useState(false);
   const [loadingSaved, setLoadingSaved] = useState(false);
   const [loadingHidden, setLoadingHidden] = useState(false); // NEW: Loading state for hidden posts
-  const [joinedCommunityIds, setJoinedCommunityIds] = useState([]); 
+  const [joinedCommunityIds, setJoinedCommunityIds] = useState([]);
   const [isOwnProfile, setIsOwnProfile] = useState(false);
   const [allCommunities, setAllCommunities] = useState([]);
+  const [upvotedPosts, setUpvotedPosts] = useState([]);
+  const [downvotedPosts, setDownvotedPosts] = useState([]);
+  const [upvotedComments, setUpvotedComments] = useState([]);
+  const [downvotedComments, setDownvotedComments] = useState([]);
   const { username } = useParams();
+
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -32,14 +37,14 @@ function ViewProfile() {
       });
 
       if (res.status === 404) {
-          setUser(null);
-          return;
+        setUser(null);
+        return;
       }
 
       const data = await res.json();
       const userData = data;
       setUser(userData);
-      
+
       const currentUsername = localStorage.getItem('username');
       setIsOwnProfile(currentUsername === username);
     }
@@ -65,25 +70,25 @@ function ViewProfile() {
 
   useEffect(() => {
     const fetchJoinedCommunities = async () => {
-        try {
-            const res = await fetch("/api/communities/joined", {
-                method: "GET",
-                headers: { "Content-Type": "application/json" }
-            });
+      try {
+        const res = await fetch("/api/communities/joined", {
+          method: "GET",
+          headers: { "Content-Type": "application/json" }
+        });
 
-            if (res.ok) {
-                const communities = await res.json();
-                setJoinedCommunityIds(communities.map(c => c._id));
-            } else {
-                console.error("Error fetching joined communities:", await res.text());
-            }
-        } catch (error) {
-            console.error("Error fetching joined communities:", error);
+        if (res.ok) {
+          const communities = await res.json();
+          setJoinedCommunityIds(communities.map(c => c._id));
+        } else {
+          console.error("Error fetching joined communities:", await res.text());
         }
+      } catch (error) {
+        console.error("Error fetching joined communities:", error);
+      }
     };
-    
+
     fetchJoinedCommunities();
-  }, []); 
+  }, []);
 
   // Fetch user comments
   const fetchUserComments = async () => {
@@ -96,15 +101,15 @@ function ViewProfile() {
 
       if (res.ok) {
         const comments = await res.json();
-        
+
         // Batch fetch all posts to get community data
         const postIds = comments
           .map(c => c.post?._id)
           .filter(id => id)
           .filter((value, index, self) => self.indexOf(value) === index);
-        
+
         if (postIds.length > 0) {
-          const postPromises = postIds.map(postId => 
+          const postPromises = postIds.map(postId =>
             fetch(`/api/posts/${postId}`)
               .then(res => {
                 if (!res.ok) throw new Error(`Failed to fetch post ${postId}`);
@@ -119,20 +124,20 @@ function ViewProfile() {
                 return { postId, data: null };
               })
           );
-          
+
           const postsData = await Promise.all(postPromises);
-          
+
           const postMap = {};
           postsData.forEach(({ postId, data }) => {
             if (data) {
               postMap[postId] = data;
             }
           });
-          
+
           const enrichedComments = comments.map(comment => {
             const postId = comment.post?._id;
             const fullPost = postMap[postId];
-            
+
             if (fullPost) {
               return {
                 ...comment,
@@ -143,10 +148,10 @@ function ViewProfile() {
                 }
               };
             }
-            
+
             return comment;
           });
-          
+
           setUserComments(enrichedComments);
         } else {
           setUserComments(comments);
@@ -183,33 +188,19 @@ function ViewProfile() {
     }
   };
 
-  // Fetch saved posts
   const fetchSavedPosts = async () => {
     setLoadingSaved(true);
     try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        console.error("No token found for saved posts");
-        setSavedPosts([]);
-        setLoadingSaved(false);
-        return;
-      }
-
       const res = await fetch("/api/posts/saved", {
         method: "GET",
-        headers: { 
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`
-        }
+        credentials: "include"
       });
 
       if (res.ok) {
         const posts = await res.json();
-        console.log("Saved posts fetched:", posts.length);
         setSavedPosts(posts);
       } else {
-        const errorText = await res.text();
-        console.error("Error fetching saved posts:", errorText);
+        console.error("Error fetching saved posts:", await res.text());
         setSavedPosts([]);
       }
     } catch (error) {
@@ -219,31 +210,25 @@ function ViewProfile() {
       setLoadingSaved(false);
     }
   };
-
-  // NEW: Fetch hidden posts
   const fetchHiddenPosts = async () => {
     setLoadingHidden(true);
     try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        console.error("No token found for hidden posts");
-        setHiddenPosts([]);
-        setLoadingHidden(false);
-        return;
-      }
-
       const res = await fetch("/api/posts/hidden", {
         method: "GET",
-        headers: { 
+        headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`
-        }
+          "Cache-Control": "no-cache" // ensures fresh data
+        },
+        credentials: "include" // send cookies automatically
       });
 
-      if (res.ok) {
+      if (res.status === 200) {
         const posts = await res.json();
         console.log("Hidden posts fetched:", posts.length);
         setHiddenPosts(posts);
+      } else if (res.status === 304) {
+        console.log("Hidden posts not modified, using cached data");
+        // optionally keep previous state
       } else {
         const errorText = await res.text();
         console.error("Error fetching hidden posts:", errorText);
@@ -260,74 +245,76 @@ function ViewProfile() {
   // Handle unsave from profile
   const handleUnsavePost = async (postId) => {
     try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        alert("You need to be logged in to unsave posts!");
-        return;
-      }
-
       const res = await fetch(`/api/posts/${postId}/unsave`, {
         method: "POST",
-        headers: { 
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`
-        }
+        credentials: "include"
       });
 
       if (res.ok) {
-        // Remove the post from saved posts
         setSavedPosts(prev => prev.filter(post => post._id !== postId));
-        
-        // Also update userPosts if the post is there
-        setUserPosts(prev => prev.map(post => 
-          post._id === postId ? { ...post, isSaved: false } : post
-        ));
+        setUserPosts(prev =>
+          prev.map(post =>
+            post._id === postId ? { ...post, isSaved: false } : post
+          )
+        );
       } else {
-        const errorText = await res.text();
-        console.error("Unsave failed:", errorText);
-        alert("Failed to unsave post. Please try again.");
+        console.error("Unsave failed:", await res.text());
+        alert("Failed to unsave post.");
       }
     } catch (error) {
       console.error("Unsave error:", error);
-      alert("An error occurred. Please try again.");
+      alert("An error occurred.");
     }
   };
-
   // NEW: Handle unhide from profile
   const handleUnhidePost = async (postId) => {
     try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        alert("You need to be logged in to unhide posts!");
-        return;
-      }
-
       const res = await fetch(`/api/posts/${postId}/unhide`, {
         method: "POST",
-        headers: { 
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`
-        }
+        credentials: "include"
       });
 
       if (res.ok) {
-        // Remove the post from hidden posts
         setHiddenPosts(prev => prev.filter(post => post._id !== postId));
-        
-        // Show success message
-        alert("Post unhidden successfully!");
       } else {
-        const errorText = await res.text();
-        console.error("Unhide failed:", errorText);
-        alert("Failed to unhide post. Please try again.");
+        console.error("Unhide failed:", await res.text());
+        alert("Failed to unhide post.");
       }
     } catch (error) {
       console.error("Unhide error:", error);
-      alert("An error occurred. Please try again.");
+      alert("An error occurred.");
     }
   };
 
   const renderTabContent = () => {
+
+    if (activeTab === "upvoted") {
+      return (
+        <div>
+          <h3>Upvoted Posts</h3>
+          {upvotedPosts.length
+            ? upvotedPosts.map(post => <Post key={post._id} {...post} />)
+            : <p>No upvoted posts</p>
+          }          <h3>Upvoted Comments</h3>
+          {upvotedComments.length ? upvotedComments.map(comment => <ProfileComment key={comment._id} comment={comment} user={user} allCommunities={allCommunities} />) : <p>No upvoted comments</p>}
+        </div>
+      );
+    }
+
+    if (activeTab === "downvoted") {
+      return (
+        <div>
+          <h3>Downvoted Posts</h3>
+          {downvotedPosts.length
+            ? downvotedPosts.map(post => <Post key={post._id} {...post} />)
+            : <p>No downvoted posts</p>
+          }
+          <h3>Downvoted Comments</h3>
+          {downvotedComments.length ? downvotedComments.map(comment => <ProfileComment key={comment._id} comment={comment} user={user} allCommunities={allCommunities} />) : <p>No downvoted comments</p>}
+        </div>
+      );
+    };
+
     if (activeTab === "comments") {
       if (loadingComments) {
         return (
@@ -350,9 +337,9 @@ function ViewProfile() {
       return (
         <div className="profile-comments-container">
           {userComments.map(comment => (
-            <ProfileComment 
-              key={comment._id} 
-              comment={comment} 
+            <ProfileComment
+              key={comment._id}
+              comment={comment}
               user={user}
               allCommunities={allCommunities}
             />
@@ -370,6 +357,8 @@ function ViewProfile() {
         );
       }
 
+
+
       if (userPosts.length === 0) {
         return (
           <div className="empty-state">
@@ -379,6 +368,7 @@ function ViewProfile() {
           </div>
         );
       }
+
 
       return (
         <div>
@@ -557,7 +547,7 @@ function ViewProfile() {
                 initialVote={post.userVote || 0}
                 initialComments={post.commentCount || 0}
                 community={post.community?.name || "unknown"}
-                isAllFeed={true} 
+                isAllFeed={true}
                 communityAvatarUrl={post.community?.avatar}
                 isJoined={isUserJoined}
                 onToggleJoin={null}
@@ -568,7 +558,7 @@ function ViewProfile() {
               />
             );
           })}
-          
+
           {hasSaved && (
             <div className="profile-overview-saved-section">
               <h3 className="profile-overview-section-title">
@@ -601,9 +591,9 @@ function ViewProfile() {
                   />
                 );
               })}
-              
+
               {savedPosts.length > 3 && (
-                <button 
+                <button
                   className="profile-view-all-btn"
                   onClick={() => {
                     setActiveTab("saved");
@@ -615,7 +605,7 @@ function ViewProfile() {
               )}
             </div>
           )}
-          
+
           {/* NEW: Hidden posts section in overview (only for own profile) */}
           {hasHidden && isOwnProfile && (
             <div className="profile-overview-hidden-section">
@@ -649,9 +639,9 @@ function ViewProfile() {
                   />
                 );
               })}
-              
+
               {hiddenPosts.length > 3 && (
-                <button 
+                <button
                   className="profile-view-all-btn"
                   onClick={() => {
                     setActiveTab("hidden");
@@ -663,23 +653,23 @@ function ViewProfile() {
               )}
             </div>
           )}
-          
+
           {hasComments && (
             <div className="profile-overview-comments-section">
               <h3 className="profile-overview-section-title">
                 Recent Comments {userComments.length > 3 && `(${userComments.length})`}
               </h3>
               {userComments.slice(0, 3).map(comment => (
-                <ProfileComment 
-                  key={comment._id} 
-                  comment={comment} 
+                <ProfileComment
+                  key={comment._id}
+                  comment={comment}
                   user={user}
                   allCommunities={allCommunities}
                 />
               ))}
-              
+
               {userComments.length > 3 && (
-                <button 
+                <button
                   className="profile-view-all-btn"
                   onClick={() => {
                     setActiveTab("comments");
@@ -713,14 +703,64 @@ function ViewProfile() {
 
   const handleTabClick = (tabName) => {
     setActiveTab(tabName);
-    if (tabName === "comments") {
-      fetchUserComments();
-    } else if (tabName === "posts") {
-      fetchUserPosts();
-    } else if (tabName === "saved") {
-      fetchSavedPosts();
-    } else if (tabName === "hidden") { // NEW: Fetch hidden posts
-      fetchHiddenPosts();
+    if (tabName === "comments") fetchUserComments();
+    else if (tabName === "posts") fetchUserPosts();
+    else if (tabName === "saved") fetchSavedPosts();
+    else if (tabName === "hidden") fetchHiddenPosts();
+    else if (tabName === "upvoted") {
+      fetchUpvotedPosts();
+      fetchUpvotedComments();
+    } else if (tabName === "downvoted") {
+      fetchDownvotedPosts();
+      fetchDownvotedComments();
+    }
+  };
+
+  const fetchUpvotedPosts = async () => {
+    try {
+      const res = await fetch("/api/posts/upvoted", { credentials: "include" });
+      if (res.ok) {
+        const data = await res.json();
+        setUpvotedPosts(data);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const fetchDownvotedPosts = async () => {
+    try {
+      const res = await fetch("/api/posts/downvoted", { credentials: "include" });
+      if (res.ok) {
+        const data = await res.json();
+        setDownvotedPosts(data);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const fetchUpvotedComments = async () => {
+    try {
+      const res = await fetch("/api/comments/upvoted", { credentials: "include" });
+      if (res.ok) {
+        const data = await res.json();
+        setUpvotedComments(data);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const fetchDownvotedComments = async () => {
+    try {
+      const res = await fetch("/api/comments/downvoted", { credentials: "include" });
+      if (res.ok) {
+        const data = await res.json();
+        setDownvotedComments(data);
+      }
+    } catch (err) {
+      console.error(err);
     }
   };
 
@@ -740,7 +780,7 @@ function ViewProfile() {
   return (
     <>
       <Header />
-      <Sidebar/>
+      <Sidebar />
       <div className="profile-page-container">
         <div className="profile-page-content">
           <div className="profile-main-column">
@@ -761,7 +801,7 @@ function ViewProfile() {
                   </p>
                 </div>
               </div>
-              
+
               {isOwnProfile && (
                 <Link to="/edit-avatar" className="profile-edit-btn">
                   Edit Profile
@@ -770,43 +810,43 @@ function ViewProfile() {
             </div>
 
             <div className="profile-tabs-main">
-              <button 
+              <button
                 className={`profile-tab ${activeTab === "overview" ? "profile-tab-active" : ""}`}
                 onClick={() => handleTabClick("overview")}
               >
                 Overview
               </button>
-              <button 
+              <button
                 className={`profile-tab ${activeTab === "posts" ? "profile-tab-active" : ""}`}
                 onClick={() => handleTabClick("posts")}
               >
                 Posts
               </button>
-              <button 
+              <button
                 className={`profile-tab ${activeTab === "comments" ? "profile-tab-active" : ""}`}
                 onClick={() => handleTabClick("comments")}
               >
                 Comments
               </button>
-              <button 
+              <button
                 className={`profile-tab ${activeTab === "saved" ? "profile-tab-active" : ""}`}
                 onClick={() => handleTabClick("saved")}
               >
                 Saved
               </button>
-              <button 
+              <button
                 className={`profile-tab ${activeTab === "hidden" ? "profile-tab-active" : ""}`}
                 onClick={() => handleTabClick("hidden")}
               >
                 Hidden
               </button>
-              <button 
+              <button
                 className={`profile-tab ${activeTab === "upvoted" ? "profile-tab-active" : ""}`}
                 onClick={() => handleTabClick("upvoted")}
               >
                 Upvoted
               </button>
-              <button 
+              <button
                 className={`profile-tab ${activeTab === "downvoted" ? "profile-tab-active" : ""}`}
                 onClick={() => handleTabClick("downvoted")}
               >

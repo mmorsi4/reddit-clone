@@ -7,7 +7,7 @@ import ModelClient, { isUnexpected } from "@azure-rest/ai-inference";
 import { AzureKeyCredential } from "@azure/core-auth";
 import path from 'path'
 import fs from 'fs'
-import groq from '../../utils/groq.js';
+import groq from '../utils/groq.js';
 
 export async function createPost(req, res) {
   const { title, body, url, community } = req.body;
@@ -661,11 +661,11 @@ export async function savePost(req, res) {
     post.saves = (post.saves || 0) + 1;
     await post.save();
     
-    res.json({ 
-      message: 'Post saved successfully',
-      saves: post.saves,
-      isSaved: true 
-    });
+   res.json({ 
+  message: 'Post has been added to your saved posts',
+  saves: post.saves,
+  isSaved: true 
+});
   } catch (err) {
     console.error("❌ Error saving post:", err);
     res.status(500).json({ message: "Failed to save post", error: err.message });
@@ -886,5 +886,72 @@ export async function getHiddenPosts(req, res) {
       message: "Failed to fetch hidden posts",
       error: err.message 
     });
+  }
+}
+
+// GET /api/posts/:id/saved
+export const getSavedStatus = async (req, res) => {
+  const { id } = req.params;
+  const userId = req.user.id; // from auth middleware
+
+  try {
+    const post = await Post.findById(id);
+    if (!post) return res.status(404).json({ error: "Post not found" });
+
+    const isSaved = post.savedBy.includes(userId);
+    res.json({ isSaved });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error" });
+  }
+};
+
+// Fetch posts upvoted by the current user
+export async function getUpvotedPosts(req, res) {
+  try {
+    const posts = await Post.find({ "votes": { $elemMatch: { user: req.userId, value: 1 } } })
+      .populate('author', 'username displayName avatarUrl')
+      .populate('community', 'name title avatar _id')
+      .sort({ createdAt: -1 })
+      .lean();
+
+    const normalized = posts.map(post => {
+      const userVote = post.votes?.find(v => v.user.toString() === req.userId);
+      const score = post.votes?.reduce((sum, v) => sum + v.value, 0) || 0;
+      const isSaved = post.savedBy?.some(id => id.toString() === req.userId) || false;
+      const isHidden = post.hiddenBy?.some(id => id.toString() === req.userId) || false;
+
+      return { ...post, userVote: userVote?.value || 0, score, isSaved, isHidden };
+    });
+
+    res.json(normalized);
+  } catch (err) {
+    console.error("Error fetching upvoted posts:", err);
+    res.status(500).json({ message: "Internal server error" });
+  }
+}
+
+// Fetch posts downvoted by the current user
+export async function getDownvotedPosts(req, res) {
+  try {
+    const posts = await Post.find({ "votes": { $elemMatch: { user: req.userId, value: -1 } } })
+      .populate('author', 'username displayName avatarUrl')
+      .populate('community', 'name title avatar _id')
+      .sort({ createdAt: -1 })
+      .lean();
+
+    const normalized = posts.map(post => {
+      const userVote = post.votes?.find(v => v.user.toString() === req.userId);
+      const score = post.votes?.reduce((sum, v) => sum + v.value, 0) || 0;
+      const isSaved = post.savedBy?.some(id => id.toString() === req.userId) || false;
+      const isHidden = post.hiddenBy?.some(id => id.toString() === req.userId) || false;
+
+      return { ...post, userVote: userVote?.value || 0, score, isSaved, isHidden };
+    });
+
+    res.json(normalized);
+  } catch (err) {
+    console.error("Error fetching downvoted posts:", err);
+    res.status(500).json({ message: "Internal server error" });
   }
 }

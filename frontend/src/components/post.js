@@ -30,11 +30,35 @@ function Post({
   const [saved, setSaved] = useState(isSaved); // NEW: Local saved state
   const [isSaving, setIsSaving] = useState(false); // NEW: Saving state
   const menuRef = useRef(null);
+  const [isHidden, setIsHidden] = useState(false);
+  const [showUndo, setShowUndo] = useState(false);
+
 
   // Update saved state when prop changes
   useEffect(() => {
     setSaved(isSaved);
   }, [isSaved]);
+
+  useEffect(() => {
+  const fetchSavedStatus = async () => {
+    try {
+      const res = await fetch(`/api/posts/${postId}/saved`, {
+        method: "GET",
+        credentials: "include",
+      });
+
+      if (!res.ok) throw new Error("Failed to fetch saved status");
+
+      const data = await res.json();
+      setSaved(data.isSaved); // assuming backend returns { isSaved: true/false }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  fetchSavedStatus();
+}, [postId]);
+
 
   // Close menu when clicking outside
   useEffect(() => {
@@ -53,48 +77,50 @@ function Post({
     };
   }, [menuOpen]);
 
-const handleUpvote = async (e) => {
-  e.preventDefault();
-  e.stopPropagation();
-  const newVoteValue = vote === 1 ? 0 : 1;
-  setVote(newVoteValue);
-  await updateVote(newVoteValue);
-};
+  const handleUpvote = async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const newVoteValue = vote === 1 ? 0 : 1;
+    setVote(newVoteValue);
+    await updateVote(newVoteValue);
+  };
 
-const handleDownvote = async (e) => {
-  e.preventDefault();
-  e.stopPropagation();
-  const newVoteValue = vote === -1 ? 0 : -1;
-  setVote(newVoteValue);
-  await updateVote(newVoteValue);
-};
+  const handleDownvote = async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const newVoteValue = vote === -1 ? 0 : -1;
+    setVote(newVoteValue);
+    await updateVote(newVoteValue);
+  };
 
-const updateVote = async (newVoteValue) => {
-  try {
-    const res = await fetch(`/api/posts/${postId}/vote`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({ value: newVoteValue }),
-    });
+  const updateVote = async (newVoteValue) => {
+    try {
+      const res = await fetch(`/api/posts/${postId}/vote`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        credentials: "include",
+        body: JSON.stringify({ value: newVoteValue }),
+      });
 
-    if (!res.ok) throw new Error("Vote failed");
+      if (!res.ok) throw new Error("Vote failed");
 
-    const data = await res.json();
-    setVote(data.userVote ?? newVoteValue);
-    setVoteCount(data.score);
-  } catch (err) {
-    console.error(err);
-  }
-};
+      const data = await res.json();
+      setVote(data.userVote ?? newVoteValue);
+      setVoteCount(data.score);
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   // NEW: Handle save/unsave
   const handleSave = async (e) => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     if (isSaving) return;
-    
+
     setIsSaving(true);
     try {
       const token = localStorage.getItem('token');
@@ -105,24 +131,25 @@ const updateVote = async (newVoteValue) => {
       }
 
       const endpoint = saved ? `/api/posts/${postId}/unsave` : `/api/posts/${postId}/save`;
-      
+
       const res = await fetch(endpoint, {
         method: "POST",
-        headers: { 
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`
-        }
+        headers: {
+          "Content-Type": "application/json"
+        },
+        credentials: "include"
       });
+
 
       if (res.ok) {
         const newSavedState = !saved;
         setSaved(newSavedState);
-        
+
         // Call the appropriate callback
         if (newSavedState === false && onUnsave) {
           onUnsave(postId);
         }
-        
+
         if (newSavedState === true && onSave) {
           onSave(postId);
         }
@@ -153,7 +180,7 @@ const updateVote = async (newVoteValue) => {
   const handleMenuAction = (action, e) => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     if (action === 'save') {
       handleSave(e);
     } else {
@@ -162,19 +189,58 @@ const updateVote = async (newVoteValue) => {
     closeMenu();
   };
 
-  const handleHide = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    console.log("Hide post:", postId);
-    closeMenu();
+const handleHide = async (postId) => {
+  setIsHidden(true);
+  setShowUndo(true);
+  setMenuOpen(false);
+
+  try {
+    const res = await fetch(`/api/posts/${postId}/hide`, {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+    });
+
+    if (!res.ok) {
+      const errorText = await res.text();
+      console.error("Error hiding post:", errorText);
+      setIsHidden(false);
+      setShowUndo(false);
+    }
+  } catch (error) {
+    console.error("Error hiding post:", error);
+    setIsHidden(false);
+    setShowUndo(false);
+  }
+
+  setTimeout(() => setShowUndo(false), 5000);
+};
+
+  const handleUndoHide = async (postId) => {
+    try {
+      const res = await fetch(`/api/posts/${postId}/unhide`, {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+      });
+
+      if (!res.ok) {
+        const text = await res.text();
+        console.error("Error unhiding post:", text);
+        return;
+      }
+
+      setIsHidden(false);
+      setShowUndo(false);
+    } catch (err) {
+      console.error("Error unhiding post:", err);
+    }
   };
 
-  const handleReport = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    console.log("Report post:", postId);
-    closeMenu();
-  };
+
+
+
+
 
   const handleJoinClick = (e) => {
     e.preventDefault();
@@ -182,19 +248,30 @@ const updateVote = async (newVoteValue) => {
     if (onToggleJoin) onToggleJoin(community);
   };
 
-  const imageStyle = { 
-    borderRadius: '50%', 
-    width: '20px', 
-    height: '20px', 
-    marginRight: '8px' 
+  const imageStyle = {
+    borderRadius: '50%',
+    width: '20px',
+    height: '20px',
+    marginRight: '8px'
   };
 
   const showCommunityMeta = isAllFeed || (!isCommunityPage && community);
-  
+
   // Format time display
-  const formattedTime = !time || isNaN(new Date(time)) 
-    ? 'Unknown time' 
+  const formattedTime = !time || isNaN(new Date(time))
+    ? 'Unknown time'
     : formatDistanceToNow(new Date(time), { addSuffix: true }).replace(/^about /, '');
+
+  if (isHidden) {
+    return (
+      showUndo && (
+        <div className="post-undo-banner">
+          <span>Post hidden</span>
+          <button onClick={handleUndoHide}>Undo</button>
+        </div>
+      )
+    );
+  }
 
   return (
     <div className={`post-fullwidth ${viewType === 'compact' ? 'compact-view' : ''}`}>
@@ -209,10 +286,10 @@ const updateVote = async (newVoteValue) => {
               <div className="post-user-info">
                 {showCommunityMeta ? (
                   <>
-                    <img 
-                      src={communityAvatarUrl || "../images/default-community.svg"} 
-                      alt="Community Avatar" 
-                      style={imageStyle} 
+                    <img
+                      src={communityAvatarUrl || "../images/default-community.svg"}
+                      alt="Community Avatar"
+                      style={imageStyle}
                     />
                     <span className="post-community-name">r/{community}</span>
                     <span className="post-separator-meta post-separator">
@@ -245,7 +322,7 @@ const updateVote = async (newVoteValue) => {
                 {isJoined ? 'Joined' : 'Join'}
               </button>
             )}
-            
+
             {/* THREE DOTS MENU */}
             <div className="post-dots-wrapper" ref={menuRef}>
               <button
@@ -262,7 +339,7 @@ const updateVote = async (newVoteValue) => {
 
               {menuOpen && (
                 <div className="post-dots-menu" onClick={(e) => e.stopPropagation()}>
-                  <button 
+                  <button
                     className="post-dots-item"
                     onClick={(e) => handleMenuAction('save', e)}
                     disabled={isSaving}
@@ -270,20 +347,15 @@ const updateVote = async (newVoteValue) => {
                     <img src={saved ? "../images/save-active.svg" : "../images/save.svg"} alt="Save" />
                     <span>{isSaving ? "..." : (saved ? "Unsave" : "Save")}</span>
                   </button>
-                  <button 
+                  <button
                     className="post-dots-item"
-                    onClick={handleHide}
+                    onClick={() => handleHide(postId)}
                   >
                     <img src="../images/hide.svg" alt="Hide" />
                     <span>Hide</span>
                   </button>
-                  <button 
-                    className="post-dots-item"
-                    onClick={handleReport}
-                  >
-                    <img src="../images/report.svg" alt="Report" />
-                    <span>Report</span>
-                  </button>
+
+
                 </div>
               )}
             </div>
@@ -320,7 +392,7 @@ const updateVote = async (newVoteValue) => {
           <div className="post-activity">
             {/* VOTING */}
             <div className="post-vote post-activity-container">
-              <button 
+              <button
                 className="post-activity-button"
                 onClick={handleUpvote}
                 aria-label="Upvote"
@@ -331,7 +403,7 @@ const updateVote = async (newVoteValue) => {
                 />
               </button>
               <span className="post-vote-score">{voteCount}</span>
-              <button 
+              <button
                 className="post-activity-button"
                 onClick={handleDownvote}
                 aria-label="Downvote"
@@ -353,18 +425,7 @@ const updateVote = async (newVoteValue) => {
               <span className="post-comment-amount">{initialComments}</span>
             </Link>
 
-            {/* SAVE BUTTON - NEW */}
-            <button 
-              className="post-save post-activity-button post-activity-container"
-              onClick={handleSave}
-              disabled={isSaving}
-            >
-              <img 
-                src={saved ? "../images/save-active.svg" : "../images/save.svg"} 
-                alt="Save" 
-              />
-              <span>{isSaving ? "..." : (saved ? "Saved" : "Save")}</span>
-            </button>
+
           </div>
         </div>
       </div>

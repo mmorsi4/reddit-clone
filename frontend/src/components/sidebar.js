@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { Link, useLocation } from "react-router-dom";
 import CreateCommunityPopup from "./create-community";
-import CustomFeedPopup from "../pages/CustomFeedPopup";
+import CustomFeedPopup from "./CustomFeedPopup";
 
 function Sidebar() {
   const [recent, setRecent] = useState([]);

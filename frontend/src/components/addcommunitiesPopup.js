@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import CommunitySearchSelector from "../components/CommunitySearchSelector";
+import CommunitySearchSelector from "./CommunitySearchSelector";
 import "../styles/addcommunitiesPopup.css";
 
 function AddCommunitiesModal({ feed, onClose, onCommunityAdded }) {
