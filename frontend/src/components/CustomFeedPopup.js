@@ -3,8 +3,8 @@ import React, { useState } from 'react';
 const CustomFeedPopup = ({ onClose, onSubmit, initialFeed = null }) => {
   const [name, setName] = useState(initialFeed?.name || '');
   const [description, setDescription] = useState(initialFeed?.description || '');
-  const [isPrivate, setIsPrivate] = useState(initialFeed?.isPrivate || false);
-  const [showOnProfile, setShowOnProfile] = useState(initialFeed?.showOnProfile || true);
+  const [isPrivate, setIsPrivate] = useState(initialFeed?.isPrivate ?? false);
+  const [showOnProfile, setShowOnProfile] = useState(initialFeed?.showOnProfile ?? true);
   const isEditing = !!initialFeed;
 
   // Detect theme

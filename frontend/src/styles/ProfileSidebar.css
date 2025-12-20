@@ -539,3 +539,84 @@
   transition: none !important;
   animation: none !important;
 }
+
+/* Custom Feeds Container */
+.profile-sidebar-custom-feeds {
+  margin-top: 20px;
+  padding: 0 12px;
+}
+
+.profile-sidebar-custom-feeds h3.profile-sidebar-section-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #888; /* light gray for light mode */
+  margin-bottom: 8px;
+  text-transform: uppercase;
+}
+
+/* Empty state */
+.profile-sidebar-custom-feeds .feed-empty {
+  font-size: 13px;
+  color: #aaa;
+  display: block;
+  padding: 8px 0;
+}
+
+/* Each feed item */
+.profile-sidebar-custom-feed-item {
+  display: flex;
+  align-items: center;
+  padding: 6px 0;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.profile-sidebar-custom-feed-item:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+  border-radius: 6px;
+}
+
+/* Feed image */
+.profile-sidebar-custom-feed-image {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  margin-right: 8px;
+  object-fit: cover;
+}
+
+/* Feed name */
+.profile-sidebar-custom-feed-item .feed-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: #333; /* dark text for light mode */
+  flex: 1;
+}
+
+/* Private badge (lock icon) */
+.profile-sidebar-custom-feed-item img[alt="Private"] {
+  width: 12px;
+  margin-left: 5px;
+  filter: none;
+}
+
+/* -------------------- DARK MODE -------------------- */
+html[data-theme='dark'] .profile-sidebar-custom-feeds h3.profile-sidebar-section-title {
+  color: #bbb; /* lighter gray for dark mode */
+}
+
+html[data-theme='dark'] .profile-sidebar-custom-feeds .feed-empty {
+  color: #888;
+}
+
+html[data-theme='dark'] .profile-sidebar-custom-feed-item:hover {
+  background-color: rgba(255, 255, 255, 0.08); /* subtle hover effect in dark mode */
+}
+
+html[data-theme='dark'] .profile-sidebar-custom-feed-item .feed-name {
+  color: #eee; /* light text for dark mode */
+}
+
+html[data-theme='dark'] .profile-sidebar-custom-feed-item img[alt="Private"] {
+  filter: invert(1) brightness(1.5);
+}

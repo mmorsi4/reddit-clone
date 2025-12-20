@@ -1,21 +1,27 @@
 import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 
-function ProfileSidebar({ user, isOwnProfile = false }) {
+function ProfileSidebar({ user, isOwnProfile = false, }) {
   const [followersCount, setFollowersCount] = useState(13); // Default from image
   const [karma, setKarma] = useState(661); // From image
   const [contributions, setContributions] = useState(208); // From image
   const [isFollowing, setIsFollowing] = useState(false);
+  const [customFeeds, setCustomFeeds] = useState([]);
+  const [loadingFeeds, setLoadingFeeds] = useState(false);
+
+  console.log("isOwnProfile =", isOwnProfile);
 
   // Format numbers with commas
   const formatKarmaWithCommas = (num) => {
     return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   };
 
+
   // Fetch profile data
   useEffect(() => {
     const fetchProfileData = async () => {
       if (!user?._id) return;
-      
+
       try {
         // Use data from image as defaults
         setKarma(661);
@@ -25,29 +31,29 @@ function ProfileSidebar({ user, isOwnProfile = false }) {
         console.error("Error fetching profile data:", error);
       }
     };
-    
+
     fetchProfileData();
   }, [user?._id]);
 
   const handleFollowToggle = async () => {
     if (!user?._id) return;
-    
+
     try {
       const token = localStorage.getItem('token');
       if (!token) {
         alert("You need to be logged in to follow users!");
         return;
       }
-      
+
       const method = isFollowing ? 'DELETE' : 'POST';
       const res = await fetch(`/api/users/${user._id}/follow`, {
         method,
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         }
       });
-      
+
       if (res.ok) {
         setIsFollowing(!isFollowing);
         setFollowersCount(prev => isFollowing ? prev - 1 : prev + 1);
@@ -63,6 +69,30 @@ function ProfileSidebar({ user, isOwnProfile = false }) {
     alert("Profile URL copied to clipboard!");
   };
 
+  useEffect(() => {
+    const fetchProfileFeeds = async () => {
+      if (!user?._id) return;
+
+      try {
+        const token = localStorage.getItem('token');
+        const res = await fetch(`/api/customfeeds/profile/${user._id}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (!res.ok) throw new Error("Failed to fetch custom feeds");
+
+        const data = await res.json();
+        setCustomFeeds(data);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    fetchProfileFeeds();
+  }, [user?._id]);
+
   if (!user) {
     return (
       <div className="profile-sidebar-container">
@@ -75,6 +105,7 @@ function ProfileSidebar({ user, isOwnProfile = false }) {
     );
   }
 
+
   return (
     <div className="profile-sidebar-container">
       <div className="profile-sidebar-card">
@@ -86,15 +117,15 @@ function ProfileSidebar({ user, isOwnProfile = false }) {
         {/* Username Section - UNDER the banner */}
         <div className="profile-sidebar-username-section">
           <h2 className="profile-sidebar-username">{user.username || "Purrple_Colouds"}</h2>
-          
+
           {/* Share Button - UNDER username - DARKER GREY NO BORDER */}
-          <button 
+          <button
             className="profile-sidebar-share-btn"
             onClick={handleShareProfile}
           >
             <span className="profile-sidebar-share-btn-icon">
               <svg viewBox="0 0 24 24" fill="currentColor">
-                <path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/>
+                <path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z" />
               </svg>
             </span>
             Share
@@ -117,7 +148,7 @@ function ProfileSidebar({ user, isOwnProfile = false }) {
               <span className="profile-sidebar-karma-label">Karma</span>
             </div>
           </div>
-          
+
           <div className="profile-sidebar-contributions-stat">
             <div className="profile-sidebar-contributions-value-container">
               <span className="profile-sidebar-contributions-value">{formatKarmaWithCommas(contributions)}</span>
@@ -132,7 +163,7 @@ function ProfileSidebar({ user, isOwnProfile = false }) {
             <span className="profile-sidebar-age-label">Reddit Age</span>
             <span className="profile-sidebar-age-value">5 y</span>
           </div>
-          
+
           <div className="profile-sidebar-active-stat">
             <span className="profile-sidebar-active-label">Active in</span>
             <span className="profile-sidebar-active-value">&gt;39</span>
@@ -146,11 +177,11 @@ function ProfileSidebar({ user, isOwnProfile = false }) {
             <span className="profile-sidebar-gold-value">0</span>
           </div>
         </div>
-        
+
         {/* Follow Button - For non-own profiles - LEFT ALIGNED */}
         {!isOwnProfile && (
           <div className="profile-sidebar-follow-section">
-            <button 
+            <button
               className={`profile-sidebar-follow-btn ${isFollowing ? 'profile-sidebar-following' : ''}`}
               onClick={handleFollowToggle}
             >
@@ -158,12 +189,12 @@ function ProfileSidebar({ user, isOwnProfile = false }) {
             </button>
           </div>
         )}
-        
+
         {/* Settings Section - For own profile */}
         {isOwnProfile && (
           <div className="profile-sidebar-settings-section">
             <h3 className="profile-sidebar-settings-title">SETTINGS</h3>
-            
+
             <div className="profile-sidebar-settings-item">
               <div className="profile-sidebar-settings-icon">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -177,7 +208,7 @@ function ProfileSidebar({ user, isOwnProfile = false }) {
               </div>
               <button className="profile-sidebar-settings-update-btn">Update</button>
             </div>
-            
+
             <div className="profile-sidebar-settings-item">
               <div className="profile-sidebar-settings-icon">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -191,7 +222,7 @@ function ProfileSidebar({ user, isOwnProfile = false }) {
               </div>
               <button className="profile-sidebar-settings-update-btn">Update</button>
             </div>
-            
+
             <div className="profile-sidebar-settings-item">
               <div className="profile-sidebar-settings-icon">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -206,7 +237,7 @@ function ProfileSidebar({ user, isOwnProfile = false }) {
               </div>
               <button className="profile-sidebar-settings-update-btn">Update</button>
             </div>
-            
+
             <div className="profile-sidebar-settings-item">
               <div className="profile-sidebar-settings-icon">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -221,6 +252,53 @@ function ProfileSidebar({ user, isOwnProfile = false }) {
             </div>
           </div>
         )}
+
+        <div className="profile-sidebar-custom-feeds">
+          <h3 className="profile-sidebar-section-title">Custom Feeds</h3>
+
+          {customFeeds.length === 0 ? (
+            <span className="feed-empty">No custom feeds yet</span>
+          ) : (
+            customFeeds.map(feed => (
+              <Link
+                key={feed._id}
+                to={`/f/${feed._id}`} // <-- navigate to feed page
+                className="profile-sidebar-custom-feed-item"
+                style={{ display: "flex", alignItems: "center", textDecoration: "none", color: "inherit" }}
+              >
+                <img
+                  src={feed.image}
+                  alt={feed.name}
+                  className="profile-sidebar-custom-feed-image"
+                  style={{
+                    width: "30px",
+                    height: "30px",
+                    borderRadius: "50%",
+                    marginRight: "8px",
+                  }}
+                />
+                <span className="feed-name">{feed.name}</span>
+
+                {feed.isPrivate && (
+                  <img
+                    src="../images/lock.svg"
+                    alt="Private"
+                    style={{
+                      width: "12px",
+                      marginLeft: "5px",
+                      filter: document.documentElement.getAttribute('data-theme') === 'dark'
+                        ? 'invert(1) brightness(1.5)'
+                        : 'none'
+                    }}
+                  />
+                )}
+              </Link>
+            ))
+          )}
+        </div>
+
+
+
       </div>
     </div>
   );

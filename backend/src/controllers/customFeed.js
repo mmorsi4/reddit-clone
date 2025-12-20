@@ -279,4 +279,25 @@ export async function toggleFollowCustomFeed(req, res) {
     console.error("Error toggling follow:", err);
     res.status(500).json({ message: "Internal server error" });
   }
+
+}
+
+export async function getCustomFeedsForProfile(req, res) {
+  try {
+    const { userId } = req.params; // get user ID from URL
+
+    if (!userId) return res.status(400).json({ message: "User ID is required." });
+
+    const feeds = await CustomFeed.find({
+      author: userId,
+      showOnProfile: true
+    })
+    .sort({ createdAt: 1 }) // oldest first
+    .select('-__v');
+
+    res.status(200).json(feeds);
+  } catch (err) {
+    console.error("Error fetching profile custom feeds:", err);
+    res.status(500).json({ message: "Internal server error" });
+  }
 }
