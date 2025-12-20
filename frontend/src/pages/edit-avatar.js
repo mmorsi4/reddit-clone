@@ -157,7 +157,7 @@ const AvatarCustomizer = ({ headerAvatarRef }) => {
             // 2. Save to database (for profile page and comments)
             const saveToDatabase = async (avatarDataUrl) => {
                 try {
-                    const updateRes = await fetch('http://localhost:5001/api/users/update-avatar', {
+                    const updateRes = await fetch('/api/users/update-avatar', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
