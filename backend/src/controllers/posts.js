@@ -7,7 +7,6 @@ import ModelClient, { isUnexpected } from "@azure-rest/ai-inference";
 import { AzureKeyCredential } from "@azure/core-auth";
 import path from 'path'
 import fs from 'fs'
-import groq from '../utils/groq.js';
 
 export async function createPost(req, res) {
   const { title, body, url, community } = req.body;
@@ -160,7 +159,7 @@ export async function getPostSummary(req, res) {
           "If the post is text-only, summarize the text clearly. " +
           "If an image exists, describe its content and combine it with the text. " +
           "If a video exists, do NOT attempt to analyze the actual video file, but acknowledge it is a video and summarize based on any textual context. " +
-          "Be concise and factual. " +
+          "Be concise and factual in under 100 words." +
           "Do not mention that you are guessing or inferring. " +
           "Refuse to summarize any explicit content."
       }
@@ -210,16 +209,15 @@ export async function getPostSummary(req, res) {
       content: userContent
     });
 
-    const completion = await groq.chat.completions.create({
-      model: "llama-3.1-8b-instant",
-      messages,
-      max_tokens: 120,
-      temperature: 0.4
-    });
+    const client = ModelClient(
+      "https://models.github.ai/inference",
+      new AzureKeyCredential(process.env.GITHUB_MODELS_TOKEN)
+    );
 
-    res.json({
-      summary: completion.choices[0].message.content
-    });
+    const response = await client.path("/chat/completions").post({
+      body: { model: "openai/gpt-4.1", messages, max_tokens: 120, temperature: 0.4 } });
+
+    res.json({ summary: response.body.choices[0].message.content });
 
   } catch (err) {
     console.error("Summary error:", err);
