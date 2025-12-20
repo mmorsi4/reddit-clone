@@ -5,8 +5,11 @@ import Post from '../models/Post.js';
 export async function createComment(req, res) {
   try {
     const { post, parent, body } = req.body;
+
     const postDoc = await Post.findById(post);
-    if (!postDoc) return res.status(404).json({ message: 'Post not found' });
+    if (!postDoc) {
+      return res.status(404).json({ message: "Post not found" });
+    }
 
     const comment = await Comment.create({
       post,
@@ -15,15 +18,20 @@ export async function createComment(req, res) {
       body,
     });
 
-    // increment commentCount safely
+    // increment comment count
     await Post.findByIdAndUpdate(post, { $inc: { commentCount: 1 } });
 
-    res.status(201).json(comment);
+    // ✅ POPULATE AUTHOR BEFORE RETURNING
+    const populatedComment = await Comment.findById(comment._id)
+      .populate("author", "username avatarUrl");
+
+    res.status(201).json(populatedComment);
   } catch (err) {
-    console.error('Error creating comment:', err);
-    res.status(500).json({ message: 'Failed to create comment' });
+    console.error("Error creating comment:", err);
+    res.status(500).json({ message: "Failed to create comment" });
   }
 }
+
 
 // Delete a comment and decrement commentCount
 export async function deleteComment(req, res) {

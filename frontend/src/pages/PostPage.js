@@ -11,7 +11,7 @@
 // function PostPage() {
 //   const { postId } = useParams();
 //   const location = useLocation();
-  
+
 //   const [post, setPost] = useState(location.state?.post || null);
 //   const [comments, setComments] = useState([]);
 //   const [sortedComments, setSortedComments] = useState([]);
@@ -23,7 +23,7 @@
 //   const [showFormattingToolbar, setShowFormattingToolbar] = useState(false);
 //   const [searchQuery, setSearchQuery] = useState("");
 //   const [showDropdown, setShowDropdown] = useState(false);
-  
+
 //   const [allCommunities, setAllCommunities] = useState([]);
 //   const [currentCommunity, setCurrentCommunity] = useState(null);
 
@@ -93,26 +93,26 @@
 //     const fetchCurrentUser = async () => {
 //       try {
 //         const token = localStorage.getItem('token');
-        
+
 //         if (!token) {
 //           // If no token, set a default user
 //           const savedUsername = localStorage.getItem("username") || "your_username";
 //           const savedAvatar = localStorage.getItem("userAvatar") || "../images/avatar.png";
-          
+
 //           setCurrentUser({
 //             username: savedUsername,
 //             avatarUrl: savedAvatar
 //           });
 //           return;
 //         }
-        
+
 //         const res = await fetch("/api/users/me", {
 //           headers: { 
 //             "Content-Type": "application/json",
 //             "Authorization": `Bearer ${token}`
 //           }
 //         });
-        
+
 //         if (res.ok) {
 //           const userData = await res.json();
 //           setCurrentUser(userData);
@@ -120,7 +120,7 @@
 //           // Fallback to localStorage data
 //           const savedUsername = localStorage.getItem("username") || "your_username";
 //           const savedAvatar = localStorage.getItem("userAvatar") || "../images/avatar.png";
-          
+
 //           setCurrentUser({
 //             username: savedUsername,
 //             avatarUrl: savedAvatar
@@ -153,7 +153,7 @@
 //       setComments(data.comments || []);
 //       setSortedComments(data.comments || []);
 //       setFilteredComments(data.comments || []);
-      
+
 //       // Set saved and hidden status from post data
 //       setIsSaved(data.post?.isSaved || false);
 //       setIsHidden(data.post?.isHidden || false);
@@ -175,7 +175,7 @@
 //   useEffect(() => {
 //     const sortComments = () => {
 //       let sorted = [...comments];
-      
+
 //       switch (sortOption) {
 //         case "best":
 //           sorted.sort((a, b) => (b.upvotes || 0) - (a.upvotes || 0));
@@ -199,10 +199,10 @@
 //         default:
 //           sorted.sort((a, b) => (b.upvotes || 0) - (a.upvotes || 0));
 //       }
-      
+
 //       setSortedComments(sorted);
 //     };
-    
+
 //     sortComments();
 //   }, [comments, sortOption]);
 
@@ -236,20 +236,20 @@
 //     try {
 //       let value;
 //       const currentVote = post.userVote;
-      
+
 //       if (type === 'up') {
 //         value = currentVote === 1 ? 0 : 1;
 //       } else {
 //         value = currentVote === -1 ? 0 : -1;
 //       }
-      
+
 //       const token = localStorage.getItem('token');
-      
+
 //       if (!token) {
 //         alert("You need to be logged in to vote!");
 //         return;
 //       }
-      
+
 //       const res = await fetch(`/api/posts/${postId}/vote`, {
 //         method: "POST",
 //         headers: { 
@@ -305,7 +305,7 @@
 //       if (res.ok) {
 //         const data = await res.json();
 //         setIsSaved(!isSaved);
-        
+
 //         // Update the post object
 //         setPost(prev => ({
 //           ...prev,
@@ -351,7 +351,7 @@
 //       }
 
 //       const endpoint = `/api/posts/${postId}/hide`;
-      
+
 //       const res = await fetch(endpoint, {
 //         method: "POST",
 //         headers: { 
@@ -363,13 +363,13 @@
 //       if (res.ok) {
 //         const data = await res.json();
 //         setIsHidden(true);
-        
+
 //         // Update the post object
 //         setPost(prev => ({
 //           ...prev,
 //           isHidden: true
 //         }));
-        
+
 //         alert("Post hidden! It won't appear in your feeds anymore.");
 //       } else {
 //         const errorText = await res.text();
@@ -392,7 +392,7 @@
 //     try {
 //       const token = localStorage.getItem('token');
 //       const endpoint = `/api/posts/${postId}/unhide`;
-      
+
 //       const res = await fetch(endpoint, {
 //         method: "POST",
 //         headers: { 
@@ -404,7 +404,7 @@
 //       if (res.ok) {
 //         const data = await res.json();
 //         setIsHidden(false);
-        
+
 //         // Update the post object
 //         setPost(prev => ({
 //           ...prev,
@@ -437,7 +437,7 @@
 
 //     try {
 //       const token = localStorage.getItem('token');
-      
+
 //       if (!token) {
 //         alert("You need to be logged in to comment!");
 //         return;
@@ -463,12 +463,12 @@
 //       }
 
 //       const savedComment = await res.json();
-      
+
 //       // Update comments with the server response
 //       setComments((prev) => [savedComment, ...prev]);
 //       setNewComment("");
 //       setShowFormattingToolbar(false);
-      
+
 //       // Update comment count
 //       setPost(prev => ({
 //         ...prev,
@@ -491,10 +491,10 @@
 //     const start = textarea.selectionStart;
 //     const end = textarea.selectionEnd;
 //     const selectedText = newComment.substring(start, end);
-    
+
 //     let formattedText = '';
 //     let cursorOffset = 0;
-    
+
 //     switch (format) {
 //       case 'bold':
 //         formattedText = `**${selectedText}**`;
@@ -515,10 +515,10 @@
 //       default:
 //         formattedText = selectedText;
 //     }
-    
+
 //     const newText = newComment.substring(0, start) + formattedText + newComment.substring(end);
 //     setNewComment(newText);
-    
+
 //     setTimeout(() => {
 //       textarea.focus();
 //       if (selectedText) {
@@ -637,7 +637,7 @@
 //                   </svg>
 //                 </span>
 //               </button>
-              
+
 //               <div className="post-page-community-info">
 //                 <img 
 //                   src={currentCommunity?.avatar?.replace('/images/', '../images/')} 
@@ -676,7 +676,7 @@
 //                       </svg>
 //                     </span>
 //                   </button>
-                  
+
 //                   {showDropdown && (
 //                     <div className="post-options-dropdown">
 //                       <button 
@@ -765,7 +765,7 @@
 //                   <span className="action-icon">💬</span>
 //                   <span>{post.commentCount || comments.length} Comments</span>
 //                 </button>
-                
+
 //                 {/* Save button in main actions */}
 //                 <button 
 //                   className={`post-action-btn ${isSaved ? 'saved' : ''}`}
@@ -775,7 +775,7 @@
 //                   <span className="action-icon">{isSaved ? '⭐' : '☆'}</span>
 //                   <span>{isSaving ? '...' : (isSaved ? 'Saved' : 'Save')}</span>
 //                 </button>
-                
+
 //                 {/* Hide button in main actions */}
 //                 <button 
 //                   className={`post-action-btn ${isHidden ? 'hidden' : ''}`}
@@ -785,13 +785,13 @@
 //                   <span className="action-icon">{isHidden ? '👁️' : '👁️‍🗨️'}</span>
 //                   <span>{isHiding ? '...' : (isHidden ? 'Hidden' : 'Hide')}</span>
 //                 </button>
-                
+
 //                 <button className="post-action-btn">
 //                   <span className="action-icon">🔄</span>
 //                   <span>Share</span>
 //                 </button>
 //               </div>
-              
+
 //               <button
 //                 className="summarize-button"
 //                 onClick={!summary ? handleSummarize : undefined}
@@ -839,7 +839,7 @@
 //                     </svg>
 //                   </button>
 //                 </div>
-                
+
 //                 <textarea
 //                   className="comment-textarea"
 //                   value={newComment}
@@ -847,7 +847,7 @@
 //                   rows="4"
 //                   placeholder="What are your thoughts?"
 //                 />
-                
+
 //                 <div className="comment-actions">
 //                   <div className="comment-actions-left">
 //                     <button 
@@ -931,7 +931,7 @@ import { formatDistanceToNow } from 'date-fns';
 function PostPage() {
   const { postId } = useParams();
   const location = useLocation();
-  
+
   const [post, setPost] = useState(location.state?.post || null);
   const [comments, setComments] = useState([]);
   const [sortedComments, setSortedComments] = useState([]);
@@ -943,7 +943,7 @@ function PostPage() {
   const [showFormattingToolbar, setShowFormattingToolbar] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [showDropdown, setShowDropdown] = useState(false);
-  
+
   const [allCommunities, setAllCommunities] = useState([]);
   const [currentCommunity, setCurrentCommunity] = useState(null);
 
@@ -1001,12 +1001,12 @@ function PostPage() {
   // Find the current community when post loads
   useEffect(() => {
     if (post?.community?.name && allCommunities.length > 0) {
-      const foundCommunity = allCommunities.find(c => 
+      const foundCommunity = allCommunities.find(c =>
         c?.name?.toLowerCase() === post.community.name.toLowerCase()
       );
       setCurrentCommunity(foundCommunity);
     }
-  }, [post?.community?.name, allCommunities]);  
+  }, [post?.community?.name, allCommunities]);
 
   // Fetch current user info - SIMPLIFIED without auth checks
   useEffect(() => {
@@ -1015,7 +1015,7 @@ function PostPage() {
         // Get user info from localStorage (no token required)
         const savedUsername = localStorage.getItem("username") || "Guest";
         const savedAvatar = localStorage.getItem("userAvatar") || "../images/avatar.png";
-        
+
         setCurrentUser({
           username: savedUsername,
           avatarUrl: savedAvatar
@@ -1023,7 +1023,7 @@ function PostPage() {
       } catch (error) {
         console.error("Failed to fetch current user:", error);
         setCurrentUser({
-          username: "Guest", 
+          username: "Guest",
           avatarUrl: "../images/avatar.png"
         });
       }
@@ -1036,7 +1036,7 @@ function PostPage() {
       setIsLoading(false);
       setPost(null);
       console.error("Post ID is missing. Cannot fetch.");
-      return; 
+      return;
     }
     try {
       setIsLoading(true);
@@ -1047,7 +1047,7 @@ function PostPage() {
       setComments(data.comments || []);
       setSortedComments(data.comments || []);
       setFilteredComments(data.comments || []);
-      
+
       // Set saved and hidden status from post data
       setIsSaved(data.post?.isSaved || false);
       setIsHidden(data.post?.isHidden || false);
@@ -1069,7 +1069,7 @@ function PostPage() {
   useEffect(() => {
     const sortComments = () => {
       let sorted = [...comments];
-      
+
       switch (sortOption) {
         case "best":
           sorted.sort((a, b) => (b.upvotes || 0) - (a.upvotes || 0));
@@ -1093,10 +1093,10 @@ function PostPage() {
         default:
           sorted.sort((a, b) => (b.upvotes || 0) - (a.upvotes || 0));
       }
-      
+
       setSortedComments(sorted);
     };
-    
+
     sortComments();
   }, [comments, sortOption]);
 
@@ -1105,7 +1105,7 @@ function PostPage() {
     if (!searchQuery.trim()) {
       setFilteredComments(sortedComments);
     } else {
-      const filtered = sortedComments.filter(comment => 
+      const filtered = sortedComments.filter(comment =>
         comment.body?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         comment.author?.username?.toLowerCase().includes(searchQuery.toLowerCase())
       );
@@ -1130,23 +1130,23 @@ function PostPage() {
     try {
       let value;
       const currentVote = post.userVote;
-      
+
       if (type === 'up') {
         value = currentVote === 1 ? 0 : 1;
       } else {
         value = currentVote === -1 ? 0 : -1;
       }
-      
+
       // REMOVED: Token check and alert
       // const token = localStorage.getItem('token');
       // if (!token) {
       //   alert("You need to be logged in to vote!");
       //   return;
       // }
-      
+
       const res = await fetch(`/api/posts/${postId}/vote`, {
         method: "POST",
-        headers: { 
+        headers: {
           "Content-Type": "application/json"
           // REMOVED: Authorization header
           // "Authorization": `Bearer ${token}`
@@ -1182,7 +1182,7 @@ function PostPage() {
 
       const res = await fetch(endpoint, {
         method: "POST",
-        headers: { 
+        headers: {
           "Content-Type": "application/json"
           // REMOVED: Authorization header
         }
@@ -1191,7 +1191,7 @@ function PostPage() {
       if (res.ok) {
         const data = await res.json();
         setIsSaved(!isSaved);
-        
+
         // Update the post object
         setPost(prev => ({
           ...prev,
@@ -1226,10 +1226,10 @@ function PostPage() {
     setIsHiding(true);
     try {
       const endpoint = `/api/posts/${postId}/hide`;
-      
+
       const res = await fetch(endpoint, {
         method: "POST",
-        headers: { 
+        headers: {
           "Content-Type": "application/json"
           // REMOVED: Authorization header
         }
@@ -1238,7 +1238,7 @@ function PostPage() {
       if (res.ok) {
         const data = await res.json();
         setIsHidden(true);
-        
+
         // Update the post object
         setPost(prev => ({
           ...prev,
@@ -1262,10 +1262,10 @@ function PostPage() {
 
     try {
       const endpoint = `/api/posts/${postId}/unhide`;
-      
+
       const res = await fetch(endpoint, {
         method: "POST",
-        headers: { 
+        headers: {
           "Content-Type": "application/json"
         }
       });
@@ -1273,7 +1273,7 @@ function PostPage() {
       if (res.ok) {
         const data = await res.json();
         setIsHidden(false);
-        
+
         // Update the post object
         setPost(prev => ({
           ...prev,
@@ -1314,7 +1314,7 @@ function PostPage() {
 
       const res = await fetch("/api/comments", {
         method: "POST",
-        headers: { 
+        headers: {
           "Content-Type": "application/json"
           // REMOVED: Authorization header
           // "Authorization": `Bearer ${token}`
@@ -1333,12 +1333,12 @@ function PostPage() {
       }
 
       const savedComment = await res.json();
-      
-      // Update comments with the server response
+
+
       setComments((prev) => [savedComment, ...prev]);
       setNewComment("");
       setShowFormattingToolbar(false);
-      
+
       // Update comment count
       setPost(prev => ({
         ...prev,
@@ -1360,10 +1360,10 @@ function PostPage() {
     const start = textarea.selectionStart;
     const end = textarea.selectionEnd;
     const selectedText = newComment.substring(start, end);
-    
+
     let formattedText = '';
     let cursorOffset = 0;
-    
+
     switch (format) {
       case 'bold':
         formattedText = `**${selectedText}**`;
@@ -1384,10 +1384,10 @@ function PostPage() {
       default:
         formattedText = selectedText;
     }
-    
+
     const newText = newComment.substring(0, start) + formattedText + newComment.substring(end);
     setNewComment(newText);
-    
+
     setTimeout(() => {
       textarea.focus();
       if (selectedText) {
@@ -1407,9 +1407,9 @@ function PostPage() {
           <div className="sort-options">
             <span className="sort-by-text">Sort by:</span>
             <div className="sort-container">
-              <select 
-                className="sort-select" 
-                value={sortOption} 
+              <select
+                className="sort-select"
+                value={sortOption}
                 onChange={handleSortChange}
               >
                 <option value="best">Best</option>
@@ -1424,7 +1424,7 @@ function PostPage() {
             <div className="search-input-wrapper">
               <span className="search-icon-container">
                 <svg viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+                  <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" />
                 </svg>
               </span>
               <input
@@ -1487,7 +1487,7 @@ function PostPage() {
                   <span className="hidden-banner-text">
                     📭 This post is hidden. You won't see it in your feeds.
                   </span>
-                  <button 
+                  <button
                     className="unhide-button"
                     onClick={handleUnhidePost}
                   >
@@ -1502,15 +1502,15 @@ function PostPage() {
               <button className="back-button" onClick={() => window.history.back()}>
                 <span className="back-button-icon">
                   <svg viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
+                    <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z" />
                   </svg>
                 </span>
               </button>
-              
+
               <div className="post-page-community-info">
-                <img 
-                  src={currentCommunity?.avatar?.replace('/images/', '../images/')} 
-                  alt="Community avatar" 
+                <img
+                  src={currentCommunity?.avatar?.replace('/images/', '../images/')}
+                  alt="Community avatar"
                   className="post-page-community-avatar"
                   onError={(e) => {
                     console.log("❌ Community avatar failed:", currentCommunity?.avatar);
@@ -1533,43 +1533,43 @@ function PostPage() {
               {/* Options Button with Dropdown */}
               <div className="post-options-wrapper">
                 <div className="post-options-container">
-                  <button 
+                  <button
                     className="post-options-button"
                     onClick={() => setShowDropdown(!showDropdown)}
                   >
                     <span className="post-options-icon">
                       <svg viewBox="0 0 24 24" fill="currentColor">
-                        <circle cx="5" cy="12" r="1.5"/>
-                        <circle cx="12" cy="12" r="1.5"/>
-                        <circle cx="19" cy="12" r="1.5"/>
+                        <circle cx="5" cy="12" r="1.5" />
+                        <circle cx="12" cy="12" r="1.5" />
+                        <circle cx="19" cy="12" r="1.5" />
                       </svg>
                     </span>
                   </button>
-                  
+
                   {showDropdown && (
                     <div className="post-options-dropdown">
-                      <button 
-                        className="dropdown-item" 
+                      <button
+                        className="dropdown-item"
                         onClick={handleSavePost}
                         disabled={isSaving}
                       >
                         {isSaving ? "Processing..." : (isSaved ? "Unsave" : "Save")}
                       </button>
-                      <button 
-                        className="dropdown-item" 
+                      <button
+                        className="dropdown-item"
                         onClick={handleHidePost}
                         disabled={isHiding}
                       >
                         {isHiding ? "Processing..." : (isHidden ? "Unhide" : "Hide")}
                       </button>
-                      <button 
-                        className="dropdown-item" 
+                      <button
+                        className="dropdown-item"
                         onClick={handleReportPost}
                       >
                         Report
                       </button>
-                      <button 
-                        className="dropdown-item" 
+                      <button
+                        className="dropdown-item"
                         onClick={handleCrosspost}
                       >
                         Crosspost
@@ -1589,9 +1589,9 @@ function PostPage() {
               <div className="post-content">
                 {post.mediaUrl ? (
                   <div className="post-media">
-                    <img 
-                      src={post.mediaUrl} 
-                      alt="post content" 
+                    <img
+                      src={post.mediaUrl}
+                      alt="post content"
                       className="post-image"
                       onError={(e) => {
                         console.error("Failed to load image:", post.mediaUrl);
@@ -1609,23 +1609,23 @@ function PostPage() {
               {/* Post Actions & Voting */}
               <div className="post-actions">
                 <div className="post-voting-horizontal">
-                  <button 
+                  <button
                     className={`vote-btn upvote ${post.userVote === 1 ? 'active' : ''}`}
                     onClick={() => handleVote('up')}
                   >
-                    <img 
-                      src={post.userVote === 1 ? "../images/upvote-active.svg" : "../images/upvote.svg"} 
-                      alt="upvote" 
+                    <img
+                      src={post.userVote === 1 ? "../images/upvote-active.svg" : "../images/upvote.svg"}
+                      alt="upvote"
                     />
                   </button>
                   <span className="vote-count">{post.score || 0}</span>
-                  <button 
+                  <button
                     className={`vote-btn downvote ${post.userVote === -1 ? 'active' : ''}`}
                     onClick={() => handleVote('down')}
                   >
-                    <img 
-                      src={post.userVote === -1 ? "../images/downvote-active.svg" : "../images/downvote.svg"} 
-                      alt="downvote" 
+                    <img
+                      src={post.userVote === -1 ? "../images/downvote-active.svg" : "../images/downvote.svg"}
+                      alt="downvote"
                     />
                   </button>
                 </div>
@@ -1634,9 +1634,9 @@ function PostPage() {
                   <span className="action-icon">💬</span>
                   <span>{post.commentCount || comments.length} Comments</span>
                 </button>
-                
+
                 {/* Save button in main actions */}
-                <button 
+                <button
                   className={`post-action-btn ${isSaved ? 'saved' : ''}`}
                   onClick={handleSavePost}
                   disabled={isSaving}
@@ -1644,9 +1644,9 @@ function PostPage() {
                   <span className="action-icon">{isSaved ? '⭐' : '☆'}</span>
                   <span>{isSaving ? '...' : (isSaved ? 'Saved' : 'Save')}</span>
                 </button>
-                
+
                 {/* Hide button in main actions */}
-                <button 
+                <button
                   className={`post-action-btn ${isHidden ? 'hidden' : ''}`}
                   onClick={handleHidePost}
                   disabled={isHiding}
@@ -1654,13 +1654,13 @@ function PostPage() {
                   <span className="action-icon">{isHidden ? '👁️' : '👁️‍🗨️'}</span>
                   <span>{isHiding ? '...' : (isHidden ? 'Hidden' : 'Hide')}</span>
                 </button>
-                
+
                 <button className="post-action-btn">
                   <span className="action-icon">🔄</span>
                   <span>Share</span>
                 </button>
               </div>
-              
+
               <button
                 className="summarize-button"
                 onClick={!summary ? handleSummarize : undefined}
@@ -1677,38 +1677,38 @@ function PostPage() {
               {/* Add Comment */}
               <div className="add-comment-card">
                 <div className={`formatting-toolbar ${showFormattingToolbar ? 'visible' : ''}`}>
-                  <button 
-                    className="format-btn" 
+                  <button
+                    className="format-btn"
                     onClick={() => handleFormatText('bold')}
                     title="Bold"
                   >
                     <strong>B</strong>
                   </button>
-                  <button 
-                    className="format-btn" 
+                  <button
+                    className="format-btn"
                     onClick={() => handleFormatText('italic')}
                     title="Italic"
                   >
                     <em>I</em>
                   </button>
-                  <button 
-                    className="format-btn" 
+                  <button
+                    className="format-btn"
                     onClick={() => handleFormatText('strikethrough')}
                     title="Strikethrough"
                   >
                     <s>S</s>
                   </button>
-                  <button 
-                    className="format-btn" 
+                  <button
+                    className="format-btn"
                     onClick={() => handleFormatText('code')}
                     title="Code"
                   >
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"/>
+                      <path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z" />
                     </svg>
                   </button>
                 </div>
-                
+
                 <textarea
                   className="comment-textarea"
                   value={newComment}
@@ -1716,10 +1716,10 @@ function PostPage() {
                   rows="4"
                   placeholder="What are your thoughts?"
                 />
-                
+
                 <div className="comment-actions">
                   <div className="comment-actions-left">
-                    <button 
+                    <button
                       className="format-toggle-btn"
                       onClick={() => setShowFormattingToolbar(!showFormattingToolbar)}
                       title="Formatting options"
@@ -1728,13 +1728,13 @@ function PostPage() {
                     </button>
                   </div>
                   <div className="comment-actions-right">
-                    <button 
+                    <button
                       className="comment-cancel-btn"
                       onClick={handleCancelComment}
                     >
                       Cancel
                     </button>
-                    <button 
+                    <button
                       className="comment-submit-btn"
                       onClick={handleAddComment}
                       disabled={!newComment.trim()}
@@ -1771,8 +1771,8 @@ function PostPage() {
           {/* Sidebar Column */}
           <div className="post-sidebar-column">
             <div className="community-sidebar-container">
-              <CommunitySidebar 
-                communityId={post.community?._id} 
+              <CommunitySidebar
+                communityId={post.community?._id}
                 post={post}
                 currentUser={currentUser}
                 isCommunityPage={false}
